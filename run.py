@@ -1,10 +1,7 @@
 from app import create_app
-from dotenv import load_dotenv
-import os  # <-- ADD THIS LINE
+import os
 
-load_dotenv()
-
-app = create_app(os.environ.get('FLASK_ENV', 'development'))
+app = create_app()
 
 if __name__ == '__main__':
-    app.run(debug=app.config['DEBUG'], host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
