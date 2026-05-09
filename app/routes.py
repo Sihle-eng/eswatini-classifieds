@@ -1380,3 +1380,22 @@ def admin_deletions():
     """View account deletion log"""
     deletions = DeletionLog.query.order_by(DeletionLog.deleted_at.desc()).all()
     return render_template('admin/deletions.html', deletions=deletions)
+
+@main.route('/business/payment-history')
+@login_required
+def payment_history():
+    if current_user.user_type != 'business':
+        flash('Access denied.', 'error')
+        return redirect(url_for('main.home'))
+    
+    # Get all transactions for this business user
+    transactions = Transaction.query.filter_by(
+        payer_user_id=current_user.id
+    ).order_by(Transaction.created_at.desc()).all()
+    
+    # Calculate total spent
+    total_spent = sum(float(t.amount) for t in transactions if t.payment_status == 'success')
+    
+    return render_template('business/payment_history.html', 
+                         transactions=transactions,
+                         total_spent=total_spent)
