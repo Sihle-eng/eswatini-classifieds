@@ -1,6 +1,6 @@
-.env
-*.db
-__pycache__/
 venv/
-instance/
+.env
+__pycache__/
+*.pyc
+site.db
 uploads/
