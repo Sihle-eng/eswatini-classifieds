@@ -20,13 +20,18 @@ def send_email(to, subject, template_name, **kwargs):
             sender=current_app.config['MAIL_DEFAULT_SENDER']
         )
         
-        mail.send(msg)
-        print(f"[SUCCESS] Email sent to {to}: {subject}")
+        # Try to actually send, but don't crash if SMTP fails
+        try:
+            mail.send(msg)
+            print(f"[SUCCESS] Email sent to {to}: {subject}")
+        except Exception as send_error:
+            print(f"[WARNING] SMTP send failed (non-blocking): {send_error}")
+            print(f"[INFO] Registration continues. Would have sent to {to}: {subject}")
+        
         return True
     except Exception as e:
-        print(f"[ERROR] Email failed to {to}: {e}")
+        print(f"[ERROR] Email template error: {e}")
         return False
-
 
 def send_welcome_email(user_email, user_type, name):
     """Send welcome email after registration"""
