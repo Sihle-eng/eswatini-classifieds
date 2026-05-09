@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Eswatini Classifieds{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white rounded-lg shadow-lg p-6 mt-8 fade-in">
+    <h2 class="text-2xl font-bold text-center mb-6">Create Your Account</h2>
+    
+    <form method="POST" action="{{ url_for('main.register') }}">
+        
+        <!-- Email -->
+        <div class="mb-4">
+            <label class="block text-gray-700 mb-2">Email Address</label>
+            <input type="email" name="email" required 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+        </div>
+        
+        <!-- Password -->
+        <div class="mb-4">
+            <label class="block text-gray-700 mb-2">Password</label>
+            <input type="password" name="password" required minlength="8"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+            <p class="text-xs text-gray-500 mt-1">Min 8 chars, 1 uppercase, 1 number</p>
+        </div>
+        
+        <!-- Confirm Password -->
+        <div class="mb-4">
+            <label class="block text-gray-700 mb-2">Confirm Password</label>
+            <input type="password" name="confirm_password" required minlength="8"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+        </div>
+        
+        <!-- Account Type Toggle -->
+        <div class="mb-6">
+            <label class="block text-gray-700 mb-3">I am a:</label>
+            <div class="flex gap-4">
+                <label class="flex items-center cursor-pointer">
+                    <input type="radio" name="user_type" id="user_type_client" value="client" checked 
+                           class="mr-2 w-5 h-5 text-blue-600">
+                    <span class="text-lg"><i class="fas fa-user mr-1"></i> Job Seeker / Buyer</span>
+                </label>
+                <label class="flex items-center cursor-pointer">
+                    <input type="radio" name="user_type" id="user_type_business" value="business" 
+                           class="mr-2 w-5 h-5 text-blue-600">
+                    <span class="text-lg"><i class="fas fa-building mr-1"></i> Business / Employer</span>
+                </label>
+            </div>
+        </div>
+        
+        <!-- Terms & Conditions Agreement -->
+        <div class="mb-6">
+            <label class="flex items-start cursor-pointer">
+                <input type="checkbox" name="agree_terms" id="agree_terms" required class="mr-3 mt-1 w-5 h-5 text-blue-600">
+                <span class="text-gray-700 text-sm">
+                    I have read and agree to the 
+                    <a href="#" onclick="showTermsModal(); return false;" class="text-blue-600 hover:underline font-medium">Terms & Conditions</a>
+                    and acknowledge the internet safety guidelines. *
+                </span>
+            </label>
+        </div>
+        
+        <!-- Submit -->
+        <button type="submit" 
+                class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition btn-hover-grow">
+            Create Account
+        </button>
+    </form>
+    
+    <div class="mt-4 text-center">
+        <p class="text-gray-600">Already have an account? 
+            <a href="{{ url_for('main.login') }}" class="text-blue-600 hover:underline">Login here</a>
+        </p>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- TERMS MODAL - MOVED OUTSIDE MAIN CONTAINER -->
+<!-- ============================================ -->
+<div id="termsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 12px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; margin: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);">
+        <div style="padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #e5e7eb; padding-bottom: 12px;">
+                <h3 style="font-size: 1.25rem; font-weight: bold;" id="termsTitle">Terms & Conditions</h3>
+                <button onclick="closeTermsModal()" style="font-size: 1.5rem; color: #6b7280; background: none; border: none; cursor: pointer; min-width: auto; min-height: auto;">&times;</button>
+            </div>
+            <div id="termsContent" style="font-size: 0.875rem; line-height: 1.5;">
+                <!-- Content will be loaded here -->
+            </div>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
+                <button onclick="closeTermsModal()" style="background: #2563eb; color: white; padding: 8px 24px; border-radius: 8px; border: none; cursor: pointer; font-weight: 500; min-width: auto;">I Understand</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Terms content
+const businessTerms = `
+    <h2 style="font-size: 1.125rem; font-weight: bold; color: #2563eb; margin-bottom: 8px;">🇸🇿 Business Terms & Conditions</h2>
+    <p style="color: #6b7280; margin-bottom: 16px; font-size: 0.875rem;">Please read carefully before agreeing.</p>
+    
+    <h3 style="font-weight: bold; margin-top: 16px; color: #1e40af;">1. Business Account Responsibilities</h3>
+    <p style="font-size: 0.875rem; margin-bottom: 8px;">As a business account holder, you agree to provide accurate information, comply with Eswatini labour laws, and not discriminate against applicants.</p>
+    
+    <h3 style="font-weight: bold; margin-top: 16px; color: #1e40af;">2. Payment Terms</h3>
+    <p style="font-size: 0.875rem; margin-bottom: 8px;">Payments are non-refundable once listings are activated. Applicable fees depend on your selected listing duration.</p>
+    
+    <h3 style="font-weight: bold; margin-top: 16px; color: #1e40af;">3. Prohibited Content</h3>
+    <p style="font-size: 0.875rem; margin-bottom: 8px;">No fraudulent, illegal, or discriminatory content. No adult content or pyramid schemes.</p>
+    
+    <h3 style="font-weight: bold; margin-top: 16px; color: #dc2626;"><i class="fas fa-exclamation-triangle mr-1"></i> Internet Safety & Fraud Awareness</h3>
+    <p style="font-size: 0.875rem; margin-bottom: 8px;"><strong>NEVER</strong> share your banking passwords or MoMo PIN. We will never ask for your PIN.</p>
+    
+    <h3 style="font-weight: bold; margin-top: 16px; color: #1e40af;">4. Listing Expiration</h3>
+    <p style="font-size: 0.875rem; margin-bottom: 8px;">Listings expire based on purchased duration. Renewal fees apply to extend visibility.</p>
+    
+    <h3 style="font-weight: bold; margin-top: 16px; color: #1e40af;">5. Limitation of Liability</h3>
+    <p style="font-size: 0.875rem; margin-bottom: 8px;">Eswatini Classifieds is a platform only. We are not responsible for transaction outcomes or disputes.</p>
+    
+    <p style="margin-top: 16px; font-size: 0.75rem; color: #9ca3af;">By clicking "I Understand", you acknowledge acceptance of these terms.</p>
+`;
+
+const clientTerms = `
+    <h2 style="font-size: 1.125rem; font-weight: bold; color: #16a34a; margin-bottom: 8px;">🇸🇿 Client Terms & Conditions</h2>
+    <p style="color: #6b7280; margin-bottom: 16px; font-size: 0.875rem;">Please read carefully before agreeing.</p>
+    
+    <h3 style="font-weight: bold; margin-top: 16px; color: #15803d;">1. Client Responsibilities</h3>
+    <p style="font-size: 0.875rem; margin-bottom: 8px;">Provide accurate information, use the platform respectfully, and do not engage in illegal activities.</p>
+    
+    <h3 style="font-weight: bold; margin-top: 16px; color: #dc2626;"><i class="fas fa-shield-alt mr-1"></i> PROTECT YOURSELF - Safety Tips</h3>
+    <p style="font-size: 0.875rem; margin-bottom: 8px;"><strong>NEVER</strong> send money upfront for job applications. <strong>NEVER</strong> share banking details or PINs. Meet sellers in safe, public locations.</p>
+    
+    <h3 style="font-weight: bold; margin-top: 16px; color: #15803d;">2. Job Application Safety</h3>
+    <p style="font-size: 0.875rem; margin-bottom: 8px;">Legitimate employers will NEVER ask for payment to apply. Research companies before interviews.</p>
+    
+    <h3 style="font-weight: bold; margin-top: 16px; color: #15803d;">3. Buying and Selling Safety</h3>
+    <p style="font-size: 0.875rem; margin-bottom: 8px;">Inspect items in person before payment. Use secure payment methods. Trust your instincts.</p>
+    
+    <h3 style="font-weight: bold; margin-top: 16px; color: #15803d;">4. Reporting Violations</h3>
+    <p style="font-size: 0.875rem; margin-bottom: 8px;">Use the "Report" button on listings or email eswatiniclassifieds@gmail.com.</p>
+    
+    <h3 style="font-weight: bold; margin-top: 16px; color: #15803d;">5. Emergency Contacts</h3>
+    <p style="font-size: 0.875rem; margin-bottom: 8px;">Royal Eswatini Police Service: <strong>999 / 112</strong></p>
+    
+    <p style="margin-top: 16px; font-size: 0.75rem; color: #9ca3af;">By clicking "I Understand", you acknowledge acceptance of these terms.</p>
+`;
+
+function showTermsModal() {
+    const clientRadio = document.getElementById('user_type_client');
+    const userType = clientRadio.checked ? 'client' : 'business';
+    
+    const title = document.getElementById('termsTitle');
+    const content = document.getElementById('termsContent');
+    const modal = document.getElementById('termsModal');
+    
+    // Check if elements exist
+    if (!title || !content || !modal) {
+        alert('Error: Modal elements not found. Please refresh the page.');
+        return;
+    }
+    
+    // Check if terms content exists
+    if (userType === 'business') {
+        if (typeof businessTerms === 'undefined') {
+            content.innerHTML = '<p style="color:red;">Error: Business terms not loaded.</p>';
+            modal.style.display = 'flex';
+            return;
+        }
+        title.innerHTML = '<i class="fas fa-file-contract mr-2"></i> Business Terms & Conditions';
+        content.innerHTML = businessTerms;
+    } else {
+        if (typeof clientTerms === 'undefined') {
+            content.innerHTML = '<p style="color:red;">Error: Client terms not loaded.</p>';
+            modal.style.display = 'flex';
+            return;
+        }
+        title.innerHTML = '<i class="fas fa-file-contract mr-2"></i> Client Terms & Conditions';
+        content.innerHTML = clientTerms;
+    }
+    
+    modal.style.display = 'flex';
+}
+
+function closeTermsModal() {
+    document.getElementById('termsModal').style.display = 'none';
+}
+
+// Close when clicking outside the modal content
+document.getElementById('termsModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeTermsModal();
+    }
+});
+
+// Close with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeTermsModal();
+    }
+});
+
+// Debug: Check if elements exist
+console.log('Register page loaded');
+console.log('Modal element:', document.getElementById('termsModal'));
+console.log('Title element:', document.getElementById('termsTitle'));
+console.log('Content element:', document.getElementById('termsContent'));
+</script>
+
+<style>
+.fade-in {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.btn-hover-grow {
+    transition: transform 0.2s ease;
+}
+
+.btn-hover-grow:hover {
+    transform: scale(1.02);
+}
+</style>
+
+{% endblock %}

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'Inter', Arial, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #3A75C4, #1e40af); color: white; padding: 30px; text-align: center; border-radius: 16px 16px 0 0; }
+        .content { background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 16px 16px; }
+        .agreement-box { background: #fef3c7; padding: 20px; border-radius: 12px; margin: 20px 0; border-left: 4px solid #FFD100; }
+        .footer { text-align: center; padding: 20px; color: #64748b; font-size: 12px; }
+        .details-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .details-table td { padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+        .details-table td:first-child { font-weight: 600; width: 120px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📋 Terms & Conditions Agreement</h1>
+        <p style="margin: 0; opacity: 0.9;">Your copy for safekeeping</p>
+    </div>
+    
+    <div class="content">
+        <h2>Hello {{ user_name }},</h2>
+        
+        <p>Thank you for agreeing to our Terms & Conditions. This email serves as your official record of acceptance.</p>
+        
+        <div class="agreement-box">
+            <h3 style="margin-top: 0;">📌 Agreement Details</h3>
+            <table class="details-table">
+                <tr><td>Name:</td><td>{{ user_name }}</td></tr>
+                <tr><td>Email:</td><td>{{ user_email }}</td></tr>
+                <tr><td>Account Type:</td><td>{{ user_type|title }}</td></tr>
+                <tr><td>Agreement ID:</td><td>{{ agreement_id }}</td></tr>
+                <tr><td>Date Signed:</td><td>{{ date_signed }}</td></tr>
+                <tr><td>IP Address:</td><td>{{ ip_address }}</td></tr>
+            </table>
+        </div>
+        
+        {% if user_type == 'business' %}
+        <h3>🏢 Business Terms Summary</h3>
+        <ul>
+            <li>Provide accurate business information</li>
+            <li>Comply with Eswatini labour laws</li>
+            <li>Payments are non-refundable</li>
+            <li>No fraudulent or discriminatory content</li>
+        </ul>
+        {% else %}
+        <h3>👤 Client Terms Summary</h3>
+        <ul>
+            <li><strong>NEVER</strong> send money upfront for applications</li>
+            <li>Meet sellers in safe, public locations</li>
+            <li>Report suspicious activity immediately</li>
+            <li>Emergency: Royal Eswatini Police 999/112</li>
+        </ul>
+        {% endif %}
+        
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
+        
+        <p style="font-size: 12px; color: #64748b;">This agreement is governed by the laws of the Kingdom of Eswatini.</p>
+    </div>
+    
+    <div class="footer">
+        <p>🇸🇿 Eswatini Classifieds</p>
+        <p>Contact: eswatiniclassified@gmail.com</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Listings - Eswatini Classifieds{% endblock %}
+
+{% block content %}
+<div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
+    <h2 class="text-2xl font-bold mb-2"><i class="fas fa-search text-green-600 mr-2"></i>Browse All Listings</h2>
+    <p class="text-gray-700">Find jobs, cars, property, and more across Eswatini</p>
+</div>
+
+<!-- Search and Filter Bar -->
+<div class="bg-white rounded-lg shadow p-4 mb-6">
+    <form method="GET" action="{{ url_for('main.browse_ads') }}" class="flex flex-wrap gap-3">
+        <input type="text" name="search" value="{{ search }}" placeholder="Search..." 
+               class="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500">
+        
+        <select name="category" class="px-4 py-2 border rounded-lg">
+            <option value="">All Categories</option>
+            <option value="employment">Jobs</option>
+            <option value="motors">Motors</option>
+            <option value="property">Property</option>
+            <option value="services">Services</option>
+            <option value="general">General</option>
+        </select>
+        
+        <select name="city" class="px-4 py-2 border rounded-lg">
+            <option value="">All Cities</option>
+            <option value="Mbabane" {{ 'selected' if current_city == 'Mbabane' else '' }}>Mbabane</option>
+            <option value="Manzini" {{ 'selected' if current_city == 'Manzini' else '' }}>Manzini</option>
+            <option value="Matsapha" {{ 'selected' if current_city == 'Matsapha' else '' }}>Matsapha</option>
+            <option value="Ezulwini" {{ 'selected' if current_city == 'Ezulwini' else '' }}>Ezulwini</option>
+            <option value="Nhlangano" {{ 'selected' if current_city == 'Nhlangano' else '' }}>Nhlangano</option>
+            <option value="Siteki" {{ 'selected' if current_city == 'Siteki' else '' }}>Siteki</option>
+            <option value="Big Bend" {{ 'selected' if current_city == 'Big Bend' else '' }}>Big Bend</option>
+        </select>
+        
+        <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+            Search
+        </button>
+        
+        {% if search or current_category or current_city %}
+        <a href="{{ url_for('main.browse_ads') }}" class="px-4 py-2 border rounded-lg hover:bg-gray-50">
+            Clear Filters
+        </a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Results Count -->
+<div class="mb-4">
+    <p class="text-gray-600">
+        Found <strong>{{ ads|length }}</strong> listing{{ 's' if ads|length != 1 else '' }}
+        {% if search %}matching "{{ search }}"{% endif %}
+    </p>
+</div>
+
+<!-- Listings Grid -->
+{% if ads %}
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for ad in ads %}
+    <a href="{{ url_for('main.view_ad', posting_id=ad.id) }}" class="block">
+        <div class="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden h-full flex flex-col">
+            
+            <!-- Image Section -->
+            <div class="h-40 {% if ad.payment_plan == 'featured' %}bg-gradient-to-br from-yellow-100 to-yellow-200{% else %}bg-gray-200{% endif %} flex items-center justify-center overflow-hidden">
+                {% if ad.image_filename %}
+                    <img src="{{ url_for('static', filename='uploads/' + ad.image_filename) }}" 
+                         alt="{{ ad.title }}" 
+                         class="w-full h-full object-cover">
+                {% else %}
+                    {% if ad.category == 'employment' %}
+                    <img src="{{ url_for('static', filename='images/Employment.jpg') }}" alt="Jobs" class="w-full h-full object-cover">
+                    {% elif ad.category == 'motors' %}
+                    <img src="{{ url_for('static', filename='images/Motors.jpg') }}" alt="Motors" class="w-full h-full object-cover">
+                    {% elif ad.category == 'property' %}
+                    <img src="{{ url_for('static', filename='images/House.webp') }}" alt="Property" class="w-full h-full object-cover">
+                    {% elif ad.category == 'services' %}
+                    <img src="{{ url_for('static', filename='images/Services.jpg') }}" alt="Services" class="w-full h-full object-cover">
+                    {% else %}
+                    <img src="{{ url_for('static', filename='images/General.jpg') }}" alt="General" class="w-full h-full object-cover">
+                    {% endif %}
+                {% endif %}
+            </div>
+            
+            <div class="p-4 flex-1">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="font-bold text-lg">{{ ad.title[:50] }}{% if ad.title|length > 50 %}...{% endif %}</h3>
+                    {% if ad.payment_plan == 'featured' %}
+                    <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-semibold"><i class="fas fa-star"></i></span>
+                    {% endif %}
+                </div>
+                <p class="text-gray-600 text-sm mb-2"><i class="fas fa-map-marker-alt text-gray-500 mr-1"></i> {{ ad.location_city }}</p>
+                {% if ad.salary_price %}
+                <p class="text-green-600 font-semibold mb-2">{{ ad.salary_price }}</p>
+                {% endif %}
+                <p class="text-gray-500 text-sm line-clamp-2 mb-3">{{ ad.description[:100] }}{% if ad.description|length > 100 %}...{% endif %}</p>
+                <div class="flex justify-between items-center mt-auto">
+                    <span class="text-gray-400 text-xs">{{ ad.created_at.strftime('%d %b %Y') }}</span>
+                    <span class="text-green-600 text-sm font-medium">View →</span>
+                </div>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="bg-white rounded-lg shadow p-12 text-center">
+    <div class="text-6xl mb-4"><i class="fas fa-inbox text-gray-300"></i></div>
+    <h3 class="text-xl font-bold mb-2">No listings found</h3>
+    <p class="text-gray-600">Try adjusting your filters or check back later.</p>
+</div>
+{% endif %}
+{% endblock %}

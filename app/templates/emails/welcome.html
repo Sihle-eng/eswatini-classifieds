@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'Inter', Arial, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #0f172a, #1e293b); color: white; padding: 30px; text-align: center; border-radius: 16px 16px 0 0; }
+        .header h1 { color: white; margin: 0; font-size: 24px; }
+        .header .highlight { color: #FFD100; }
+        .content { background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 16px 16px; }
+        .button { display: inline-block; background: #3A75C4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 20px 0; }
+        .button:hover { background: #2a5a9e; }
+        .footer { text-align: center; padding: 20px; color: #64748b; font-size: 12px; }
+        .social-links { margin-top: 15px; }
+        .social-links a { color: #64748b; text-decoration: none; margin: 0 10px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🇸🇿 Welcome to <span class="highlight">Eswatini Classifieds</span>!</h1>
+    </div>
+    
+    <div class="content">
+        <h2>Hello {{ user_name }}! 👋</h2>
+        
+        <p>Thank you for joining Eswatini Classifieds as a <strong>{{ user_type|title }}</strong>!</p>
+        
+        {% if user_type == 'business' %}
+        <p>You can now:</p>
+        <ul>
+            <li>✅ Post ads for jobs, vehicles, property, and more</li>
+            <li>✅ Reach thousands of potential customers across Eswatini</li>
+            <li>✅ Manage your listings from your dashboard</li>
+        </ul>
+        {% else %}
+        <p>You can now:</p>
+        <ul>
+            <li>✅ Browse thousands of listings across Eswatini</li>
+            <li>✅ Save your favorite ads</li>
+            <li>✅ Contact sellers directly</li>
+        </ul>
+        {% endif %}
+        
+        <div style="text-align: center;">
+            <a href="{{ login_url }}" class="button">Go to Your Dashboard →</a>
+        </div>
+        
+        <p><strong>Your login email:</strong> {{ user_email }}</p>
+        
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
+        
+        <h3>📱 Stay Connected</h3>
+        <p>Follow us for the latest listings and updates:</p>
+        <div class="social-links">
+            <a href="https://www.instagram.com/eswatiniclassifieds/">📷 Instagram</a> |
+            <a href="https://www.facebook.com/eswatiniclassifieds">👍 Facebook</a>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>🇸🇿 Eswatini Classifieds - Connecting Communities Across Eswatini</p>
+        <p>Mbabane • Manzini • Matsapha • Nhlangano</p>
+        <p>© 2026 Eswatini Classifieds. All rights reserved.</p>
+    </div>
+</body>
+</html>

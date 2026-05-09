@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Eswatini Classifieds{% endblock %}
+
+{% block content %}
+<div class="bg-purple-50 border border-purple-200 rounded-lg p-6 mb-6">
+    <h2 class="text-2xl font-bold mb-2"><i class="fas fa-shield-alt text-purple-600 mr-2"></i>Admin Dashboard</h2>
+    <p class="text-gray-700">Manage payments and view platform statistics</p>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+    <div class="bg-white rounded-lg shadow p-4 md:p-6 text-center">
+        <i class="fas fa-users text-3xl md:text-4xl text-blue-500 mb-3"></i>
+        <div class="text-xl md:text-2xl font-bold">{{ total_users }}</div>
+        <div class="text-xs md:text-base text-gray-600">Total Users</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4 md:p-6 text-center">
+        <i class="fas fa-clipboard-list text-3xl md:text-4xl text-blue-500 mb-3"></i>
+        <div class="text-xl md:text-2xl font-bold">{{ total_ads }}</div>
+        <div class="text-xs md:text-base text-gray-600">Total Ads</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4 md:p-6 text-center">
+        <i class="fas fa-check-circle text-3xl md:text-4xl text-green-500 mb-3"></i>
+        <div class="text-xl md:text-2xl font-bold">{{ active_ads }}</div>
+        <div class="text-xs md:text-base text-gray-600">Active Ads</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4 md:p-6 text-center">
+        <i class="fas fa-money-bill-wave text-3xl md:text-4xl text-green-600 mb-3"></i>
+        <div class="text-xl md:text-2xl font-bold">SZL {{ "%.2f"|format(total_revenue) }}</div>
+        <div class="text-xs md:text-base text-gray-600">Total Revenue</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4 md:p-6 text-center">
+        <i class="fas fa-flag text-3xl md:text-4xl text-red-500 mb-3"></i>
+        <div class="text-xl md:text-2xl font-bold">{{ total_reports }}</div>
+        <div class="text-xs md:text-base text-gray-600">Total Reports</div>
+    </div>
+</div>
+
+<!-- Recent Reports Section -->
+<div class="bg-white rounded-lg shadow overflow-hidden overflow-x-auto mb-8">
+    <div class="px-6 py-4 border-b bg-gray-50 flex justify-between items-center">
+        <h3 class="text-xl font-semibold"><i class="fas fa-flag text-red-500 mr-2"></i>Recent Reports</h3>
+        <a href="{{ url_for('main.admin_reports') }}" class="text-purple-600 hover:underline text-sm">View All →</a>
+    </div>
+    
+    {% if pending_reports %}
+    <table class="w-full min-w-[400px]">
+        <thead class="bg-gray-100 border-b">
+            <tr>
+                <th class="px-6 py-3 text-left">Ad</th>
+                <th class="px-6 py-3 text-left">Reason</th>
+                <th class="px-6 py-3 text-left">Reported</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in pending_reports %}
+            <tr class="border-b hover:bg-gray-50">
+                <td class="px-6 py-4">
+                    <a href="{{ url_for('main.view_ad', posting_id=report.posting_id) }}" 
+                       class="text-blue-600 hover:underline" target="_blank">
+                        {{ report.posting.title[:30] }}{% if report.posting.title|length > 30 %}...{% endif %}
+                    </a>
+                </td>
+                <td class="px-6 py-4">
+                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">
+                        {{ report.reason|title }}
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-sm">{{ report.created_at.strftime('%d %b %Y') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="p-8 text-center text-gray-500">No pending reports to review.</div>
+    {% endif %}
+</div>
+
+<!-- Pending Payments -->
+<div class="bg-white rounded-lg shadow overflow-hidden overflow-x-auto">
+    <div class="px-6 py-4 border-b bg-gray-50">
+        <h3 class="text-xl font-semibold">Pending Payment Verifications</h3>
+    </div>
+    
+    {% if pending_transactions %}
+    <table class="w-full min-w-[600px]">
+        <thead class="bg-gray-100 border-b">
+            <tr>
+                <th class="px-6 py-3 text-left">ID</th>
+                <th class="px-6 py-3 text-left">User</th>
+                <th class="px-6 py-3 text-left hidden md:table-cell">Ad Title</th>
+                <th class="px-6 py-3 text-left">Amount</th>
+                <th class="px-6 py-3 text-left hidden md:table-cell">Method</th>
+                <th class="px-6 py-3 text-left hidden md:table-cell">Date</th>
+                <th class="px-6 py-3 text-left">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for trans in pending_transactions %}
+            <tr class="border-b hover:bg-gray-50">
+                <td class="px-6 py-4">#{{ trans.id }}</td>
+                <td class="px-6 py-4">
+                    {% set user = trans.payer_user_id|get_user %}
+                    {{ user.email.split('@')[0] if user else 'Unknown' }}
+                </td>
+                <td class="px-6 py-4 hidden md:table-cell">
+                    {% if trans.posting_id %}
+                        {% set ad = trans.posting_id|get_posting %}
+                        {{ ad.title[:20] if ad else 'N/A' }}...
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td class="px-6 py-4 font-semibold">SZL {{ "%.2f"|format(trans.amount) }}</td>
+                <td class="px-6 py-4 hidden md:table-cell">
+                    {% if trans.payment_method == 'bank_transfer' %}
+                        🏦 Bank Transfer
+                    {% elif trans.payment_method == 'mtn_momo' %}
+                        📱 MoMo
+                    {% else %}
+                        {{ trans.payment_method }}
+                    {% endif %}
+                </td>
+                <td class="px-6 py-4 text-sm hidden md:table-cell">{{ trans.created_at.strftime('%d %b %Y %H:%M') }}</td>
+                <td class="px-6 py-4">
+                    <div class="flex flex-col md:flex-row gap-2">
+                        <a href="{{ url_for('main.verify_payment', transaction_id=trans.id) }}" 
+                           class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 text-center"
+                           onclick="return confirm('Verify this payment and activate the ad?')">
+                            ✓ Verify
+                        </a>
+                        <a href="{{ url_for('main.reject_payment', transaction_id=trans.id) }}" 
+                           class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 text-center"
+                           onclick="return confirm('Reject this payment?')">
+                            ✗ Reject
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="p-12 text-center text-gray-500">No pending payments to verify.</div>
+    {% endif %}
+</div>
+{% endblock %}

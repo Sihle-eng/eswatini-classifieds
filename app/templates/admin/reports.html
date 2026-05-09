@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Reports - Admin{% endblock %}
+
+{% block content %}
+<div class="bg-purple-50 border border-purple-200 rounded-lg p-6 mb-6">
+    <h2 class="text-2xl font-bold mb-2"><i class="fas fa-flag text-red-500 mr-2"></i>Manage Reports</h2>
+    <p class="text-gray-700">Review and take action on reported ads</p>
+</div>
+
+<!-- Status Tabs -->
+<div class="flex flex-wrap gap-2 mb-6">
+    <a href="{{ url_for('main.admin_reports', status='pending') }}" 
+       class="px-4 py-2 rounded-lg text-sm {{ 'bg-purple-600 text-white' if current_status == 'pending' else 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+        Pending
+    </a>
+    <a href="{{ url_for('main.admin_reports', status='reviewed') }}" 
+       class="px-4 py-2 rounded-lg text-sm {{ 'bg-purple-600 text-white' if current_status == 'reviewed' else 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+        Reviewed
+    </a>
+    <a href="{{ url_for('main.admin_reports', status='resolved') }}" 
+       class="px-4 py-2 rounded-lg text-sm {{ 'bg-purple-600 text-white' if current_status == 'resolved' else 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+        Resolved
+    </a>
+</div>
+
+<!-- Reports List -->
+<div class="bg-white rounded-lg shadow overflow-hidden overflow-x-auto">
+    {% if reports %}
+    <table class="w-full min-w-[400px]">
+        <thead class="bg-gray-100 border-b">
+            <tr>
+                <th class="px-4 py-3 text-left text-sm">Ad</th>
+                <th class="px-4 py-3 text-left text-sm hidden md:table-cell">Reason</th>
+                <th class="px-4 py-3 text-left text-sm hidden md:table-cell">Date</th>
+                <th class="px-4 py-3 text-left text-sm">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in reports %}
+            <tr class="border-b hover:bg-gray-50">
+                <td class="px-4 py-3 text-sm">
+                    <a href="{{ url_for('main.view_ad', posting_id=report.posting_id) }}" 
+                       class="text-blue-600 hover:underline" target="_blank">
+                        {{ report.posting.title[:25] }}...
+                    </a>
+                </td>
+                <td class="px-4 py-3 text-sm hidden md:table-cell">
+                    <span class="bg-red-100 text-red-800 px-2 py-0.5 rounded-full text-xs">{{ report.reason|title }}</span>
+                </td>
+                <td class="px-4 py-3 text-sm hidden md:table-cell">{{ report.created_at.strftime('%d %b') }}</td>
+                <td class="px-4 py-3 text-sm">
+                    {% if report.status == 'pending' %}
+                    <form method="POST" action="{{ url_for('main.review_report', report_id=report.id) }}">
+                        <div class="flex flex-col md:flex-row gap-2">
+                            <button type="submit" name="action" value="dismiss" 
+                                    class="bg-gray-500 text-white px-2 py-1 rounded text-xs hover:bg-gray-600 text-center">
+                                Dismiss
+                            </button>
+                            <button type="submit" name="action" value="remove_ad" 
+                                    class="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700 text-center"
+                                    onclick="return confirm('Deactivate this ad?')">
+                                Remove
+                            </button>
+                        </div>
+                    </form>
+                    {% else %}
+                        <span class="text-gray-400 text-xs">{{ report.status|title }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="p-8 text-center text-gray-500">No {{ current_status }} reports.</div>
+    {% endif %}
+</div>
+
+<div class="mt-4">
+    <a href="{{ url_for('main.admin_dashboard') }}" class="text-purple-600 hover:underline">← Back to Dashboard</a>
+</div>
+{% endblock %}

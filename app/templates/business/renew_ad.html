@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Renew Ad - Eswatini Classifieds{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <h2 class="text-2xl font-bold mb-6"><i class="fas fa-sync-alt text-blue-600 mr-2"></i> Renew Advertisement</h2>
+    
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-2">Ad Details</h3>
+        <p><strong>Title:</strong> {{ posting.title }}</p>
+        <p><strong>Current Status:</strong> 
+            {% if posting.is_active %}
+                <span class="text-green-600">Active</span>
+            {% else %}
+                <span class="text-red-600">Expired/Inactive</span>
+            {% endif %}
+        </p>
+        <p><strong>Current Expiration:</strong> {{ posting.expires_at.strftime('%d %B %Y') }}</p>
+    </div>
+    
+    <form method="POST" class="bg-white rounded-lg shadow p-6">
+        
+        <!-- Choose Plan -->
+        <div class="mb-8">
+            <h3 class="text-lg font-semibold mb-4 pb-2 border-b">Choose Renewal Plan</h3>
+            
+            <div class="grid md:grid-cols-3 gap-4">
+                
+                <!-- 7 Days Plan -->
+                <label class="block cursor-pointer">
+                    <input type="radio" name="payment_plan" value="7days" checked class="peer hidden">
+                    <div class="border-2 border-gray-300 rounded-lg p-4 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition">
+                        <div class="text-2xl mb-2"><i class="fas fa-calendar-alt text-blue-500"></i></div>
+                        <div class="font-bold text-lg">7 Days</div>
+                        <div class="text-2xl font-bold my-2">SZL 50</div>
+                        <p class="text-sm text-gray-600">Extend by 7 days</p>
+                    </div>
+                </label>
+                
+                <!-- 30 Days Plan -->
+                <label class="block cursor-pointer">
+                    <input type="radio" name="payment_plan" value="30days" class="peer hidden">
+                    <div class="border-2 border-gray-300 rounded-lg p-4 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition">
+                        <div class="text-2xl mb-2"><i class="fas fa-calendar-alt text-blue-500"></i></div>
+                        <div class="font-bold text-lg">30 Days</div>
+                        <div class="text-2xl font-bold my-2">SZL 150</div>
+                        <p class="text-sm text-gray-600">Best value - extend by 30 days</p>
+                    </div>
+                </label>
+                
+                <!-- Featured Plan -->
+                <label class="block cursor-pointer">
+                    <input type="radio" name="payment_plan" value="featured" class="peer hidden">
+                    <div class="border-2 border-gray-300 rounded-lg p-4 peer-checked:border-yellow-500 peer-checked:bg-yellow-50 transition">
+                        <div class="text-2xl mb-2"><i class="fas fa-star text-yellow-500"></i></div>
+                        <div class="font-bold text-lg">Featured 14 Days</div>
+                        <div class="text-2xl font-bold my-2">SZL 300</div>
+                        <p class="text-sm text-gray-600">Premium placement + 14 days</p>
+                    </div>
+                </label>
+            </div>
+        </div>
+        
+                <!-- Payment Method -->
+        <div class="mb-8">
+            <h3 class="text-lg font-semibold mb-4 pb-2 border-b">Payment Method</h3>
+            
+            <div class="space-y-3">
+                <!-- PayPal Option (Default) -->
+                <label class="flex items-center p-3 border-2 border-blue-500 rounded-lg cursor-pointer hover:bg-blue-50 bg-blue-50">
+                    <input type="radio" name="payment_method" value="paypal" checked class="mr-3 w-5 h-5">
+                    <div>
+                        <span class="font-medium"><i class="fab fa-paypal text-blue-800 mr-1"></i> PayPal (Recommended)</span>
+                        <p class="text-sm text-gray-600">Pay securely with PayPal or credit/debit card</p>
+                    </div>
+                </label>
+                
+                <!-- Test Mode - VISIBLE ONLY TO ADMIN -->
+                {% if current_user.is_authenticated and current_user.email in ['admin@example.com', 'techcharities@example.com'] %}
+                <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                    <input type="radio" name="payment_method" value="mock" class="mr-3 w-5 h-5">
+                    <div>
+                        <span class="font-medium"><i class="fas fa-flask mr-1"></i> Test Mode (Admin Only)</span>
+                        <p class="text-sm text-gray-600">Instant activation without payment</p>
+                    </div>
+                </label>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Submit -->
+        <div class="flex gap-3">
+            <button type="submit" 
+                    class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
+                Renew Ad →
+            </button>
+            <a href="{{ url_for('main.my_ads') }}" 
+               class="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
