@@ -10,7 +10,8 @@ from app.email_utils import (
     send_terms_agreement,
     send_ad_posted_confirmation,
     send_contact_inquiry,
-    send_payment_confirmation
+    send_payment_confirmation,
+    send_email
 )
 from app.services.momo_service import MTNMoMoService
 from app.services.dodo_service import DodoPaymentsService
