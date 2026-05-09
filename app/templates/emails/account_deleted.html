@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: #dc2626; color: white; padding: 30px; text-align: center; border-radius: 16px 16px 0 0;">
+        <h1 style="margin:0;">Account Deleted</h1>
+        <p style="margin:10px 0 0;opacity:0.9;">We're sorry to see you go</p>
+    </div>
+    <div style="background: white; padding: 30px; border:1px solid #e2e8f0; border-radius: 0 0 16px 16px;">
+        <h2>Hello {{ user_name }},</h2>
+        
+        <p>This email confirms that your Eswatini Classifieds account has been <strong>permanently deleted</strong>.</p>
+        
+        <div style="background:#fef2f2; padding:20px; border-radius:12px; margin:20px 0; border-left:4px solid #dc2626;">
+            <h3 style="margin-top:0; color:#991b1b;">Account Deletion Details</h3>
+            <table style="width:100%; border-collapse:collapse;">
+                <tr><td style="padding:4px 0; color:#7f1d1d;"><strong>Email:</strong></td><td style="padding:4px 0;">{{ user_email }}</td></tr>
+                <tr><td style="padding:4px 0; color:#7f1d1d;"><strong>Deleted On:</strong></td><td style="padding:4px 0;">{{ deletion_date }}</td></tr>
+                <tr><td style="padding:4px 0; color:#7f1d1d;"><strong>Status:</strong></td><td style="padding:4px 0;">Permanently Removed</td></tr>
+            </table>
+        </div>
+        
+        <p><strong>What this means:</strong></p>
+        <ul>
+            <li>Your account and all associated data have been permanently removed</li>
+            <li>You will no longer receive any emails from Eswatini Classifieds</li>
+            <li>If you wish to use our services in the future, you will need to create a new account</li>
+        </ul>
+        
+        <hr style="border:none;border-top:1px solid #e2e8f0; margin:30px 0;">
+        
+        <p>Thank you for being part of the Eswatini Classifieds community. We wish you all the best.</p>
+        
+        <p style="color:#64748b; font-size:12px;">
+            If you did not request this deletion or believe this was a mistake, please contact us immediately at eswatiniclassifieds@gmail.com.
+        </p>         
+        <div style="background:#f8fafc; padding:20px; border-radius:12px; margin:20px 0;">
+            <h3 style="margin-top:0;">Your Feedback</h3>
+            {% if reason and reason != 'Not specified' %}
+            <p><strong>Reason for leaving:</strong> 
+                {% if reason == 'not_useful' %}Not finding what I need
+                {% elif reason == 'too_expensive' %}Too expensive
+                {% elif reason == 'found_elsewhere' %}Found another platform
+                {% elif reason == 'privacy' %}Privacy concerns
+                {% elif reason == 'too_many_emails' %}Too many emails
+                {% elif reason == 'not_using' %}No longer using classifieds
+                {% else %}Other{% endif %}
+            </p>
+            {% endif %}
+            {% if feedback %}
+            <p><strong>Additional comments:</strong> {{ feedback }}</p>
+            {% endif %}
+            <p style="font-size:12px; color:#64748b; margin-top:10px;">Thank you for your feedback. It helps us improve Eswatini Classifieds.</p>
+        </div>
+    </div>
+</body>
+</html>

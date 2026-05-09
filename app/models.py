@@ -158,3 +158,18 @@ class AdView(db.Model):
     
     def __repr__(self):
         return f'<AdView Ad:{self.posting_id} IP:{self.viewer_ip}>'
+
+class DeletionLog(db.Model):
+    """Track account deletions and reasons"""
+    __tablename__ = 'deletion_logs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_email = db.Column(db.String(120), nullable=False)
+    user_name = db.Column(db.String(200))
+    user_type = db.Column(db.String(20))
+    reason = db.Column(db.String(50))
+    feedback = db.Column(db.Text)
+    deleted_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<DeletionLog {self.user_email}>'

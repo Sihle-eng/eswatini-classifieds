@@ -3,7 +3,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from app import db
-from app.models import User, BusinessProfile, ClientProfile, Posting, Transaction, SavedAd, Report, PostingImage, AdView
+from app.models import User, BusinessProfile, ClientProfile, Posting, Transaction, SavedAd, Report, PostingImage, AdView, DeletionLog
 from datetime import datetime, timedelta
 from app.email_utils import (
     send_welcome_email,
@@ -1295,21 +1295,88 @@ def pay_with_paypal(posting_id):
     return redirect(f"https://paypal.me/eswatiniclassifieds/{amount_usd}")
 
 
-@main.route('/business/payment-history')
+@main.route('/account/delete', methods=['POST'])
 @login_required
-def payment_history():
-    if current_user.user_type != 'business':
-        flash('Access denied. Business account required.', 'error')
-        return redirect(url_for('main.home'))
+def delete_account():
+    """Permanently delete user account"""
+    user_id = current_user.id
+    user_type = current_user.user_type
+    user_email = current_user.email
+    user_name = current_user.email.split('@')[0]
     
-    # Get all transactions for this business user
-    transactions = Transaction.query.filter_by(
-        payer_user_id=current_user.id
-    ).order_by(Transaction.created_at.desc()).all()
+    # Get deletion reason
+    reason = request.form.get('reason', 'Not specified')
+    feedback = request.form.get('feedback', '')  
+  
+   # Log the deletion BEFORE deleting
+    deletion_log = DeletionLog(
+        user_email=user_email,
+        user_name=user_name,
+        user_type=user_type,
+        reason=reason,
+        feedback=feedback
+    )
+    db.session.add(deletion_log)
+    db.session.flush()  # Save log before deleting user
     
-    # Calculate total spent
-    total_spent = sum(float(t.amount) for t in transactions if t.payment_status == 'success')
+    if user_type == 'business':
+        business = BusinessProfile.query.filter_by(user_id=user_id).first()
+        if business:
+            user_name = business.company_name
+            postings = Posting.query.filter_by(business_id=business.id).all()
+            
+            for posting in postings:
+                Transaction.query.filter_by(posting_id=posting.id).delete()
+                Report.query.filter_by(posting_id=posting.id).delete()
+                SavedAd.query.filter_by(posting_id=posting.id).delete()
+                AdView.query.filter_by(posting_id=posting.id).delete()
+                PostingImage.query.filter_by(posting_id=posting.id).delete()
+            
+            Posting.query.filter_by(business_id=business.id).delete()
+            db.session.delete(business)
+    else:
+        client = ClientProfile.query.filter_by(user_id=user_id).first()
+        if client:
+            user_name = client.full_name or user_name
+            db.session.delete(client)
     
-    return render_template('business/payment_history.html', 
-                         transactions=transactions,
-                         total_spent=total_spent)
+    # Delete remaining data
+    SavedAd.query.filter_by(client_user_id=user_id).delete()
+    Transaction.query.filter_by(payer_user_id=user_id).delete()
+    Report.query.filter_by(reporter_user_id=user_id).delete()
+    AdView.query.filter_by(viewer_user_id=user_id).delete()
+    User.query.filter_by(id=user_id).delete()
+    db.session.commit()
+    
+    # Send deletion confirmation email
+    try:
+        send_email(
+            to=user_email,
+            subject='Account Deletion Confirmation - Eswatini Classifieds',
+            template_name='account_deleted',
+            user_name=user_name,
+            user_email=user_email,
+            reason=reason,
+            feedback=feedback,
+            deletion_date=datetime.utcnow().strftime('%d %B %Y at %H:%M')
+        )
+        print(f"[SUCCESS] Deletion email sent to {user_email}")
+    except Exception as e:
+        print(f"[ERROR] Could not send deletion email: {e}")
+    
+    logout_user()
+    flash('Your account has been permanently deleted. A confirmation email has been sent to your inbox.', 'info')
+    return redirect(url_for('main.home'))
+
+@main.route('/account/delete')
+@login_required
+def delete_account_page():
+    """Show account deletion confirmation page"""
+    return render_template('delete_account.html')
+
+@main.route('/admin/deletions')
+@admin_required
+def admin_deletions():
+    """View account deletion log"""
+    deletions = DeletionLog.query.order_by(DeletionLog.deleted_at.desc()).all()
+    return render_template('admin/deletions.html', deletions=deletions)

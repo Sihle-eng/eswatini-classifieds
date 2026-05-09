@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Account - Eswatini Classifieds{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg p-8 mt-8">
+        
+        <!-- Warning Header -->
+        <div class="text-center mb-6">
+            <i class="fas fa-exclamation-triangle text-red-500 text-6xl mb-4"></i>
+            <h1 class="text-3xl font-bold text-red-600 mb-2">Delete Your Account</h1>
+            <p class="text-gray-600">This action is permanent and cannot be undone.</p>
+        </div>
+        
+        <!-- What Gets Deleted -->
+        <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+            <h3 class="text-lg font-bold text-red-800 mb-3"><i class="fas fa-list mr-2"></i> What will be deleted:</h3>
+            <ul class="space-y-2 text-red-700 text-sm">
+                <li><i class="fas fa-times mr-1"></i> Your account and login credentials</li>
+                <li><i class="fas fa-times mr-1"></i> All your advertisements and images</li>
+                <li><i class="fas fa-times mr-1"></i> Your business or client profile</li>
+                <li><i class="fas fa-times mr-1"></i> Your transaction history</li>
+                <li><i class="fas fa-times mr-1"></i> Your saved ads and preferences</li>
+                <li><i class="fas fa-times mr-1"></i> All your data permanently removed</li>
+            </ul>
+        </div>        
+        <!-- Reason for Leaving -->
+        <div class="mb-6">
+            <label class="block text-gray-700 font-medium mb-2">We're sorry to see you go. Please tell us why (optional):</label>
+            <select name="reason" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-red-500">
+                <option value="">-- Select a reason --</option>
+                <option value="not_useful">Not finding what I need</option>
+                <option value="too_expensive">Too expensive</option>
+                <option value="found_elsewhere">Found another platform</option>
+                <option value="privacy">Privacy concerns</option>
+                <option value="too_many_emails">Too many emails</option>
+                <option value="not_using">No longer using classifieds</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+        
+        <div class="mb-6">
+            <label class="block text-gray-700 font-medium mb-2">Additional comments (optional):</label>
+            <textarea name="feedback" rows="3" placeholder="Tell us more about your experience..."
+                      class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-red-500"></textarea>
+        </div>
+        
+        <!-- Confirmation Form -->
+        <div class="border-t pt-6">
+            <form method="POST" action="{{ url_for('main.delete_account') }}">
+                <div class="mb-4">
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" name="confirm_delete" required class="mr-3 w-5 h-5 text-red-600">
+                        <span class="text-gray-700">I understand that this action is permanent and cannot be undone.</span>
+                    </label>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" name="confirm_data" required class="mr-3 w-5 h-5 text-red-600">
+                        <span class="text-gray-700">I understand that all my data will be permanently deleted.</span>
+                    </label>
+                </div>
+                
+                <div class="flex gap-3">
+                    <button type="submit" 
+                            class="flex-1 bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition">
+                        <i class="fas fa-trash-alt mr-1"></i> Permanently Delete My Account
+                    </button>
+                    <a href="{{ url_for('main.home') }}" 
+                       class="px-6 py-3 border rounded-lg hover:bg-gray-50 transition font-medium">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Contact Info -->
+        <div class="mt-6 text-center text-sm text-gray-500">
+            <p>Having second thoughts? <a href="{{ url_for('main.home') }}" class="text-blue-600 hover:underline">Go back to safety</a></p>
+            <p class="mt-2">Questions? Contact us at eswatiniclassifieds@gmail.com</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
