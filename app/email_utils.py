@@ -11,10 +11,8 @@ import uuid
 def send_email(to, subject, template_name, **kwargs):
     """Generic email sending function"""
     try:
-        # Render HTML template
         html_content = render_template(f'emails/{template_name}.html', **kwargs)
         
-        # Create message
         msg = Message(
             subject=subject,
             recipients=[to],
@@ -22,16 +20,9 @@ def send_email(to, subject, template_name, **kwargs):
             sender=current_app.config['MAIL_DEFAULT_SENDER']
         )
         
-        # Check if running on Render (production)
-        if os.environ.get('RENDER') == 'true':
-            # On Render: log instead of sending (SMTP blocked)
-            print(f"[RENDER] Would send email to {to}: {subject}")
-            return True
-        else:
-            # On local: actually send
-            mail.send(msg)
-            print(f"[SUCCESS] Email sent to {to}: {subject}")
-            return True
+        mail.send(msg)
+        print(f"[SUCCESS] Email sent to {to}: {subject}")
+        return True
     except Exception as e:
         print(f"[ERROR] Email failed to {to}: {e}")
         return False
