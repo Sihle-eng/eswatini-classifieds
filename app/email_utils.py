@@ -9,7 +9,7 @@ import uuid
 
 
 def send_email(to, subject, template_name, **kwargs):
-    """Generic email sending function"""
+    """Generic email sending function -FIXED VERSION MAY 10"""
     try:
         html_content = render_template(f'emails/{template_name}.html', **kwargs)
         
