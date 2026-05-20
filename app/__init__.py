@@ -6,6 +6,8 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from dotenv import load_dotenv
 import os
+import redis
+from rq import Queue   # <-- add this
 
 # Load environment variables
 load_dotenv()
@@ -36,6 +38,18 @@ def create_app(config_name='default'):
     login_manager.login_view = 'main.login'
     login_manager.login_message = 'Please log in to access this page.'
     login_manager.login_message_category = 'info'
+    
+    # ============================================
+    # REDIS + RQ SETUP
+    # ============================================
+    redis_url = os.environ.get('REDIS_URL', 'redis://localhost:6379')
+    app.config['REDIS_URL'] = redis_url
+    # Create Redis connection (will be used by workers too)
+    redis_conn = redis.from_url(redis_url)
+    # Create a default queue
+    app.config['RQ_QUEUE'] = Queue('default', connection=redis_conn)
+    # Also store the redis connection on app for potential use
+    app.config['REDIS_CONN'] = redis_conn
     
     # Import and register blueprints
     from app.routes import main
