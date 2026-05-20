@@ -1,59 +1,81 @@
-# File: app/email_utils.py
+
 
 import threading
-import socket
+import requests
 from flask import render_template, current_app, url_for
-from flask_mail import Message
-from app import mail
 from datetime import datetime
-import os
-import uuid
+import json
 
-def _send_email_thread(app, msg):
-    """Send email in a background thread (handles its own app context)."""
-    with app.app_context():
-        # Set a short socket timeout so the thread doesn't hang forever
-        original_timeout = socket.getdefaulttimeout()
-        socket.setdefaulttimeout(15.0)   # 15 seconds connect/read timeout
+def _send_email_via_brevo_api(to, subject, html_content):
+    """Send email using Brevo's HTTP API (synchronous, but fast)."""
+    api_key = current_app.config.get('BREVO_API_KEY')
+    if not api_key:
+        raise ValueError("BREVO_API_KEY not configured")
+
+    url = "https://api.brevo.com/v3/smtp/email"
+    headers = {
+        "api-key": api_key,
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    }
+    sender_email = current_app.config.get('MAIL_DEFAULT_SENDER')
+    payload = {
+        "sender": {"email": sender_email},
+        "to": [{"email": to}],
+        "subject": subject,
+        "htmlContent": html_content
+    }
+    # Short timeout – API is usually fast (<2 seconds)
+    response = requests.post(url, json=payload, headers=headers, timeout=10)
+    response.raise_for_status()  # Raise exception for 4xx/5xx
+    return response.json()
+
+def _send_email_thread(to, subject, template_name, **kwargs):
+    """Background thread that sends the email (with retry)."""
+    with current_app.app_context():
         try:
-            mail.send(msg)
-            print(f"[SUCCESS] Background email sent to {msg.recipients}")
+            html_content = render_template(f'emails/{template_name}.html', **kwargs)
+            # Simple retry: try once, then wait 2 seconds and retry
+            for attempt in range(2):
+                try:
+                    _send_email_via_brevo_api(to, subject, html_content)
+                    print(f"[SUCCESS] Email sent to {to}: {subject}")
+                    return
+                except requests.exceptions.Timeout:
+                    if attempt == 0:
+                        print(f"[WARN] Timeout on attempt 1 for {to}, retrying...")
+                        import time
+                        time.sleep(2)
+                    else:
+                        raise
+                except Exception as e:
+                    if attempt == 0:
+                        print(f"[WARN] Error on attempt 1: {e}, retrying...")
+                        import time
+                        time.sleep(2)
+                    else:
+                        raise
         except Exception as e:
-            print(f"[ERROR] Background email failed: {e}")
-        finally:
-            socket.setdefaulttimeout(original_timeout)
+            print(f"[ERROR] Failed to send email to {to}: {e}")
 
 def send_email_async(to, subject, template_name, **kwargs):
-    """Non‑blocking email send: returns immediately, sends in background."""
-    try:
-        html_content = render_template(f'emails/{template_name}.html', **kwargs)
-        msg = Message(
-            subject=subject,
-            recipients=[to],
-            html=html_content,
-            sender=current_app.config['MAIL_DEFAULT_SENDER']
-        )
-        # Get a reference to the current app (for the background thread)
-        app = current_app._get_current_object()
-        thread = threading.Thread(target=_send_email_thread, args=(app, msg))
-        thread.daemon = True
-        thread.start()
-        print(f"[INFO] Email queued to {to}: {subject}")
-        return True
-    except Exception as e:
-        print(f"[ERROR] Failed to queue email: {e}")
-        return False
+    """Non‑blocking email send – returns immediately."""
+    thread = threading.Thread(
+        target=_send_email_thread,
+        args=(to, subject, template_name),
+        kwargs=kwargs,
+        daemon=True
+    )
+    thread.start()
+    print(f"[INFO] Email queued to {to}: {subject}")
+    return True
 
-# Keep your original send_email for compatibility, but make it use the async version
+# Keep the same wrapper functions as before
 def send_email(to, subject, template_name, **kwargs):
-    """Now non‑blocking by default (uses background thread)."""
+    """Async email send (compatible with old code)."""
     return send_email_async(to, subject, template_name, **kwargs)
 
-
-# ------------------------------------------------------------
-# Your existing wrapper functions (unchanged)
-# ------------------------------------------------------------
-
+# The following functions are unchanged (they call send_email)
 def send_welcome_email(user_email, user_type, name):
     subject = f'Welcome to Eswatini Classifieds, {name}!'
     return send_email(
