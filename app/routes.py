@@ -241,7 +241,7 @@ def register():
         login_user(new_user)
         
         # Redirect to appropriate dashboard        
-        admin_emails = ['admin@example.com', 'techcharities@example.com', 'eswatiniclassifieds@gmail.com']
+        admin_emails = ['admin@example.com', 'techcharities@example.com', 'eswatiniclassifieds@gmail.com',]
         if email in admin_emails:
             return redirect(url_for('main.admin_dashboard'))
         elif user_type == 'business':
@@ -324,6 +324,9 @@ def post_ad():
         flash('Access denied. Business account required.', 'error')
         return redirect(url_for('main.home'))
     
+    PROMO_EMAIL = "sihlelelwewelcome@gmail.com"
+    is_promo = (current_user.email == PROMO_EMAIL)
+    
     if request.method == 'POST':
         # Get form data
         title = request.form.get('title')
@@ -331,35 +334,40 @@ def post_ad():
         location_city = request.form.get('location_city')
         salary_price = request.form.get('salary_price')
         description = request.form.get('description')
-        payment_plan = request.form.get('payment_plan')
-        payment_method = request.form.get('payment_method')
         
-        # Calculate expiration date based on plan
-        from datetime import datetime, timedelta
-        
-        if payment_plan == '7days':
+        # For promo user, we ignore payment_plan and payment_method from form
+        # or they won't exist. We'll set defaults.
+        if is_promo:
+            # Set a default plan (e.g., 7 days) and method 'promotional'
+            payment_plan = '7days'
+            payment_method = 'promotional'
             days_to_add = 7
-            amount = 50.00
-        elif payment_plan == '30days':
-            days_to_add = 30
-            amount = 150.00
-        elif payment_plan == 'featured':
-            days_to_add = 14
-            amount = 300.00
+            amount = 0.00
         else:
-            days_to_add = 7
-            amount = 50.00
+            payment_plan = request.form.get('payment_plan')
+            payment_method = request.form.get('payment_method')
+            if payment_plan == '7days':
+                days_to_add = 7
+                amount = 50.00
+            elif payment_plan == '30days':
+                days_to_add = 30
+                amount = 150.00
+            elif payment_plan == 'featured':
+                days_to_add = 14
+                amount = 300.00
+            else:
+                days_to_add = 7
+                amount = 50.00
         
+        from datetime import datetime, timedelta
         expires_at = datetime.utcnow() + timedelta(days=days_to_add)
         
-        # GET BUSINESS PROFILE FIRST
         business = BusinessProfile.query.filter_by(user_id=current_user.id).first()
-        
         if not business:
             flash('Please complete your business profile first.', 'error')
             return redirect(url_for('main.business_dashboard'))
         
-        # CREATE THE POSTING
+        # CREATE POSTING
         new_posting = Posting(
             business_id=business.id,
             title=title,
@@ -367,81 +375,77 @@ def post_ad():
             category=category,
             salary_price=salary_price,
             location_city=location_city,
-            is_active=False,
+            is_active=is_promo,   # True for promo, False for others
             expires_at=expires_at,
             payment_plan=payment_plan
         )
-        
         db.session.add(new_posting)
         db.session.flush()
         
-        # HANDLE MULTIPLE IMAGE UPLOADS
+        # Handle images (same for both)
         if 'images' in request.files:
             files = request.files.getlist('images')
             valid_files = [f for f in files if f.filename != '']
-            
-            if len(valid_files) > 10:
-                flash('⚠️ Maximum 10 images allowed.', 'warning')
-            
             if valid_files:
                 saved_count = save_multiple_images(valid_files[:10], new_posting.id)
-                
                 if saved_count > 0:
-                    primary_image = PostingImage.query.filter_by(
-                        posting_id=new_posting.id, 
-                        is_primary=True
-                    ).first()
-                    if primary_image:
-                        new_posting.image_filename = primary_image.filename
-                    
-                    flash(f'📸 {saved_count} image(s) uploaded!', 'success')
+                    primary = PostingImage.query.filter_by(posting_id=new_posting.id, is_primary=True).first()
+                    if primary:
+                        new_posting.image_filename = primary.filename
+                    flash(f'📷 {saved_count} image(s) uploaded.', 'success')
         
         db.session.commit()
         
-        # CREATE TRANSACTION
-        transaction = Transaction(
-            posting_id=new_posting.id,
-            payer_user_id=current_user.id,
-            amount=amount,
-            currency='SZL',
-            payment_method=payment_method,
-            payment_status='pending'
-        )
-        
-        db.session.add(transaction)
-        db.session.commit()
-        
-        # ============================================
-        # HANDLE PAYMENT (Mock Admin Only)
-        # ============================================
-        if payment_method == 'mock':
-            admin_emails = ['admin@example.com', 'techcharities@example.com, eswatiniclassifieds@gmail.com']
-            if current_user.email not in admin_emails:
-                flash('Mock payment is for admins only.', 'error')
-                return redirect(url_for('main.business_dashboard'))
-            
-            transaction.payment_status = 'success'
-            transaction.paid_at = datetime.utcnow()
-            new_posting.is_active = True
+        if is_promo:
+            # Record dummy transaction
+            dummy = Transaction(
+                posting_id=new_posting.id,
+                payer_user_id=current_user.id,
+                amount=0.00,
+                currency='SZL',
+                payment_method='promotional',
+                payment_status='success',
+                paid_at=datetime.utcnow()
+            )
+            db.session.add(dummy)
+            db.session.commit()
+            flash(f'✓ Promotional ad posted. Expires {expires_at.strftime("%d %b %Y")}.', 'success')
+            return redirect(url_for('main.my_ads'))
+        else:
+            # Normal flow: create transaction, handle payment
+            transaction = Transaction(
+                posting_id=new_posting.id,
+                payer_user_id=current_user.id,
+                amount=amount,
+                currency='SZL',
+                payment_method=payment_method,
+                payment_status='pending'
+            )
+            db.session.add(transaction)
             db.session.commit()
             
-            try:
-                send_ad_posted_confirmation(
-                    current_user.email, title, new_posting.id,
-                    expires_at, amount, payment_method
-                )
-            except Exception as e:
-                print(f"Email error: {e}")
-            
-            flash(f'✅ Ad posted successfully! Expires {expires_at.strftime("%d %b %Y")}.', 'success')
-            return redirect(url_for('main.business_dashboard'))
-        
-        elif payment_method == 'paypal':
-            flash('💳 Redirecting to secure payment page...', 'info')
-            return redirect(url_for('main.payment_instructions', posting_id=new_posting.id))
+            if payment_method == 'mock':
+                admin_emails = ['admin@example.com', 'techcharities@example.com', 'eswatiniclassifieds@gmail.com']
+                if current_user.email not in admin_emails:
+                    flash('Mock payment is for administrators only.', 'error')
+                    return redirect(url_for('main.business_dashboard'))
+                transaction.payment_status = 'success'
+                transaction.paid_at = datetime.utcnow()
+                new_posting.is_active = True
+                db.session.commit()
+                try:
+                    send_ad_posted_confirmation(current_user.email, title, new_posting.id, expires_at, amount, payment_method)
+                except Exception as e:
+                    print(f"Email error: {e}")
+                flash(f'✔ Ad posted successfully. Expires {expires_at.strftime("%d %b %Y")}.', 'success')
+                return redirect(url_for('main.business_dashboard'))
+            elif payment_method == 'paypal':
+                flash('ℹ Redirecting to secure payment page...', 'info')
+                return redirect(url_for('main.payment_instructions', posting_id=new_posting.id))
+            # Add other payment methods (momo, dodo) as needed
     
-    # GET request - show the form
-    return render_template('business/post_ad.html')
+    # GET request – show form
+    return render_template('business/post_ad.html', is_promo=is_promo)
 
 # ============================================
 # CLIENT ROUTES (Login Required)

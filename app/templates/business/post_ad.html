@@ -5,13 +5,26 @@
 {% block content %}
 <div class="max-w-3xl mx-auto">
     <h2 class="text-2xl font-bold mb-6"><i class="fas fa-pen-square text-blue-600 mr-2"></i>Post a New Advertisement</h2>
-    
+
+    <!-- Promotional Banner (only for sihlelelwewelcome@gmail.com) -->
+    {% if is_promo %}
+    <div class="mb-6 bg-purple-100 border-l-4 border-purple-500 text-purple-700 p-4 rounded">
+        ⭐ <strong>Promotional Partner</strong> – Your ads will be posted immediately at no cost.
+    </div>
+    {% endif %}
+
     <form method="POST" action="{{ url_for('main.post_ad') }}" enctype="multipart/form-data" class="bg-white rounded-lg shadow p-6">
-        
-        <!-- Step 1: Basic Information -->
+
+        <!-- Hidden fields for promo user (default plan & method) -->
+        {% if is_promo %}
+        <input type="hidden" name="payment_plan" value="7days">
+        <input type="hidden" name="payment_method" value="promotional">
+        {% endif %}
+
+        <!-- Step 1: Basic Information (same for all) -->
         <div class="mb-8">
             <h3 class="text-lg font-semibold mb-4 pb-2 border-b">Step 1: Ad Details</h3>
-            
+
             <!-- Title -->
             <div class="mb-4">
                 <label class="block text-gray-700 mb-2 font-medium">Ad Title *</label>
@@ -20,7 +33,7 @@
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
                 <p class="text-sm text-gray-500 mt-1">Make it clear and descriptive</p>
             </div>
-            
+
             <!-- Category -->
             <div class="mb-4">
                 <label class="block text-gray-700 mb-2 font-medium">Category *</label>
@@ -33,7 +46,7 @@
                     <option value="general">General Items</option>
                 </select>
             </div>
-            
+
             <!-- Location City -->
             <div class="mb-4">
                 <label class="block text-gray-700 mb-2 font-medium">Location (City) *</label>
@@ -51,7 +64,7 @@
                     <option value="Other">Other</option>
                 </select>
             </div>
-            
+
             <!-- Salary/Price -->
             <div class="mb-4">
                 <label class="block text-gray-700 mb-2 font-medium">Salary / Price</label>
@@ -60,84 +73,59 @@
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
                 <p class="text-sm text-gray-500 mt-1">Optional but recommended</p>
             </div>
-            
-            <!-- Multiple Image Upload with Preview -->
+
+            <!-- Multiple Image Upload with Preview (unchanged) -->
             <div class="mb-4">
                 <label class="block text-gray-700 mb-2 font-medium"><i class="fas fa-camera mr-1"></i> Upload Images (Up to 10)</label>
-                
-                <!-- File Input -->
                 <input type="file" name="images" id="imageUpload" 
                        accept="image/png, image/jpeg, image/jpg, image/gif, image/webp" 
                        multiple
                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
-                
                 <p class="text-sm text-gray-500 mt-1">
                     <span id="imageCount">0</span> image(s) selected. Max 10 images. 5MB each.
                 </p>
                 <p class="text-sm text-gray-500">Supported: PNG, JPG, GIF, WEBP</p>
-                
-                <!-- Image Preview Grid -->
                 <div id="imagePreview" class="grid grid-cols-5 gap-2 mt-3"></div>
             </div>
 
-            <!-- JavaScript for Image Preview -->
+            <!-- JavaScript for Image Preview (unchanged) -->
             <script>
             document.getElementById('imageUpload').addEventListener('change', function(e) {
                 const preview = document.getElementById('imagePreview');
                 const countSpan = document.getElementById('imageCount');
                 const files = Array.from(e.target.files);
-                
                 if (files.length > 10) {
                     alert('Maximum 10 images allowed. Only the first 10 will be uploaded.');
                     files.splice(10);
                 }
-                
                 countSpan.textContent = files.length;
                 preview.innerHTML = '';
-                
                 files.forEach((file, index) => {
                     if (file.type.startsWith('image/')) {
                         const reader = new FileReader();
-                        
                         reader.onload = function(e) {
                             const div = document.createElement('div');
                             div.className = 'relative group';
-                            
                             const badge = index === 0 
                                 ? '<span class="absolute top-1 left-1 bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full z-10">Main</span>' 
                                 : '';
-                            
                             const removeBtn = `
                                 <button type="button" 
                                         class="absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition z-10"
                                         onclick="removeImage(${index})">×</button>
                             `;
-                            
-                            div.innerHTML = `
-                                ${badge}
-                                ${removeBtn}
-                                <img src="${e.target.result}" 
-                                     class="w-full h-20 object-cover rounded-lg border-2 ${index === 0 ? 'border-blue-500' : 'border-gray-200'}">
-                                <span class="text-xs text-gray-500 truncate block mt-1">${file.name.substring(0, 15)}</span>
-                            `;
-                            
+                            div.innerHTML = `${badge}${removeBtn}<img src="${e.target.result}" class="w-full h-20 object-cover rounded-lg border-2 ${index === 0 ? 'border-blue-500' : 'border-gray-200'}"><span class="text-xs text-gray-500 truncate block mt-1">${file.name.substring(0, 15)}</span>`;
                             preview.appendChild(div);
                         };
-                        
                         reader.readAsDataURL(file);
                     }
                 });
             });
-
             function removeImage(index) {
                 alert('To change images, click "Choose Files" again and re-select.');
             }
-
             let hasSelectedImages = false;
-            document.getElementById('imageUpload').addEventListener('change', function() {
-                hasSelectedImages = true;
-            });
-
+            document.getElementById('imageUpload').addEventListener('change', function() { hasSelectedImages = true; });
             window.addEventListener('beforeunload', function(e) {
                 if (hasSelectedImages) {
                     e.preventDefault();
@@ -145,7 +133,6 @@
                 }
             });
             </script>
-
             <style>
             input[type="file"] { color: transparent; }
             input[type="file"]::-webkit-file-upload-button { visibility: hidden; }
@@ -161,7 +148,7 @@
             }
             input[type="file"]:hover::before { background: #2563EB; }
             </style>
-            
+
             <!-- Description -->
             <div class="mb-4">
                 <label class="block text-gray-700 mb-2 font-medium">Description *</label>
@@ -171,14 +158,12 @@
                 <p class="text-sm text-gray-500 mt-1">Be specific - good descriptions get more responses</p>
             </div>
         </div>
-        
-        <!-- Step 2: Choose Payment Plan -->
+
+        <!-- Step 2: Choose Payment Plan (HIDDEN FOR PROMO) -->
+        {% if not is_promo %}
         <div class="mb-8">
             <h3 class="text-lg font-semibold mb-4 pb-2 border-b">Step 2: Choose Listing Duration</h3>
-            
             <div class="grid md:grid-cols-3 gap-4">
-                
-                <!-- 7 Days Plan -->
                 <label class="block cursor-pointer">
                     <input type="radio" name="payment_plan" value="7days" checked class="peer hidden">
                     <div class="border-2 border-gray-300 rounded-lg p-4 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition">
@@ -192,8 +177,6 @@
                         </ul>
                     </div>
                 </label>
-                
-                <!-- 30 Days Plan -->
                 <label class="block cursor-pointer">
                     <input type="radio" name="payment_plan" value="30days" class="peer hidden">
                     <div class="border-2 border-gray-300 rounded-lg p-4 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition">
@@ -207,8 +190,6 @@
                         </ul>
                     </div>
                 </label>
-                
-                <!-- Featured 14 Days Plan -->
                 <label class="block cursor-pointer">
                     <input type="radio" name="payment_plan" value="featured" class="peer hidden">
                     <div class="border-2 border-gray-300 rounded-lg p-4 peer-checked:border-yellow-500 peer-checked:bg-yellow-50 transition">
@@ -225,13 +206,11 @@
                 </label>
             </div>
         </div>
-        
-        <!-- Step 3: Payment Method -->
+
+        <!-- Step 3: Payment Method (HIDDEN FOR PROMO) -->
         <div class="mb-8">
             <h3 class="text-lg font-semibold mb-4 pb-2 border-b">Step 3: Payment Method</h3>
-            
             <div class="space-y-3">
-                <!-- PayPal Option (Default) -->
                 <label class="flex items-center p-3 border-2 border-blue-500 rounded-lg cursor-pointer hover:bg-blue-50 bg-blue-50">
                     <input type="radio" name="payment_method" value="paypal" checked class="mr-3 w-5 h-5">
                     <div>
@@ -244,8 +223,6 @@
                         </div>
                     </div>
                 </label>
-                
-                <!-- Test Mode - VISIBLE ONLY TO ADMIN -->
                 {% if current_user.is_authenticated and current_user.email in ['admin@example.com', 'techcharities@example.com'] %}
                 <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
                     <input type="radio" name="payment_method" value="mock" class="mr-3 w-5 h-5">
@@ -257,12 +234,13 @@
                 {% endif %}
             </div>
         </div>
+        {% endif %}
 
-        <!-- Submit -->
+        <!-- Submit button (different text for promo) -->
         <div class="flex gap-3">
             <button type="submit" 
                     class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
-                Proceed to Payment →
+                {% if is_promo %}Post Ad Immediately (Free){% else %}Proceed to Payment →{% endif %}
             </button>
             <a href="{{ url_for('main.business_dashboard') }}" 
                class="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
