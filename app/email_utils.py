@@ -1,5 +1,7 @@
 # File: app/email_utils.py
 
+import threading
+import socket
 from flask import render_template, current_app, url_for
 from flask_mail import Message
 from app import mail
@@ -7,36 +9,53 @@ from datetime import datetime
 import os
 import uuid
 
+def _send_email_thread(app, msg):
+    """Send email in a background thread (handles its own app context)."""
+    with app.app_context():
+        # Set a short socket timeout so the thread doesn't hang forever
+        original_timeout = socket.getdefaulttimeout()
+        socket.setdefaulttimeout(15.0)   # 15 seconds connect/read timeout
+        try:
+            mail.send(msg)
+            print(f"[SUCCESS] Background email sent to {msg.recipients}")
+        except Exception as e:
+            print(f"[ERROR] Background email failed: {e}")
+        finally:
+            socket.setdefaulttimeout(original_timeout)
 
-def send_email(to, subject, template_name, **kwargs):
-    """Generic email sending function -FIXED VERSION MAY 10"""
+def send_email_async(to, subject, template_name, **kwargs):
+    """Non‑blocking email send: returns immediately, sends in background."""
     try:
         html_content = render_template(f'emails/{template_name}.html', **kwargs)
-        
         msg = Message(
             subject=subject,
             recipients=[to],
             html=html_content,
             sender=current_app.config['MAIL_DEFAULT_SENDER']
         )
-        
-        # Try to actually send, but don't crash if SMTP fails
-        try:
-            mail.send(msg)
-            print(f"[SUCCESS] Email sent to {to}: {subject}")
-        except Exception as send_error:
-            print(f"[WARNING] SMTP send failed (non-blocking): {send_error}")
-            print(f"[INFO] Registration continues. Would have sent to {to}: {subject}")
-        
+        # Get a reference to the current app (for the background thread)
+        app = current_app._get_current_object()
+        thread = threading.Thread(target=_send_email_thread, args=(app, msg))
+        thread.daemon = True
+        thread.start()
+        print(f"[INFO] Email queued to {to}: {subject}")
         return True
     except Exception as e:
-        print(f"[ERROR] Email template error: {e}")
+        print(f"[ERROR] Failed to queue email: {e}")
         return False
 
+# Keep your original send_email for compatibility, but make it use the async version
+def send_email(to, subject, template_name, **kwargs):
+    """Now non‑blocking by default (uses background thread)."""
+    return send_email_async(to, subject, template_name, **kwargs)
+
+
+# ------------------------------------------------------------
+# Your existing wrapper functions (unchanged)
+# ------------------------------------------------------------
+
 def send_welcome_email(user_email, user_type, name):
-    """Send welcome email after registration"""
     subject = f'Welcome to Eswatini Classifieds, {name}!'
-    
     return send_email(
         to=user_email,
         subject=subject,
@@ -47,11 +66,8 @@ def send_welcome_email(user_email, user_type, name):
         login_url=current_app.config.get('SITE_URL', 'http://localhost:5000') + url_for('main.login')
     )
 
-
 def send_terms_agreement(user_email, user_type, name, agreement_id, ip_address):
-    """Send Terms & Conditions agreement copy"""
     subject = 'Your Terms & Conditions Agreement - Eswatini Classifieds'
-    
     return send_email(
         to=user_email,
         subject=subject,
@@ -65,13 +81,9 @@ def send_terms_agreement(user_email, user_type, name, agreement_id, ip_address):
         site_url=current_app.config.get('SITE_URL', 'http://localhost:5000')
     )
 
-
 def send_ad_posted_confirmation(user_email, ad_title, ad_id, expires_at, amount, payment_method):
-    """Send confirmation when ad is posted"""
     subject = f'Your ad "{ad_title}" is now live!'
-    
     site_url = current_app.config.get('SITE_URL', 'http://localhost:5000')
-    
     return send_email(
         to=user_email,
         subject=subject,
@@ -85,13 +97,9 @@ def send_ad_posted_confirmation(user_email, ad_title, ad_id, expires_at, amount,
         dashboard_url=site_url + url_for('main.my_ads')
     )
 
-
 def send_ad_expiry_reminder(user_email, ad_title, expires_at, ad_id):
-    """Send reminder when ad is about to expire"""
     subject = f'Your ad "{ad_title}" expires soon!'
-    
     site_url = current_app.config.get('SITE_URL', 'http://localhost:5000')
-    
     return send_email(
         to=user_email,
         subject=subject,
@@ -102,13 +110,9 @@ def send_ad_expiry_reminder(user_email, ad_title, expires_at, ad_id):
         renew_url=site_url + url_for('main.renew_ad', posting_id=ad_id)
     )
 
-
 def send_payment_confirmation(user_email, ad_title, amount, payment_method, transaction_id):
-    """Send payment confirmation"""
     subject = f'Payment Confirmed - {ad_title}'
-    
     site_url = current_app.config.get('SITE_URL', 'http://localhost:5000')
-    
     return send_email(
         to=user_email,
         subject=subject,
@@ -120,13 +124,9 @@ def send_payment_confirmation(user_email, ad_title, amount, payment_method, tran
         dashboard_url=site_url + url_for('main.my_ads')
     )
 
-
 def send_contact_inquiry(seller_email, seller_name, buyer_name, buyer_email, buyer_phone, message, ad_title, ad_id):
-    """Forward contact inquiry to seller"""
     subject = f'New Inquiry: {ad_title}'
-    
     site_url = current_app.config.get('SITE_URL', 'http://localhost:5000')
-    
     return send_email(
         to=seller_email,
         subject=subject,
@@ -140,14 +140,10 @@ def send_contact_inquiry(seller_email, seller_name, buyer_name, buyer_email, buy
         ad_url=site_url + url_for('main.view_ad', posting_id=ad_id)
     )
 
-
 def send_password_reset(user_email, reset_token):
-    """Send password reset email"""
     subject = 'Password Reset Request - Eswatini Classifieds'
-    
     site_url = current_app.config.get('SITE_URL', 'http://localhost:5000')
     reset_url = site_url + url_for('main.reset_password', token=reset_token)
-    
     return send_email(
         to=user_email,
         subject=subject,
