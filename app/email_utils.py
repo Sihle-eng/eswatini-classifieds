@@ -4,10 +4,9 @@ import threading
 import requests
 from flask import render_template, current_app, url_for
 from datetime import datetime
-import json
 
 def _send_email_via_brevo_api(to, subject, html_content):
-    """Send email using Brevo's HTTP API (synchronous, but fast)."""
+    """Send email using Brevo's HTTP API (synchronous)."""
     api_key = current_app.config.get('BREVO_API_KEY')
     if not api_key:
         raise ValueError("BREVO_API_KEY not configured")
@@ -25,14 +24,14 @@ def _send_email_via_brevo_api(to, subject, html_content):
         "subject": subject,
         "htmlContent": html_content
     }
-    # Short timeout – API is usually fast (<2 seconds)
+    # 10 second timeout – API is fast
     response = requests.post(url, json=payload, headers=headers, timeout=10)
-    response.raise_for_status()  # Raise exception for 4xx/5xx
+    response.raise_for_status()
     return response.json()
 
-def _send_email_thread(to, subject, template_name, **kwargs):
+def _send_email_thread(app, to, subject, template_name, **kwargs):
     """Background thread that sends the email (with retry)."""
-    with current_app.app_context():
+    with app.app_context():
         try:
             html_content = render_template(f'emails/{template_name}.html', **kwargs)
             # Simple retry: try once, then wait 2 seconds and retry
@@ -60,9 +59,10 @@ def _send_email_thread(to, subject, template_name, **kwargs):
 
 def send_email_async(to, subject, template_name, **kwargs):
     """Non‑blocking email send – returns immediately."""
+    app = current_app._get_current_object()   # Get the actual app object
     thread = threading.Thread(
         target=_send_email_thread,
-        args=(to, subject, template_name),
+        args=(app, to, subject, template_name),
         kwargs=kwargs,
         daemon=True
     )
@@ -70,12 +70,15 @@ def send_email_async(to, subject, template_name, **kwargs):
     print(f"[INFO] Email queued to {to}: {subject}")
     return True
 
-# Keep the same wrapper functions as before
+# For backward compatibility – all your wrapper functions stay the same
 def send_email(to, subject, template_name, **kwargs):
     """Async email send (compatible with old code)."""
     return send_email_async(to, subject, template_name, **kwargs)
 
-# The following functions are unchanged (they call send_email)
+# ------------------------------------------------------------
+# All your original wrapper functions (unchanged – they call send_email)
+# ------------------------------------------------------------
+
 def send_welcome_email(user_email, user_type, name):
     subject = f'Welcome to Eswatini Classifieds, {name}!'
     return send_email(
