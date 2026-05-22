@@ -25,6 +25,7 @@ def create_app(config_name='default'):
     from app.config import config
     app.config.from_object(config[config_name])
    
+    # Explicitly set Brevo API key from environment into config
     app.config['BREVO_API_KEY'] = os.environ.get('BREVO_API_KEY')
     
     # Create upload folder
@@ -42,7 +43,7 @@ def create_app(config_name='default'):
     login_manager.login_message_category = 'info'
     
     # ============================================
-    # REDIS + RQ SETUP
+    # REDIS + RQ SETUP (kept for potential future use)
     # ============================================
     redis_url = os.environ.get('REDIS_URL', 'redis://localhost:6379')
     app.config['REDIS_URL'] = redis_url
@@ -90,7 +91,5 @@ def create_app(config_name='default'):
             'CURRENCY_SYMBOL': app.config['CURRENCY_SYMBOL'],
             'FEATURE_IMAGE_UPLOADS': app.config['FEATURE_IMAGE_UPLOADS'],
         }
-
-    email_utils.start_email_worker()
     
     return app

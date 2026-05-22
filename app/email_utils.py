@@ -2,48 +2,27 @@ import os
 import requests
 from flask import render_template, current_app, url_for
 from datetime import datetime
-from queue import Queue
-from threading import Thread
 import time
 
-# Global queue and worker flag
-_email_queue = Queue()
-_worker_running = False
-
-def _process_email_queue():
-    """
-    Background worker that processes email jobs from the queue.
-    """
-    global _worker_running
-    while _worker_running:
-        try:
-            job = _email_queue.get(timeout=2)
-            if job is None:
-                continue
-            to, subject, template_name, kwargs = job
-            _send_email_job(to, subject, template_name, **kwargs)
-        except Queue.Empty:
-            continue
-        except Exception as e:
-            print(f"[ERROR] Queue worker error: {e}")
-
+# ------------------------------------------------------------
+# Core sending function (synchronous, blocking)
+# ------------------------------------------------------------
 def _send_email_job(to, subject, template_name, **kwargs):
     """
-    Actual sending logic – reusable.
+    Sends email synchronously (blocks until sent or failed).
     """
-    # Use os.environ directly instead of current_app.config
+    # Use os.environ directly for reliability
     api_key = os.environ.get('BREVO_API_KEY')
     if not api_key:
         raise ValueError("BREVO_API_KEY not configured in environment")
 
-    # We still need app context for rendering templates and URL building
     from app import create_app
     app = create_app()
     with app.app_context():
         try:
             html_content = render_template(f'emails/{template_name}.html', **kwargs)
             sender_email = current_app.config.get('MAIL_DEFAULT_SENDER')
-            
+
             url = "https://api.brevo.com/v3/smtp/email"
             headers = {
                 "api-key": api_key,
@@ -57,7 +36,7 @@ def _send_email_job(to, subject, template_name, **kwargs):
                 "htmlContent": html_content
             }
 
-            # Debug prints (remove after fixed)
+            # Debug prints (remove after fixing)
             print(f"[DEBUG] Using api_key: {api_key[:10]}... (length {len(api_key)})")
             print(f"[DEBUG] Sender: {sender_email}, To: {to}")
 
@@ -84,35 +63,26 @@ def _send_email_job(to, subject, template_name, **kwargs):
                         raise
         except Exception as e:
             print(f"[ERROR] Failed to send email to {to}: {e}")
+            raise
 
-def start_email_worker():
-    """
-    Start the background queue worker.
-    Call this once when the Flask app starts.
-    """
-    global _worker_running
-    if not _worker_running:
-        _worker_running = True
-        worker_thread = Thread(target=_process_email_queue, daemon=True)
-        worker_thread.start()
-        print("[INFO] Email queue worker started")
-
+# ------------------------------------------------------------
+# Async wrapper (now synchronous – blocks)
+# ------------------------------------------------------------
 def send_email_async(to, subject, template_name, **kwargs):
     """
-    Non‑blocking email send – puts the job in the queue.
+    Sends email synchronously (blocking call).
     """
-    _email_queue.put((to, subject, template_name, kwargs))
-    print(f"[INFO] Email queued to {to}: {subject}")
+    _send_email_job(to, subject, template_name, **kwargs)
+    print(f"[INFO] Email sent to {to}: {subject}")
     return True
 
 def send_email(to, subject, template_name, **kwargs):
-    """Async email send (compatible with old code)."""
+    """Send email (synchronous)."""
     return send_email_async(to, subject, template_name, **kwargs)
 
 # ------------------------------------------------------------
-# Wrapper functions (unchanged from your original code)
+# Wrapper functions (unchanged)
 # ------------------------------------------------------------
-
 def send_welcome_email(user_email, user_type, name):
     subject = f'Welcome to Eswatini Classifieds, {name}!'
     return send_email(
