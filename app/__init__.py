@@ -7,7 +7,7 @@ from flask_limiter.util import get_remote_address
 from dotenv import load_dotenv
 import os
 import redis
-from rq import Queue   # <-- add this
+from rq import Queue 
 
 # Load environment variables
 load_dotenv()
@@ -24,6 +24,8 @@ def create_app(config_name='default'):
     # Load configuration
     from app.config import config
     app.config.from_object(config[config_name])
+   
+    app.config['BREVO_API_KEY'] = os.environ.get('BREVO_API_KEY')
     
     # Create upload folder
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)

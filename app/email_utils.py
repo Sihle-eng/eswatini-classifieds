@@ -76,7 +76,7 @@ def send_email(to, subject, template_name, **kwargs):
     return send_email_async(to, subject, template_name, **kwargs)
 
 # ------------------------------------------------------------
-# All your original wrapper functions (unchanged – they call send_email)
+# Unchanged
 # ------------------------------------------------------------
 
 def send_welcome_email(user_email, user_type, name):
