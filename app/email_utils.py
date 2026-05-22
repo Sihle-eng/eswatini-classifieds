@@ -32,8 +32,6 @@ def _send_email_job(to, subject, template_name, **kwargs):
     """
     Actual sending logic – reusable.
     """
-    # We need an app context to render templates and access config.
-    # Create a new app context manually.
     from app import create_app
     app = create_app()
     with app.app_context():
@@ -58,7 +56,9 @@ def _send_email_job(to, subject, template_name, **kwargs):
                 "htmlContent": html_content
             }
 
-            # Retry logic
+            # Optional: print payload for debugging (remove after fixing)
+            print(f"[DEBUG] Payload: {payload}")
+
             for attempt in range(2):
                 try:
                     response = requests.post(url, json=payload, headers=headers, timeout=10)
@@ -73,7 +73,11 @@ def _send_email_job(to, subject, template_name, **kwargs):
                         raise
                 except Exception as e:
                     if attempt == 0:
-                        print(f"[WARN] Error on attempt 1: {e}, retrying...")
+                        # Enhanced: print the response body if available
+                        if hasattr(e, 'response') and e.response is not None:
+                            print(f"[WARN] Error on attempt 1: {e}, body: {e.response.text}")
+                        else:
+                            print(f"[WARN] Error on attempt 1: {e}, retrying...")
                         time.sleep(2)
                     else:
                         raise
