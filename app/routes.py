@@ -15,6 +15,7 @@ from app.email_utils import (
 )
 from app.services.momo_service import MTNMoMoService
 from app.services.dodo_service import DodoPaymentsService
+from app.tasks import send_welcome_email_job, send_terms_agreement_job
 
 import os
 import uuid
@@ -178,6 +179,9 @@ def register():
         ip_address = request.remote_addr
         date_signed = datetime.utcnow().strftime('%d %B %Y')
         
+        # Get the RQ queue from app config
+        queue = current_app.config['RQ_QUEUE']
+        
         # Create profile based on user type
         if user_type == 'business':
             business_profile = BusinessProfile(
@@ -191,24 +195,16 @@ def register():
             name = business_profile.company_name
             
             # ============================================
-            # SEND EMAILS USING UTILITY FUNCTIONS
+            # ENQUEUE EMAILS (sent in background)
             # ============================================
-            try:
-                from app.email_utils import send_welcome_email, send_terms_agreement
-                
-                # Send welcome email
-                send_welcome_email(email, user_type, name)
-                
-                # Send terms agreement with HTML template
-                send_terms_agreement(email, user_type, name, agreement_id, ip_address)
-                
-                flash('📧 Welcome email and Terms & Conditions sent to your inbox!', 'info')
-            except Exception as e:
-                print(f"Email error (non-blocking): {e}")
+            from app.tasks import send_welcome_email_job, send_terms_agreement_job
+            queue.enqueue(send_welcome_email_job, email, user_type, name)
+            queue.enqueue(send_terms_agreement_job, email, user_type, name, agreement_id, ip_address)
             
+            flash('📧 Welcome email and Terms & Conditions will arrive shortly!', 'info')
             flash('Business account created! Please complete your profile.', 'success')
             
-        else:
+        else:  # client
             client_profile = ClientProfile(
                 user_id=new_user.id,
                 full_name=email.split('@')[0],
@@ -220,21 +216,13 @@ def register():
             name = client_profile.full_name
             
             # ============================================
-            # SEND EMAILS USING UTILITY FUNCTIONS
+            # ENQUEUE EMAILS (sent in background)
             # ============================================
-            try:
-                from app.email_utils import send_welcome_email, send_terms_agreement
-                
-                # Send welcome email
-                send_welcome_email(email, user_type, name)
-                
-                # Send terms agreement with HTML template
-                send_terms_agreement(email, user_type, name, agreement_id, ip_address)
-                
-                flash('📧 Welcome email and Safety Guidelines sent to your inbox!', 'info')
-            except Exception as e:
-                print(f"Email error (non-blocking): {e}")
+            from app.tasks import send_welcome_email_job, send_terms_agreement_job
+            queue.enqueue(send_welcome_email_job, email, user_type, name)
+            queue.enqueue(send_terms_agreement_job, email, user_type, name, agreement_id, ip_address)
             
+            flash('📧 Welcome email and Safety Guidelines will arrive shortly!', 'info')
             flash('Client account created! Welcome to Eswatini Classifieds.', 'success')
         
         # Log the user in
@@ -250,6 +238,7 @@ def register():
             return redirect(url_for('main.client_dashboard'))
 
     return render_template('register.html')
+
 
 @main.route('/login', methods=['GET', 'POST'])
 def login():

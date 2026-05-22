@@ -90,5 +90,7 @@ def create_app(config_name='default'):
             'CURRENCY_SYMBOL': app.config['CURRENCY_SYMBOL'],
             'FEATURE_IMAGE_UPLOADS': app.config['FEATURE_IMAGE_UPLOADS'],
         }
+
+    email_utils.start_email_worker()
     
     return app
