@@ -197,7 +197,7 @@ def register():
             # ============================================
             # ENQUEUE EMAILS (sent in background)
             # ============================================
-            from app.tasks import send_welcome_email_job, send_terms_agreement_job
+            from app.email_utils import send_welcome_email_job, send_terms_agreement_job
             queue.enqueue(send_welcome_email_job, email, user_type, name)
             queue.enqueue(send_terms_agreement_job, email, user_type, name, agreement_id, ip_address)
             
@@ -218,7 +218,7 @@ def register():
             # ============================================
             # ENQUEUE EMAILS (sent in background)
             # ============================================
-            from app.tasks import send_welcome_email_job, send_terms_agreement_job
+            from app.email_utils import send_welcome_email_job, send_terms_agreement_job
             queue.enqueue(send_welcome_email_job, email, user_type, name)
             queue.enqueue(send_terms_agreement_job, email, user_type, name, agreement_id, ip_address)
             
