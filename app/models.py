@@ -1,4 +1,3 @@
-# File: app/models.py
 
 from app import db
 from datetime import datetime
@@ -173,3 +172,14 @@ class DeletionLog(db.Model):
     
     def __repr__(self):
         return f'<DeletionLog {self.user_email}>'
+
+class ClientPreference(db.Model):
+    __tablename__ = 'client_preferences'
+    id = db.Column(db.Integer, primary_key=True)
+    client_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
+    receive_daily_updates = db.Column(db.Boolean, default=False)
+    preferred_categories = db.Column(db.Text, default='')  # comma-separated: 'employment,motors'
+    preferred_cities = db.Column(db.Text, default='')      # comma-separated
+    last_digest_sent = db.Column(db.DateTime, nullable=True)
+
+    client = db.relationship('User', backref='preferences', uselist=False)

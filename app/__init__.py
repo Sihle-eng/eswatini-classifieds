@@ -27,6 +27,8 @@ def create_app(config_name='default'):
    
     # Explicitly set Brevo API key from environment into config
     app.config['BREVO_API_KEY'] = os.environ.get('BREVO_API_KEY')
+   
+    app.config['CRON_SECRET'] = os.environ.get('CRON_SECRET', 'eswatini2025daily')
     
     # Create upload folder
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)

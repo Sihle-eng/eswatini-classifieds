@@ -28,4 +28,48 @@
         <div class="text-2xl font-bold">{{ saved_count if saved_count else 0 }}</div>
     </a>
 </div>
+
+<!-- Daily Digest Preferences -->
+<div class="bg-white rounded-lg shadow p-6 mb-6">
+    <h3 class="text-xl font-bold mb-4"><i class="fas fa-envelope text-blue-500 mr-2"></i> Daily Email Updates</h3>
+    <form method="POST" action="{{ url_for('main.update_preferences') }}">
+        <div class="mb-4">
+            <label class="flex items-center">
+                <input type="checkbox" name="receive_daily_updates" value="1" 
+                       {% if client_prefs and client_prefs.receive_daily_updates %}checked{% endif %}
+                       class="mr-2 w-4 h-4">
+                Send me daily email with new listings matching my interests
+            </label>
+        </div>
+        <div class="mb-4">
+            <label class="block font-semibold mb-2">Preferred categories (optional)</label>
+            <div class="flex flex-wrap gap-3">
+                {% set selected_cats = (client_prefs.preferred_categories.split(',') if client_prefs and client_prefs.preferred_categories else []) %}
+                {% for cat in ['employment', 'motors', 'property', 'services', 'general'] %}
+                    <label class="flex items-center">
+                        <input type="checkbox" name="categories" value="{{ cat }}"
+                               {% if cat in selected_cats %}checked{% endif %} class="mr-1">
+                        {{ cat|title }}
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="mb-4">
+            <label class="block font-semibold mb-2">Preferred cities (optional)</label>
+            <div class="flex flex-wrap gap-3">
+                {% set selected_cities = (client_prefs.preferred_cities.split(',') if client_prefs and client_prefs.preferred_cities else []) %}
+                {% for city in ['Mbabane', 'Manzini', 'Lobamba', 'Nhlangano', 'Siteki', 'Big Bend', 'Mhlume', 'Hlatikulu', 'Piggs Peak'] %}
+                    <label class="flex items-center">
+                        <input type="checkbox" name="cities" value="{{ city }}"
+                               {% if city in selected_cities %}checked{% endif %} class="mr-1">
+                        {{ city }}
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+            Save Preferences
+        </button>
+    </form>
+</div>
 {% endblock %}

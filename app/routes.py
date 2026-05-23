@@ -16,6 +16,8 @@ from app.email_utils import (
 from app.services.momo_service import MTNMoMoService
 from app.services.dodo_service import DodoPaymentsService
 from app.tasks import send_welcome_email_job, send_terms_agreement_job
+from sqlalchemy import case
+from app.models import ClientPreference
 
 import os
 import uuid
@@ -433,8 +435,11 @@ def client_dashboard():
         return redirect(url_for('main.home'))
     
     saved_count = SavedAd.query.filter_by(client_user_id=current_user.id).count()
+
+    prefs = ClientPreference.query.filter_by(client_user_id=current_user.id).first()
     
-    return render_template('client/dashboard.html', saved_count=saved_count)
+    return render_template('client/dashboard.html', saved_count=saved_count, client_prefs=prefs)
+
 @main.route('/client/browse')
 @login_required
 def browse_ads():
@@ -467,7 +472,13 @@ def browse_ads():
         query = query.filter(Posting.location_city == city)
     
     # Get all matching ads
-    ads = query.order_by(Posting.created_at.desc()).all()
+    rank = case(
+         (Posting.payment_plan == 'featured', 1),
+         (Posting.payment_plan == '30days', 2),
+         (Posting.payment_plan == '7days' 3,
+         else_=4
+    )
+    ads = query.order_by(rank, Posting.created_at.desc()).all()
     
     # Get category counts for sidebar
     category_counts = {}
@@ -1378,3 +1389,84 @@ def payment_history():
     return render_template('business/payment_history.html', 
                          transactions=transactions,
                          total_spent=total_spent)
+
+@main.route('/create-preferences-table')
+def create_prefs_table():
+    db.create_all()  # This creates any missing tables
+    return "Table created (if it didn't exist)"
+
+@main.route('/client/update-preferences', methods=['POST'])
+@login_required
+def update_preferences():
+    if current_user.user_type != 'client':
+        flash('Access denied.', 'error')
+        return redirect(url_for('main.home'))
+    
+    prefs = ClientPreference.query.filter_by(client_user_id=current_user.id).first()
+    if not prefs:
+        prefs = ClientPreference(client_user_id=current_user.id)
+        db.session.add(prefs)
+    
+    prefs.receive_daily_updates = 'receive_daily_updates' in request.form
+    prefs.preferred_categories = ','.join(request.form.getlist('categories'))
+    prefs.preferred_cities = ','.join(request.form.getlist('cities'))
+    
+    db.session.commit()
+    flash('Your daily digest preferences have been saved!', 'success')
+    return redirect(url_for('main.client_dashboard'))
+
+@main.route('/cron/daily-digest/<secret>')
+def daily_digest_cron(secret):
+    if secret != current_app.config.get('CRON_SECRET'):
+        return 'Unauthorized', 401
+    
+    from datetime import datetime, timedelta
+    
+    # Get clients who want daily updates
+    clients = User.query.filter(
+        User.user_type == 'client',
+        User.preferences.has(ClientPreference.receive_daily_updates == True),
+        (
+            (User.preferences.has(ClientPreference.last_digest_sent == None)) |
+            (User.preferences.has(ClientPreference.last_digest_sent < datetime.utcnow() - timedelta(days=1)))
+        )
+    ).all()
+    
+    sent_count = 0
+    for client in clients:
+        prefs = client.preferences
+        categories = prefs.preferred_categories.split(',') if prefs.preferred_categories else []
+        cities = prefs.preferred_cities.split(',') if prefs.preferred_cities else []
+        
+        # Find new ads since last digest (or last 24h)
+        since_date = prefs.last_digest_sent if prefs.last_digest_sent else (datetime.utcnow() - timedelta(days=1))
+        query = Posting.query.filter(
+            Posting.is_active == True,
+            Posting.expires_at > datetime.utcnow(),
+            Posting.created_at > since_date
+        )
+        if categories:
+            query = query.filter(Posting.category.in_(categories))
+        if cities:
+            query = query.filter(Posting.location_city.in_(cities))
+        
+        new_ads = query.limit(20).all()
+        if new_ads:
+            try:
+                from app.email_utils import send_email
+                subject = "Your Daily Digest - New Listings in Eswatini Classifieds"
+                send_email(
+                    to=client.email,
+                    subject=subject,
+                    template_name='daily_digest',
+                    client_name=client.client_profile.full_name if client.client_profile else client.email.split('@')[0],
+                    ads=new_ads,
+                    date=datetime.utcnow().strftime('%B %d, %Y')
+                )
+                prefs.last_digest_sent = datetime.utcnow()
+                db.session.commit()
+                sent_count += 1
+            except Exception as e:
+                print(f"[ERROR] Digest failed for {client.email}: {e}")
+    
+    return f'Processed {len(clients)} clients, sent {sent_count} digests', 200

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Your Daily Digest - Eswatini Classifieds</title>
+</head>
+
+<body style="font-family: Arial, sans-serif; line-height: 1.6;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #2563eb;">📰 Your Daily Digest</h2>
+        <p>Hello {{ client_name }},</p>
+        <p>Here are the latest listings matching your preferences:</p>
+
+        {% if ads %}
+        <div style="margin: 20px 0;">
+            {% for ad in ads %}
+            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                <h3 style="margin: 0 0 8px;">
+                    <a href="{{ url_for('main.view_ad', posting_id=ad.id, _external=True) }}" style="color: #1e40af;">
+                        {{ ad.title }}
+                    </a>
+                </h3>
+                <p style="margin: 0 0 4px; color: #4b5563;">
+                    Category: {{ ad.category|title }} | Location: {{ ad.location_city }}
+                </p>
+                {% if ad.salary_price %}
+                <p style="margin: 0; color: #16a34a; font-weight: bold;">{{ ad.salary_price }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>No new listings match your preferences today. Check back tomorrow!</p>
+        {% endif %}
+
+        <hr style="margin: 20px 0;">
+        <p style="font-size: 12px; color: #6b7280;">
+            You received this because you opted into daily updates.<br>
+            <a href="{{ url_for('main.client_dashboard', _external=True) }}">Change preferences</a>
+        </p>
+    </div>
+</body>
+
+</html>
