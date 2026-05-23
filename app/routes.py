@@ -475,7 +475,7 @@ def browse_ads():
     rank = case(
          (Posting.payment_plan == 'featured', 1),
          (Posting.payment_plan == '30days', 2),
-         (Posting.payment_plan == '7days' 3,
+         (Posting.payment_plan == '7days', 3),
          else_=4
     )
     ads = query.order_by(rank, Posting.created_at.desc()).all()
