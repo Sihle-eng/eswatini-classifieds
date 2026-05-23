@@ -179,9 +179,6 @@ def register():
         ip_address = request.remote_addr
         date_signed = datetime.utcnow().strftime('%d %B %Y')
         
-        # Get the RQ queue from app config
-        queue = current_app.config['RQ_QUEUE']
-        
         # Create profile based on user type
         if user_type == 'business':
             business_profile = BusinessProfile(
@@ -191,19 +188,7 @@ def register():
             )
             db.session.add(business_profile)
             db.session.commit()
-            
             name = business_profile.company_name
-            
-            # ============================================
-            # ENQUEUE EMAILS (sent in background)
-            # ============================================
-            from app.email_utils import send_welcome_email_job, send_terms_agreement_job
-            queue.enqueue(send_welcome_email_job, email, user_type, name)
-            queue.enqueue(send_terms_agreement_job, email, user_type, name, agreement_id, ip_address)
-            
-            flash('📧 Welcome email and Terms & Conditions will arrive shortly!', 'info')
-            flash('Business account created! Please complete your profile.', 'success')
-            
         else:  # client
             client_profile = ClientProfile(
                 user_id=new_user.id,
@@ -212,24 +197,25 @@ def register():
             )
             db.session.add(client_profile)
             db.session.commit()
-            
             name = client_profile.full_name
-            
-            # ============================================
-            # ENQUEUE EMAILS (sent in background)
-            # ============================================
-            from app.email_utils import send_welcome_email_job, send_terms_agreement_job
-            queue.enqueue(send_welcome_email_job, email, user_type, name)
-            queue.enqueue(send_terms_agreement_job, email, user_type, name, agreement_id, ip_address)
-            
-            flash('📧 Welcome email and Safety Guidelines will arrive shortly!', 'info')
-            flash('Client account created! Welcome to Eswatini Classifieds.', 'success')
+        
+        # ============================================
+        # SEND EMAILS SYNCHRONOUSLY (NO RQ)
+        # ============================================
+        from app.email_utils import send_welcome_email, send_terms_agreement
+        try:
+            send_welcome_email(email, user_type, name)
+            send_terms_agreement(email, user_type, name, agreement_id, ip_address)
+            flash('📧 Welcome email and Terms & Conditions sent!', 'info')
+        except Exception as e:
+            print(f"[ERROR] Failed to send registration emails: {e}")
+            flash('Account created but welcome email could not be sent.', 'warning')
         
         # Log the user in
         login_user(new_user)
         
         # Redirect to appropriate dashboard        
-        admin_emails = ['admin@example.com', 'techcharities@example.com', 'eswatiniclassifieds@gmail.com',]
+        admin_emails = ['admin@example.com', 'techcharities@example.com', 'eswatiniclassifieds@gmail.com']
         if email in admin_emails:
             return redirect(url_for('main.admin_dashboard'))
         elif user_type == 'business':
@@ -238,7 +224,6 @@ def register():
             return redirect(url_for('main.client_dashboard'))
 
     return render_template('register.html')
-
 
 @main.route('/login', methods=['GET', 'POST'])
 def login():
