@@ -8,10 +8,6 @@ import time
 # Core sending function (synchronous, blocking)
 # ------------------------------------------------------------
 def _send_email_job(to, subject, template_name, **kwargs):
-    """
-    Sends email synchronously (blocks until sent or failed).
-    """
-    # Use os.environ directly for reliability
     api_key = os.environ.get('BREVO_API_KEY')
     if not api_key:
         raise ValueError("BREVO_API_KEY not configured in environment")
@@ -21,7 +17,13 @@ def _send_email_job(to, subject, template_name, **kwargs):
     with app.app_context():
         try:
             html_content = render_template(f'emails/{template_name}.html', **kwargs)
-            sender_email = current_app.config.get('MAIL_DEFAULT_SENDER')
+            raw_sender = current_app.config.get('MAIL_DEFAULT_SENDER')
+            
+            # Extract plain email address
+            if '<' in raw_sender and '>' in raw_sender:
+                sender_email = raw_sender.split('<')[-1].rstrip('>')
+            else:
+                sender_email = raw_sender
 
             url = "https://api.brevo.com/v3/smtp/email"
             headers = {
@@ -36,9 +38,9 @@ def _send_email_job(to, subject, template_name, **kwargs):
                 "htmlContent": html_content
             }
 
-            # Debug prints (remove after fixing)
-            print(f"[DEBUG] Using api_key: {api_key[:10]}... (length {len(api_key)})")
-            print(f"[DEBUG] Sender: {sender_email}, To: {to}")
+            # Debug (optional, remove later)
+            print(f"[DEBUG] Using api_key: {api_key[:10]}...")
+            print(f"[DEBUG] Sender (extracted): {sender_email}, To: {to}")
 
             for attempt in range(2):
                 try:
