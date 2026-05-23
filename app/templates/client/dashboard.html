@@ -58,7 +58,7 @@
             <label class="block font-semibold mb-2">Preferred cities (optional)</label>
             <div class="flex flex-wrap gap-3">
                 {% set selected_cities = (client_prefs.preferred_cities.split(',') if client_prefs and client_prefs.preferred_cities else []) %}
-                {% for city in ['Mbabane', 'Manzini', 'Lobamba', 'Nhlangano', 'Siteki', 'Big Bend', 'Mhlume', 'Hlatikulu', 'Piggs Peak'] %}
+                {% for city in ['Mbabane', 'Manzini', 'Lobamba', 'Nhlangano', 'Siteki', 'Big Bend', 'Mhlume', 'Hlathikulu', 'Piggs Peak'] %}
                     <label class="flex items-center">
                         <input type="checkbox" name="cities" value="{{ city }}"
                                {% if city in selected_cities %}checked{% endif %} class="mr-1">
