@@ -1414,7 +1414,6 @@ def update_preferences():
     db.session.commit()
     flash('Your daily digest preferences have been saved!', 'success')
     return redirect(url_for('main.client_dashboard'))
-
 @main.route('/cron/daily-digest/<secret>')
 def daily_digest_cron(secret):
     if secret != current_app.config.get('CRON_SECRET'):
@@ -1422,23 +1421,24 @@ def daily_digest_cron(secret):
     
     from datetime import datetime, timedelta
     
-    # Get clients who want daily updates
-    clients = User.query.filter(
+    # Get clients who want daily updates - USING JOIN INSTEAD OF .has()
+    clients = db.session.query(User).join(
+        ClientPreference, User.id == ClientPreference.client_user_id
+    ).filter(
         User.user_type == 'client',
-        User.preferences.has(ClientPreference.receive_daily_updates == True),
-        (
-            (User.preferences.has(ClientPreference.last_digest_sent == None)) |
-            (User.preferences.has(ClientPreference.last_digest_sent < datetime.utcnow() - timedelta(days=1)))
+        ClientPreference.receive_daily_updates == True,
+        db.or_(
+            ClientPreference.last_digest_sent == None,
+            ClientPreference.last_digest_sent < datetime.utcnow() - timedelta(days=1)
         )
     ).all()
     
     sent_count = 0
     for client in clients:
-        prefs = client.preferences
+        prefs = client.preferences  # This still works (scalar)
         categories = prefs.preferred_categories.split(',') if prefs.preferred_categories else []
         cities = prefs.preferred_cities.split(',') if prefs.preferred_cities else []
         
-        # Find new ads since last digest (or last 24h)
         since_date = prefs.last_digest_sent if prefs.last_digest_sent else (datetime.utcnow() - timedelta(days=1))
         query = Posting.query.filter(
             Posting.is_active == True,
