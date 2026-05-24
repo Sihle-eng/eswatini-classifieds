@@ -1414,6 +1414,8 @@ def update_preferences():
     db.session.commit()
     flash('Your daily digest preferences have been saved!', 'success')
     return redirect(url_for('main.client_dashboard'))
+
+
 @main.route('/cron/daily-digest/<secret>')
 def daily_digest_cron(secret):
     if secret != current_app.config.get('CRON_SECRET'):
