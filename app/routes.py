@@ -1508,29 +1508,34 @@ def admin_bulk_email():
             flash('No recipients found.', 'warning')
             return redirect(url_for('main.admin_bulk_email'))
 
-        # Send emails one by one – NEVER crash
+        # Send emails one by one – now uses the safe send_email() and the HTML template
         sent_count = 0
         for user in recipients:
             if user.user_type == 'business':
                 biz = BusinessProfile.query.filter_by(user_id=user.id).first()
                 name = biz.company_name if biz else user.email.split('@')[0]
+                user_type_label = 'Business'
             else:
                 client = ClientProfile.query.filter_by(user_id=user.id).first()
                 name = client.full_name if (client and client.full_name) else user.email.split('@')[0]
+                user_type_label = 'Client'
 
-            personalized_subject = subject.replace('{name}', name).replace('{email}', user.email).replace('{user_type}', user.user_type.capitalize())
-            personalized_body = body_template.replace('{name}', name).replace('{email}', user.email).replace('{user_type}', user.user_type.capitalize())
+            # Replace placeholders in the admin's message
+            personalized_subject = subject.replace('{name}', name).replace('{email}', user.email).replace('{user_type}', user_type_label)
+            personalized_body = body_template.replace('{name}', name).replace('{email}', user.email).replace('{user_type}', user_type_label)
 
             try:
-                msg = Message(
+                send_email(
+                    to=user.email,
                     subject=personalized_subject,
-                    recipients=[user.email],
+                    template_name='bulk_message',   # the new HTML template
+                    user_name=name,
+                    user_type=user_type_label,
                     body=personalized_body,
-                    sender=current_app.config['MAIL_DEFAULT_SENDER']
+                    site_url=current_app.config.get('SITE_URL', 'https://eswatiniclassifieds.com'),
+                    current_year=datetime.utcnow().year
                 )
-                mail.send(msg)
                 sent_count += 1
-                print(f"[BULK] Sent to {user.email}")
             except Exception as e:
                 print(f"[BULK ERROR] {user.email}: {e}")
 
