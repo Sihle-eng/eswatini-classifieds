@@ -1507,7 +1507,7 @@ def admin_bulk_email():
             flash('No recipients found.', 'warning')
             return redirect(url_for('main.admin_bulk_email'))
 
-        # Send emails one by one
+                
         sent_count = 0
         for user in recipients:
             # Determine the display name
@@ -1518,32 +1518,22 @@ def admin_bulk_email():
                 client = ClientProfile.query.filter_by(user_id=user.id).first()
                 name = client.full_name if (client and client.full_name) else user.email.split('@')[0]
 
-            # Replace placeholders
             personalized_subject = subject.replace('{name}', name).replace('{email}', user.email).replace('{user_type}', user.user_type.capitalize())
             personalized_body = body_template.replace('{name}', name).replace('{email}', user.email).replace('{user_type}', user.user_type.capitalize())
 
-            # Use the same send_email function (which now gracefully handles failures)
+
             try:
-                # We'll create a simple plain-text version for the bulk email (no HTML template needed)
-                from flask_mail import Message
-                from app import mail
-                msg = Message(
+                # send_email expects a template name, but we can pass the body directly via kwargs
+                # We'll create a tiny inline template that just outputs the body
+                send_email(
+                    to=user.email,
                     subject=personalized_subject,
-                    recipients=[user.email],
-                    body=personalized_body,
-                    sender=current_app.config['MAIL_DEFAULT_SENDER']
+                    template_name='plain_message',  
+                    body=personalized_body
                 )
-                mail.send(msg)
                 sent_count += 1
-                print(f"[BULK] Sent to {user.email}")
             except Exception as e:
                 print(f"[BULK ERROR] {user.email}: {e}")
 
-            # Small delay to avoid overwhelming the SMTP server (optional)
-            # time.sleep(0.1)   # uncomment if needed
-
         flash(f'Bulk email sent to {sent_count} out of {len(recipients)} recipients.', 'success')
         return redirect(url_for('main.admin_dashboard'))
-
-    # GET request – show the form
-    return render_template('admin/bulk_email.html')

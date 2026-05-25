@@ -56,6 +56,12 @@ def create_app(config_name='default'):
     # Also store the redis connection on app for potential use
     app.config['REDIS_CONN'] = redis_conn
     
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'connect_args': {
+        'sslmode': 'require'
+    }
+}
+    
     # Import and register blueprints
     from app.routes import main
     app.register_blueprint(main)
