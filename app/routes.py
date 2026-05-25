@@ -1506,34 +1506,28 @@ def admin_bulk_email():
         if not recipients:
             flash('No recipients found.', 'warning')
             return redirect(url_for('main.admin_bulk_email'))
+
+        # Send emails one by one – NEVER crash
         sent_count = 0
         for user in recipients:
-            # Determine the display name and type
             if user.user_type == 'business':
                 biz = BusinessProfile.query.filter_by(user_id=user.id).first()
                 name = biz.company_name if biz else user.email.split('@')[0]
-                user_type = 'Business'
             else:
                 client = ClientProfile.query.filter_by(user_id=user.id).first()
                 name = client.full_name if (client and client.full_name) else user.email.split('@')[0]
-                user_type = 'Client'
 
-            # Replace placeholders in the admin's message
-            personalized_body = body_template.replace('{name}', name).replace('{email}', user.email).replace('{user_type}', user_type)
-            personalized_subject = subject.replace('{name}', name).replace('{email}', user.email).replace('{user_type}', user_type)
+            personalized_subject = subject.replace('{name}', name).replace('{email}', user.email).replace('{user_type}', user.user_type.capitalize())
+            personalized_body = body_template.replace('{name}', name).replace('{email}', user.email).replace('{user_type}', user.user_type.capitalize())
 
-            # Use the safe send_email function
             try:
-                send_email(
-                    to=user.email,
+                msg = Message(
                     subject=personalized_subject,
-                    template_name='bulk_message',   # our new template
-                    user_name=name,
-                    user_type=user_type,
+                    recipients=[user.email],
                     body=personalized_body,
-                    site_url=current_app.config.get('SITE_URL', 'https://eswatiniclassifieds.com'),
-                    current_year=datetime.utcnow().year
+                    sender=current_app.config['MAIL_DEFAULT_SENDER']
                 )
+                mail.send(msg)
                 sent_count += 1
                 print(f"[BULK] Sent to {user.email}")
             except Exception as e:
@@ -1541,3 +1535,6 @@ def admin_bulk_email():
 
         flash(f'Bulk email sent to {sent_count} out of {len(recipients)} recipients.', 'success')
         return redirect(url_for('main.admin_dashboard'))
+
+    # GET request – show the form
+    return render_template('admin/bulk_email.html')
