@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            line-height: 1.6;
+            color: #1e293b;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 16px 16px 0 0;
+        }
+        .header h1 {
+            color: white;
+            margin: 0;
+            font-size: 24px;
+        }
+        .header .highlight {
+            color: #FFD100;
+        }
+        .content {
+            background: white;
+            padding: 30px;
+            border: 1px solid #e2e8f0;
+            border-top: none;
+            border-radius: 0 0 16px 16px;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #64748b;
+            font-size: 12px;
+        }
+        .social-links {
+            margin-top: 15px;
+        }
+        .social-links a {
+            color: #64748b;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        hr {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin: 30px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🇸🇿 <span class="highlight">Eswatini Classifieds</span></h1>
+    </div>
+    
+    <div class="content">
+        <p>Hello {{ user_name }},</p>
+        
+        <!-- The admin's message is inserted here, with line breaks preserved -->
+        <div style="white-space: pre-line;">{{ body }}</div>
+        
+        <hr>
+        
+        <p style="font-size: 12px; color: #64748b;">
+            You received this message because you are a registered {{ user_type }} on Eswatini Classifieds.
+            If you no longer wish to receive emails, you can <a href="{{ site_url }}/account/delete">delete your account</a>.
+        </p>
+    </div>
+    
+    <div class="footer">
+        <p>🇸🇿 Eswatini Classifieds – Connecting Communities Across Eswatini</p>
+        <p>Mbabane • Manzini • Matsapha • Nhlangano</p>
+        <div class="social-links">
+            <a href="https://www.instagram.com/eswatiniclassifieds/">Instagram</a> |
+            <a href="https://www.facebook.com/eswatiniclassifieds">Facebook</a>
+        </div>
+        <p>© {{ current_year }} Eswatini Classifieds. All rights reserved.</p>
+    </div>
+</body>
+</html>
