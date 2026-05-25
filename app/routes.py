@@ -22,6 +22,7 @@ from flask_mail import Message
 
 import os
 import uuid
+import cloudinary.uploader
 
 main = Blueprint('main', __name__)
 
