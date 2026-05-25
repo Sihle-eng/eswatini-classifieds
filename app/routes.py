@@ -1507,7 +1507,7 @@ def admin_bulk_email():
             flash('No recipients found.', 'warning')
             return redirect(url_for('main.admin_bulk_email'))
 
-                
+        # Send emails one by one
         sent_count = 0
         for user in recipients:
             # Determine the display name
@@ -1518,22 +1518,26 @@ def admin_bulk_email():
                 client = ClientProfile.query.filter_by(user_id=user.id).first()
                 name = client.full_name if (client and client.full_name) else user.email.split('@')[0]
 
+            # Replace placeholders
             personalized_subject = subject.replace('{name}', name).replace('{email}', user.email).replace('{user_type}', user.user_type.capitalize())
             personalized_body = body_template.replace('{name}', name).replace('{email}', user.email).replace('{user_type}', user.user_type.capitalize())
 
-
+            # Use the safe send_email function (from email_utils)
             try:
-                # send_email expects a template name, but we can pass the body directly via kwargs
-                # We'll create a tiny inline template that just outputs the body
+                # send_email expects a template_name – we use the plain_message template
                 send_email(
                     to=user.email,
                     subject=personalized_subject,
-                    template_name='plain_message',  
+                    template_name='plain_message',
                     body=personalized_body
                 )
                 sent_count += 1
+                print(f"[BULK] Sent to {user.email}")
             except Exception as e:
                 print(f"[BULK ERROR] {user.email}: {e}")
 
         flash(f'Bulk email sent to {sent_count} out of {len(recipients)} recipients.', 'success')
         return redirect(url_for('main.admin_dashboard'))
+
+    # GET request – show the form
+    return render_template('admin/bulk_email.html')
