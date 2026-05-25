@@ -18,6 +18,7 @@ from app.services.dodo_service import DodoPaymentsService
 from app.tasks import send_welcome_email_job, send_terms_agreement_job
 from sqlalchemy import case
 from app.models import ClientPreference
+from flask_mail import Message
 
 import os
 import uuid
