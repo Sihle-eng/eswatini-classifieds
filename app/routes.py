@@ -1472,3 +1472,78 @@ def daily_digest_cron(secret):
                 print(f"[ERROR] Digest failed for {client.email}: {e}")
     
     return f'Processed {len(clients)} clients, sent {sent_count} digests', 200
+
+@main.route('/admin/bulk-email', methods=['GET', 'POST'])
+@admin_required
+def admin_bulk_email():
+    if request.method == 'POST':
+        subject = request.form.get('subject', '').strip()
+        body_template = request.form.get('body', '').strip()
+        recipient_type = request.form.get('recipient_type', 'all')
+        specific_email = request.form.get('specific_email', '').strip()
+
+        if not subject or not body_template:
+            flash('Subject and message body are required.', 'error')
+            return redirect(url_for('main.admin_bulk_email'))
+
+        # Build the list of recipients
+        recipients = []
+        if recipient_type == 'specific' and specific_email:
+            user = User.query.filter_by(email=specific_email).first()
+            if user:
+                recipients.append(user)
+            else:
+                flash('User not found with that email.', 'error')
+                return redirect(url_for('main.admin_bulk_email'))
+        else:
+            query = User.query
+            if recipient_type == 'business':
+                query = query.filter_by(user_type='business')
+            elif recipient_type == 'client':
+                query = query.filter_by(user_type='client')
+            recipients = query.all()
+
+        if not recipients:
+            flash('No recipients found.', 'warning')
+            return redirect(url_for('main.admin_bulk_email'))
+
+        # Send emails one by one
+        sent_count = 0
+        for user in recipients:
+            # Determine the display name
+            if user.user_type == 'business':
+                biz = BusinessProfile.query.filter_by(user_id=user.id).first()
+                name = biz.company_name if biz else user.email.split('@')[0]
+            else:
+                client = ClientProfile.query.filter_by(user_id=user.id).first()
+                name = client.full_name if (client and client.full_name) else user.email.split('@')[0]
+
+            # Replace placeholders
+            personalized_subject = subject.replace('{name}', name).replace('{email}', user.email).replace('{user_type}', user.user_type.capitalize())
+            personalized_body = body_template.replace('{name}', name).replace('{email}', user.email).replace('{user_type}', user.user_type.capitalize())
+
+            # Use the same send_email function (which now gracefully handles failures)
+            try:
+                # We'll create a simple plain-text version for the bulk email (no HTML template needed)
+                from flask_mail import Message
+                from app import mail
+                msg = Message(
+                    subject=personalized_subject,
+                    recipients=[user.email],
+                    body=personalized_body,
+                    sender=current_app.config['MAIL_DEFAULT_SENDER']
+                )
+                mail.send(msg)
+                sent_count += 1
+                print(f"[BULK] Sent to {user.email}")
+            except Exception as e:
+                print(f"[BULK ERROR] {user.email}: {e}")
+
+            # Small delay to avoid overwhelming the SMTP server (optional)
+            # time.sleep(0.1)   # uncomment if needed
+
+        flash(f'Bulk email sent to {sent_count} out of {len(recipients)} recipients.', 'success')
+        return redirect(url_for('main.admin_dashboard'))
+
+    # GET request – show the form
+    return render_template('admin/bulk_email.html')

@@ -521,7 +521,12 @@
                         <a href="{{ url_for('main.home') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
                             <i class="fas fa-eye mr-1"></i> View Site
                         </a>
-                    
+                        <a href="{{ url_for('main.admin_bulk_email') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
+                            <i class="fas fa-mail-bulk mr-1"></i> Bulk Email
+                        </a>
+                         <a href="{{ url_for('main.admin_deletions') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
+                            <i class="fas fa-trash-alt mr-1"></i> Deletions
+                        </a>
                     <!-- ============================================ -->
                     <!-- BUSINESS NAVIGATION -->
                     <!-- ============================================ -->
@@ -677,6 +682,9 @@
             </a>
             <a href="{{ url_for('main.home') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
                 <i class="fas fa-eye w-6 text-gray-600"></i> View Site
+            </a>
+            <a href="{{ url_for('main.admin_bulk_email') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-mail-bulk w-6 text-purple-600"></i> Bulk Email
             </a>
             
             <div class="border-t my-3"></div>

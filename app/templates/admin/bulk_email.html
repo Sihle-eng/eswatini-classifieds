@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Bulk Email - Admin{% endblock %}
+
+{% block content %}
+<div class="bg-purple-50 border border-purple-200 rounded-lg p-6 mb-6">
+    <h2 class="text-2xl font-bold mb-2"><i class="fas fa-mail-bulk text-purple-600 mr-2"></i> Bulk Email / Newsletter
+    </h2>
+    <p class="text-gray-700">Send a personalized message to multiple users at once using placeholders.</p>
+</div>
+
+<!-- Instructions -->
+<div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+    <p class="text-sm text-yellow-800">
+        <strong>Available placeholders:</strong><br>
+        <code>{name}</code> – user's company name (business) or full name (client)<br>
+        <code>{email}</code> – their email address<br>
+        <code>{user_type}</code> – "Business" or "Client"<br>
+        <strong>Free Brevo account limit: 300 emails/day.</strong> If you have more recipients, the remaining will fail
+        silently. You can send again tomorrow.
+    </p>
+</div>
+
+<!-- Compose Form -->
+<div class="bg-white rounded-lg shadow p-6">
+    <form method="POST">
+        <!-- Recipient selection -->
+        <div class="mb-4">
+            <label class="block text-gray-700 font-medium mb-2">Send to:</label>
+            <select name="recipient_type" id="recipient_type"
+                class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500"
+                onchange="toggleSpecificEmail()">
+                <option value="all">All Users</option>
+                <option value="business">Business Users Only</option>
+                <option value="client">Client Users Only</option>
+                <option value="specific">Specific User (by email)</option>
+            </select>
+            <div id="specific_email_div" class="mt-2 hidden">
+                <input type="email" name="specific_email" placeholder="user@example.com"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500">
+            </div>
+        </div>
+
+        <!-- Subject -->
+        <div class="mb-4">
+            <label class="block text-gray-700 font-medium mb-2">Subject</label>
+            <input type="text" name="subject" required
+                class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500"
+                placeholder="Hello {name}, check out our latest features!">
+        </div>
+
+        <!-- Body -->
+        <div class="mb-4">
+            <label class="block text-gray-700 font-medium mb-2">Message Body</label>
+            <textarea name="body" required rows="8"
+                class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500"
+                placeholder="Hi {name},%0A%0AWe're excited to share..."></textarea>
+            <p class="text-sm text-gray-500 mt-1">Use placeholders like {name}, {email}, {user_type}. They will be
+                replaced with the actual user data.</p>
+        </div>
+
+        <button type="submit" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition">
+            <i class="fas fa-paper-plane mr-1"></i> Send Bulk Email
+        </button>
+    </form>
+</div>
+
+<div class="mt-4">
+    <a href="{{ url_for('main.admin_dashboard') }}" class="text-purple-600 hover:underline">
+        <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
+    </a>
+</div>
+
+<script>
+    function toggleSpecificEmail() {
+        const type = document.getElementById('recipient_type').value;
+        const div = document.getElementById('specific_email_div');
+        if (type === 'specific') {
+            div.classList.remove('hidden');
+        } else {
+            div.classList.add('hidden');
+        }
+    }
+    // Run on page load in case of form validation error
+    document.addEventListener('DOMContentLoaded', function () {
+        toggleSpecificEmail();
+    });
+</script>
+{% endblock %}
