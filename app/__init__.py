@@ -6,7 +6,6 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from dotenv import load_dotenv
 import os
-from rq import Queue 
 
 # Load environment variables
 load_dotenv()
