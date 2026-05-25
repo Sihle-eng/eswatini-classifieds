@@ -38,7 +38,7 @@ def save_uploaded_file(file):
     if file and allowed_file(file.filename):
         try:
             upload_result = cloudinary.uploader.upload(file)
-            return upload_result['secure_url']  # this is the full HTTPS URL
+            return upload_result['secure_url']
         except Exception as e:
             print(f"Cloudinary upload error: {e}")
             return None
