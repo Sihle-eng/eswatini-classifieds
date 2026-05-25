@@ -48,23 +48,35 @@
         <h2 class="section-title">Browse Categories</h2>
         <a href="{{ url_for('main.browse_ads') }}" class="section-link">View All →</a>
     </div>
-    
+
     <div class="flex flex-wrap gap-3">
-         <a href="{{ url_for('main.home', category='employment') }}" class="category-pill {{ 'active' if current_category == 'employment' else '' }}">
-    <img src="{{ url_for('static', filename='images/Employment.jpg') }}" alt="Jobs" class="w-5 h-5 rounded-full object-cover"> Jobs
-         </a>
-         <a href="{{ url_for('main.home', category='motors') }}" class="category-pill {{ 'active' if current_category == 'motors' else '' }}">
-    <img src="{{ url_for('static', filename='images/Motors.jpg') }}" alt="Motors" class="w-5 h-5 rounded-full object-cover"> Motors
-         </a>
-         <a href="{{ url_for('main.home', category='property') }}" class="category-pill {{ 'active' if current_category == 'property' else '' }}">
-    <img src="{{ url_for('static', filename='images/House.webp') }}" alt="Property" class="w-5 h-5 rounded-full object-cover" onerror="this.src='{{ url_for('static', filename='images/General.jpg') }}'"> Property
-         </a>
-         <a href="{{ url_for('main.home', category='services') }}" class="category-pill {{ 'active' if current_category == 'services' else '' }}">
-    <img src="{{ url_for('static', filename='images/Services.jpg') }}" alt="Services" class="w-5 h-5 rounded-full object-cover" onerror="this.src='{{ url_for('static', filename='images/General.jpg') }}'"> Services
-         </a>
-         <a href="{{ url_for('main.home', category='general') }}" class="category-pill {{ 'active' if current_category == 'general' else '' }}">
-    <img src="{{ url_for('static', filename='images/General.jpg') }}" alt="General" class="w-5 h-5 rounded-full object-cover"> General
-         </a>
+        <a href="{{ url_for('main.home', category='employment') }}"
+            class="category-pill {{ 'active' if current_category == 'employment' else '' }}">
+            <img src="{{ url_for('static', filename='images/Employment.jpg') }}" alt="Jobs"
+                class="w-5 h-5 rounded-full object-cover"> Jobs
+        </a>
+        <a href="{{ url_for('main.home', category='motors') }}"
+            class="category-pill {{ 'active' if current_category == 'motors' else '' }}">
+            <img src="{{ url_for('static', filename='images/Motors.jpg') }}" alt="Motors"
+                class="w-5 h-5 rounded-full object-cover"> Motors
+        </a>
+        <a href="{{ url_for('main.home', category='property') }}"
+            class="category-pill {{ 'active' if current_category == 'property' else '' }}">
+            <img src="{{ url_for('static', filename='images/House.webp') }}" alt="Property"
+                class="w-5 h-5 rounded-full object-cover"
+                onerror="this.src='{{ url_for('static', filename='images/General.jpg') }}'"> Property
+        </a>
+        <a href="{{ url_for('main.home', category='services') }}"
+            class="category-pill {{ 'active' if current_category == 'services' else '' }}">
+            <img src="{{ url_for('static', filename='images/Services.jpg') }}" alt="Services"
+                class="w-5 h-5 rounded-full object-cover"
+                onerror="this.src='{{ url_for('static', filename='images/General.jpg') }}'"> Services
+        </a>
+        <a href="{{ url_for('main.home', category='general') }}"
+            class="category-pill {{ 'active' if current_category == 'general' else '' }}">
+            <img src="{{ url_for('static', filename='images/General.jpg') }}" alt="General"
+                class="w-5 h-5 rounded-full object-cover"> General
+        </a>
     </div>
 </div>
 
@@ -77,7 +89,7 @@
         </h2>
         <span class="text-sm text-gray-500">Hover to pause • Auto-rotating</span>
     </div>
-    
+
     <div class="featured-carousel">
         <div class="carousel-container">
             <div class="carousel-track">
@@ -87,62 +99,24 @@
                         <span class="featured-badge"><i class="fas fa-star mr-1"></i> FEATURED</span>
                         <div class="modern-card-image">
                             {% if ad.image_filename %}
-                                <img src="{{ url_for('static', filename='uploads/' + ad.image_filename) }}" 
-                                     alt="{{ ad.title }}" loading="lazy">
+                            <img src="{{ ad.image_filename }}" alt="{{ ad.title }}" loading="lazy">
                             {% else %}
-                                {% if ad.category == 'employment' %}
-                                <img src="{{ url_for('static', filename='images/Employment.jpg') }}" alt="Jobs" class="w-full h-full object-cover">
-                                {% elif ad.category == 'motors' %}
-                                <img src="{{ url_for('static', filename='images/Motors.jpg') }}" alt="Motors" class="w-full h-full object-cover">
-                                {% elif ad.category == 'property' %}
-                                <img src="{{ url_for('static', filename='images/House.webp') }}" alt="Property" class="w-full h-full object-cover">
-                                {% elif ad.category == 'services' %}
-                                <img src="{{ url_for('static', filename='images/Services.jpg') }}" alt="Services" class="w-full h-full object-cover">
-                                {% else %}
-                                <img src="{{ url_for('static', filename='images/General.jpg') }}" alt="General" class="w-full h-full object-cover">
-                                {% endif %}
-                            {% endif %}
-                            <span class="card-category-tag">{{ ad.category|title }}</span>
-                        </div>
-                        <div class="modern-card-content">
-                            <h3 class="modern-card-title">{{ ad.title[:40] }}...</h3>
-                            <div class="modern-card-location">
-                                <span>📍</span> {{ ad.location_city }}
-                            </div>
-                            {% if ad.salary_price %}
-                            <div class="modern-card-price">{{ ad.salary_price }}</div>
-                            {% endif %}
-                            <p class="modern-card-description">{{ ad.description[:80] }}...</p>
-                            <div class="modern-card-footer">
-                                <span class="text-xs text-gray-400">{{ ad.created_at.strftime('%d %b') }}</span>
-                                <a href="{{ url_for('main.view_ad', posting_id=ad.id) }}" 
-                                   class="text-blue-600 font-semibold hover:underline">View Deal →</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-                {# Duplicate for seamless loop #}
-                {% for ad in featured_ads %}
-                <div class="carousel-slide">
-                    <div class="featured-card">
-                        <span class="featured-badge"><i class="fas fa-star mr-1"></i> FEATURED</span>
-                        <div class="modern-card-image">
-                            {% if ad.image_filename %}
-                                <img src="{{ url_for('static', filename='uploads/' + ad.image_filename) }}" 
-                                     alt="{{ ad.title }}" loading="lazy">
+                            {% if ad.category == 'employment' %}
+                            <img src="{{ url_for('static', filename='images/Employment.jpg') }}" alt="Jobs"
+                                class="w-full h-full object-cover">
+                            {% elif ad.category == 'motors' %}
+                            <img src="{{ url_for('static', filename='images/Motors.jpg') }}" alt="Motors"
+                                class="w-full h-full object-cover">
+                            {% elif ad.category == 'property' %}
+                            <img src="{{ url_for('static', filename='images/House.webp') }}" alt="Property"
+                                class="w-full h-full object-cover">
+                            {% elif ad.category == 'services' %}
+                            <img src="{{ url_for('static', filename='images/Services.jpg') }}" alt="Services"
+                                class="w-full h-full object-cover">
                             {% else %}
-                                {% if ad.category == 'employment' %}
-                                <img src="{{ url_for('static', filename='images/Employment.jpg') }}" alt="Jobs" class="w-full h-full object-cover">
-                                {% elif ad.category == 'motors' %}
-                                <img src="{{ url_for('static', filename='images/Motors.jpg') }}" alt="Motors" class="w-full h-full object-cover">
-                                {% elif ad.category == 'property' %}
-                                <img src="{{ url_for('static', filename='images/House.webp') }}" alt="Property" class="w-full h-full object-cover">
-                                {% elif ad.category == 'services' %}
-                                <img src="{{ url_for('static', filename='images/Services.jpg') }}" alt="Services" class="w-full h-full object-cover">
-                                {% else %}
-                                <img src="{{ url_for('static', filename='images/General.jpg') }}" alt="General" class="w-full h-full object-cover">
-                                {% endif %}
+                            <img src="{{ url_for('static', filename='images/General.jpg') }}" alt="General"
+                                class="w-full h-full object-cover">
+                            {% endif %}
                             {% endif %}
                             <span class="card-category-tag">{{ ad.category|title }}</span>
                         </div>
@@ -157,8 +131,54 @@
                             <p class="modern-card-description">{{ ad.description[:80] }}...</p>
                             <div class="modern-card-footer">
                                 <span class="text-xs text-gray-400">{{ ad.created_at.strftime('%d %b') }}</span>
-                                <a href="{{ url_for('main.view_ad', posting_id=ad.id) }}" 
-                                   class="text-blue-600 font-semibold hover:underline">View Deal →</a>
+                                <a href="{{ url_for('main.view_ad', posting_id=ad.id) }}"
+                                    class="text-blue-600 font-semibold hover:underline">View Deal →</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {# Duplicate for seamless loop #}
+                {% for ad in featured_ads %}
+                <div class="carousel-slide">
+                    <div class="featured-card">
+                        <span class="featured-badge"><i class="fas fa-star mr-1"></i> FEATURED</span>
+                        <div class="modern-card-image">
+                            {% if ad.image_filename %}
+                            <img src="{{ ad.image_filename }}" alt="{{ ad.title }}" loading="lazy">
+                            {% else %}
+                            {% if ad.category == 'employment' %}
+                            <img src="{{ url_for('static', filename='images/Employment.jpg') }}" alt="Jobs"
+                                class="w-full h-full object-cover">
+                            {% elif ad.category == 'motors' %}
+                            <img src="{{ url_for('static', filename='images/Motors.jpg') }}" alt="Motors"
+                                class="w-full h-full object-cover">
+                            {% elif ad.category == 'property' %}
+                            <img src="{{ url_for('static', filename='images/House.webp') }}" alt="Property"
+                                class="w-full h-full object-cover">
+                            {% elif ad.category == 'services' %}
+                            <img src="{{ url_for('static', filename='images/Services.jpg') }}" alt="Services"
+                                class="w-full h-full object-cover">
+                            {% else %}
+                            <img src="{{ url_for('static', filename='images/General.jpg') }}" alt="General"
+                                class="w-full h-full object-cover">
+                            {% endif %}
+                            {% endif %}
+                            <span class="card-category-tag">{{ ad.category|title }}</span>
+                        </div>
+                        <div class="modern-card-content">
+                            <h3 class="modern-card-title">{{ ad.title[:40] }}...</h3>
+                            <div class="modern-card-location">
+                                <i class="fas fa-map-marker-alt text-gray-500 mr-1"></i> {{ ad.location_city }}
+                            </div>
+                            {% if ad.salary_price %}
+                            <div class="modern-card-price">{{ ad.salary_price }}</div>
+                            {% endif %}
+                            <p class="modern-card-description">{{ ad.description[:80] }}...</p>
+                            <div class="modern-card-footer">
+                                <span class="text-xs text-gray-400">{{ ad.created_at.strftime('%d %b') }}</span>
+                                <a href="{{ url_for('main.view_ad', posting_id=ad.id) }}"
+                                    class="text-blue-600 font-semibold hover:underline">View Deal →</a>
                             </div>
                         </div>
                     </div>
@@ -176,27 +196,31 @@
         <h2 class="section-title">Recent Listings</h2>
         <a href="{{ url_for('main.browse_ads') }}" class="section-link">Browse All →</a>
     </div>
-    
+
     {% if recent_ads %}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {% for ad in recent_ads %}
         <div class="modern-ad-card">
             <div class="modern-card-image">
                 {% if ad.image_filename %}
-                    <img src="{{ url_for('static', filename='uploads/' + ad.image_filename) }}" 
-                         alt="{{ ad.title }}" loading="lazy">
+                <img src="{{ ad.image_filename }}" alt="{{ ad.title }}" loading="lazy">
                 {% else %}
-                    {% if ad.category == 'employment' %}
-                    <img src="{{ url_for('static', filename='images/Employment.jpg') }}" alt="Jobs" class="w-full h-full object-cover">
-                    {% elif ad.category == 'motors' %}
-                    <img src="{{ url_for('static', filename='images/Motors.jpg') }}" alt="Motors" class="w-full h-full object-cover">
-                    {% elif ad.category == 'property' %}
-                    <img src="{{ url_for('static', filename='images/House.webp') }}" alt="Property" class="w-full h-full object-cover">
-                    {% elif ad.category == 'services' %}
-                    <img src="{{ url_for('static', filename='images/Services.jpg') }}" alt="Services" class="w-full h-full object-cover">
-                    {% else %}
-                    <img src="{{ url_for('static', filename='images/General.jpg') }}" alt="General" class="w-full h-full object-cover">
-                    {% endif %}
+                {% if ad.category == 'employment' %}
+                <img src="{{ url_for('static', filename='images/Employment.jpg') }}" alt="Jobs"
+                    class="w-full h-full object-cover">
+                {% elif ad.category == 'motors' %}
+                <img src="{{ url_for('static', filename='images/Motors.jpg') }}" alt="Motors"
+                    class="w-full h-full object-cover">
+                {% elif ad.category == 'property' %}
+                <img src="{{ url_for('static', filename='images/House.webp') }}" alt="Property"
+                    class="w-full h-full object-cover">
+                {% elif ad.category == 'services' %}
+                <img src="{{ url_for('static', filename='images/Services.jpg') }}" alt="Services"
+                    class="w-full h-full object-cover">
+                {% else %}
+                <img src="{{ url_for('static', filename='images/General.jpg') }}" alt="General"
+                    class="w-full h-full object-cover">
+                {% endif %}
                 {% endif %}
                 <span class="card-category-tag">{{ ad.category|title }}</span>
             </div>
@@ -208,11 +232,12 @@
                 {% if ad.salary_price %}
                 <div class="modern-card-price">{{ ad.salary_price }}</div>
                 {% endif %}
-                <p class="modern-card-description">{{ ad.description[:100] }}{% if ad.description|length > 100 %}...{% endif %}</p>
+                <p class="modern-card-description">{{ ad.description[:100] }}{% if ad.description|length > 100 %}...{%
+                    endif %}</p>
                 <div class="modern-card-footer">
                     <span class="text-xs text-gray-400">{{ ad.created_at.strftime('%d %b %Y') }}</span>
-                    <a href="{{ url_for('main.view_ad', posting_id=ad.id) }}" 
-                       class="text-blue-600 font-medium hover:underline">View →</a>
+                    <a href="{{ url_for('main.view_ad', posting_id=ad.id) }}"
+                        class="text-blue-600 font-medium hover:underline">View →</a>
                 </div>
             </div>
         </div>
@@ -223,7 +248,8 @@
         <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
         <h3 class="text-xl font-bold mb-2">No listings yet</h3>
         <p class="text-gray-600 mb-4">Be the first to post an ad!</p>
-        <a href="{{ url_for('main.post_ad') }}" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700">
+        <a href="{{ url_for('main.post_ad') }}"
+            class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700">
             Post Your Ad
         </a>
     </div>
@@ -236,7 +262,8 @@
         <h2 class="text-3xl font-bold mb-4">Ready to Sell or Hire?</h2>
         <p class="text-xl mb-6 text-blue-100">Join thousands of businesses and individuals in Eswatini</p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="{{ url_for('main.register') }}" class="bg-white hover:bg-gray-100 text-blue-800 px-8 py-3 rounded-xl font-bold text-lg transition">
+            <a href="{{ url_for('main.register') }}"
+                class="bg-white hover:bg-gray-100 text-blue-800 px-8 py-3 rounded-xl font-bold text-lg transition">
                 <i class="fas fa-user-plus mr-1"></i> Create Account
             </a>
         </div>
@@ -245,49 +272,54 @@
 
 <!-- Carousel Control Script -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const track = document.querySelector('.carousel-track');
-    const container = document.querySelector('.carousel-container');
-    
-    if (track && container) {
-        container.addEventListener('mouseenter', () => {
-            track.style.animationPlayState = 'paused';
-        });
-        
-        container.addEventListener('mouseleave', () => {
-            track.style.animationPlayState = 'running';
-        });
-        
-        const slides = track.children;
-        const slideCount = slides.length;
-        
-        if (slideCount < 10) {
-            for (let i = 0; i < slideCount; i++) {
-                const clone = slides[i].cloneNode(true);
-                track.appendChild(clone);
+    document.addEventListener('DOMContentLoaded', function () {
+        const track = document.querySelector('.carousel-track');
+        const container = document.querySelector('.carousel-container');
+
+        if (track && container) {
+            container.addEventListener('mouseenter', () => {
+                track.style.animationPlayState = 'paused';
+            });
+
+            container.addEventListener('mouseleave', () => {
+                track.style.animationPlayState = 'running';
+            });
+
+            const slides = track.children;
+            const slideCount = slides.length;
+
+            if (slideCount < 10) {
+                for (let i = 0; i < slideCount; i++) {
+                    const clone = slides[i].cloneNode(true);
+                    track.appendChild(clone);
+                }
             }
         }
-    }
-});
+    });
 </script>
 
 <style>
-.carousel-track {
-    display: flex;
-    gap: 1.5rem;
-    transition: transform 0.5s ease;
-    will-change: transform;
-    animation: scrollCarousel 40s linear infinite;
-}
+    .carousel-track {
+        display: flex;
+        gap: 1.5rem;
+        transition: transform 0.5s ease;
+        will-change: transform;
+        animation: scrollCarousel 40s linear infinite;
+    }
 
-@keyframes scrollCarousel {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-}
+    @keyframes scrollCarousel {
+        0% {
+            transform: translateX(0);
+        }
 
-.carousel-container:hover .carousel-track {
-    animation-play-state: paused;
-}
+        100% {
+            transform: translateX(-50%);
+        }
+    }
+
+    .carousel-container:hover .carousel-track {
+        animation-play-state: paused;
+    }
 </style>
 
 {% endblock %}

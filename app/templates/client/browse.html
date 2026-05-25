@@ -96,23 +96,23 @@
         <div class="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden h-full flex flex-col">
             
             <!-- Image Section -->
-            <div class="h-40 {% if ad.payment_plan == 'featured' %}bg-gradient-to-br from-yellow-100 to-yellow-200{% else %}bg-gray-200{% endif %} flex items-center justify-center overflow-hidden">
+            <div
+                class="h-40 {% if ad.payment_plan == 'featured' %}bg-gradient-to-br from-yellow-100 to-yellow-200{% else %}bg-gray-200{% endif %} flex items-center justify-center overflow-hidden">
                 {% if ad.image_filename %}
-                    <img src="{{ url_for('static', filename='uploads/' + ad.image_filename) }}" 
-                         alt="{{ ad.title }}" 
-                         class="w-full h-full object-cover">
+                <img src="{{ ad.image_filename }}" alt="{{ ad.title }}" class="w-full h-full object-cover">
                 {% else %}
-                    {% if ad.category == 'employment' %}
-                    <img src="{{ url_for('static', filename='images/Employment.jpg') }}" alt="Jobs" class="w-full h-full object-cover">
-                    {% elif ad.category == 'motors' %}
-                    <img src="{{ url_for('static', filename='images/Motors.jpg') }}" alt="Motors" class="w-full h-full object-cover">
-                    {% elif ad.category == 'property' %}
-                    <img src="{{ url_for('static', filename='images/House.webp') }}" alt="Property" class="w-full h-full object-cover">
-                    {% elif ad.category == 'services' %}
-                    <img src="{{ url_for('static', filename='images/Services.jpg') }}" alt="Services" class="w-full h-full object-cover">
-                    {% else %}
-                    <img src="{{ url_for('static', filename='images/General.jpg') }}" alt="General" class="w-full h-full object-cover">
-                    {% endif %}
+                {% if ad.category == 'employment' %}
+                <img src="{{ url_for('static', filename='images/Employment.jpg') }}" alt="Jobs" class="w-full h-full object-cover">
+                {% elif ad.category == 'motors' %}
+                <img src="{{ url_for('static', filename='images/Motors.jpg') }}" alt="Motors" class="w-full h-full object-cover">
+                {% elif ad.category == 'property' %}
+                <img src="{{ url_for('static', filename='images/House.webp') }}" alt="Property" class="w-full h-full object-cover">
+                {% elif ad.category == 'services' %}
+                <img src="{{ url_for('static', filename='images/Services.jpg') }}" alt="Services"
+                    class="w-full h-full object-cover">
+                {% else %}
+                <img src="{{ url_for('static', filename='images/General.jpg') }}" alt="General" class="w-full h-full object-cover">
+                {% endif %}
                 {% endif %}
             </div>
             

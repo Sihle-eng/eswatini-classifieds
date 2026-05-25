@@ -34,14 +34,16 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def save_uploaded_file(file):
-    """Save uploaded file and return filename"""
+    """Upload file to Cloudinary and return the public URL"""
     if file and allowed_file(file.filename):
-        ext = file.filename.rsplit('.', 1)[1].lower()
-        filename = f"{uuid.uuid4().hex}.{ext}"
-        filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
-        return filename
+        try:
+            upload_result = cloudinary.uploader.upload(file)
+            return upload_result['secure_url']  # this is the full HTTPS URL
+        except Exception as e:
+            print(f"Cloudinary upload error: {e}")
+            return None
     return None
+
 def save_multiple_images(files, posting_id, primary_index=0):
     """Save multiple images and associate with posting"""
     saved_count = 0

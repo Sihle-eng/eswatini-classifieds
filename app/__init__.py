@@ -99,5 +99,15 @@ def create_app(config_name='default'):
             'CURRENCY_SYMBOL': app.config['CURRENCY_SYMBOL'],
             'FEATURE_IMAGE_UPLOADS': app.config['FEATURE_IMAGE_UPLOADS'],
         }
+    import cloudinary
+    import cloudinary.uploader
+    import cloudinary.api
+    
+    cloudinary.config(
+        cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
+        api_key=os.environ.get('CLOUDINARY_API_KEY'),
+        api_secret=os.environ.get('CLOUDINARY_API_SECRET'),
+        secure=True
+    )
     
     return app

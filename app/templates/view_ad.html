@@ -13,44 +13,48 @@
     <!-- Main Ad Card -->
     <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
         
-        <!-- Image Gallery Section -->
-        <div class="mb-6">
-            {% set images = posting.images if posting.images else [] %}
-            
-            {% if images %}
-            <div class="relative bg-gray-100 rounded-lg overflow-hidden mb-4">
-                <img id="mainImage" src="{{ url_for('static', filename='uploads/' + images[0].filename) }}" 
-                     alt="{{ posting.title }}" 
-                     class="w-full h-64 md:h-96 object-contain cursor-pointer"
-                     onclick="openLightbox()">
-                <div class="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white px-3 py-1 rounded-full text-sm">
-                    <i class="fas fa-camera mr-1"></i> <span id="currentImageIndex">1</span> / {{ images|length }}
+                <!-- Image Gallery Section -->
+                <div class="mb-6">
+                    {% set images = posting.images if posting.images else [] %}
+                
+                    {% if images %}
+                    <div class="relative bg-gray-100 rounded-lg overflow-hidden mb-4">
+                        <img id="mainImage" src="{{ images[0].filename }}" alt="{{ posting.title }}"
+                            class="w-full h-64 md:h-96 object-contain cursor-pointer" onclick="openLightbox()">
+                        <div class="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white px-3 py-1 rounded-full text-sm">
+                            <i class="fas fa-camera mr-1"></i> <span id="currentImageIndex">1</span> / {{ images|length }}
+                        </div>
+                        {% if images|length > 1 %}
+                        <button onclick="prevImage()"
+                            class="absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white w-10 h-10 rounded-full hover:bg-opacity-70 transition"><i
+                                class="fas fa-chevron-left"></i></button>
+                        <button onclick="nextImage()"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white w-10 h-10 rounded-full hover:bg-opacity-70 transition"><i
+                                class="fas fa-chevron-right"></i></button>
+                        {% endif %}
+                    </div>
+                    {% if images|length > 1 %}
+                    <div class="flex gap-2 overflow-x-auto pb-2">
+                        {% for img in images %}
+                        <div class="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 cursor-pointer {{ 'border-blue-500' if loop.first else 'border-gray-200 hover:border-blue-300' }}"
+                            onclick="switchImage({{ loop.index0 }}, this)">
+                            <img src="{{ img.filename }}" alt="Thumbnail {{ loop.index }}" class="w-full h-full object-cover">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <!-- No Images Available (no change here) -->
+                    <div
+                        class="h-64 {% if posting.payment_plan == 'featured' %}bg-gradient-to-br from-yellow-100 to-yellow-200{% else %}bg-gray-100{% endif %} flex items-center justify-center rounded-lg">
+                        <div class="text-center text-gray-400">
+                            <i class="fas fa-image text-6xl block mb-3"></i>
+                            <span class="text-lg font-medium">No Image Available</span>
+                            <p class="text-sm mt-1">The seller did not upload any images for this ad.</p>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
-                {% if images|length > 1 %}
-                <button onclick="prevImage()" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white w-10 h-10 rounded-full hover:bg-opacity-70 transition"><i class="fas fa-chevron-left"></i></button>
-                <button onclick="nextImage()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white w-10 h-10 rounded-full hover:bg-opacity-70 transition"><i class="fas fa-chevron-right"></i></button>
-                {% endif %}
-            </div>
-            {% if images|length > 1 %}
-            <div class="flex gap-2 overflow-x-auto pb-2">
-                {% for img in images %}
-                <div class="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 cursor-pointer {{ 'border-blue-500' if loop.first else 'border-gray-200 hover:border-blue-300' }}"
-                     onclick="switchImage({{ loop.index0 }}, this)">
-                    <img src="{{ url_for('static', filename='uploads/' + img.filename) }}" alt="Thumbnail {{ loop.index }}" class="w-full h-full object-cover">
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-            {% else %}
-            <div class="h-64 {% if posting.payment_plan == 'featured' %}bg-gradient-to-br from-yellow-100 to-yellow-200{% else %}bg-gray-100{% endif %} flex items-center justify-center rounded-lg">
-                <div class="text-center text-gray-400">
-                    <i class="fas fa-image text-6xl block mb-3"></i>
-                    <span class="text-lg font-medium">No Image Available</span>
-                    <p class="text-sm mt-1">The seller did not upload any images for this ad.</p>
-                </div>
-            </div>
-            {% endif %}
-        </div>
 
         <!-- Lightbox Modal -->
         <div id="lightbox" class="hidden fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center" onclick="closeLightbox()">
@@ -62,18 +66,18 @@
         </div>
 
         <script>
-        {% if images %}
-        const images = [{% for img in images %}"{{ url_for('static', filename='uploads/' + img.filename) }}",{% endfor %}];
-        let currentIndex = 0, totalImages = images.length, lightboxIndex = 0;
-        function switchImage(i,e){currentIndex=i;document.getElementById('mainImage').src=images[i];document.getElementById('currentImageIndex').textContent=i+1;document.querySelectorAll('.w-20').forEach((t,j)=>{t.classList.toggle('border-blue-500',j===i);t.classList.toggle('border-gray-200',j!==i)});}
-        function nextImage(){currentIndex=(currentIndex+1)%totalImages;switchImage(currentIndex);}
-        function prevImage(){currentIndex=(currentIndex-1+totalImages)%totalImages;switchImage(currentIndex);}
-        function openLightbox(){document.getElementById('lightbox').classList.remove('hidden');document.getElementById('lightboxImage').src=images[currentIndex];document.getElementById('lightboxCounter').textContent=(currentIndex+1)+' / '+totalImages;lightboxIndex=currentIndex;}
-        function closeLightbox(){document.getElementById('lightbox').classList.add('hidden');}
-        function lightboxNext(){lightboxIndex=(lightboxIndex+1)%totalImages;document.getElementById('lightboxImage').src=images[lightboxIndex];document.getElementById('lightboxCounter').textContent=(lightboxIndex+1)+' / '+totalImages;}
-        function lightboxPrev(){lightboxIndex=(lightboxIndex-1+totalImages)%totalImages;document.getElementById('lightboxImage').src=images[lightboxIndex];document.getElementById('lightboxCounter').textContent=(lightboxIndex+1)+' / '+totalImages;}
-        document.addEventListener('keydown',function(e){if(document.getElementById('lightbox').classList.contains('hidden'))return;if(e.key==='ArrowLeft')lightboxPrev();else if(e.key==='ArrowRight')lightboxNext();else if(e.key==='Escape')closeLightbox();});
-        {% endif %}
+            {% if images %}
+            const images = [{% for img in images %}"{{ img.filename }}", {% endfor %}];
+            let currentIndex = 0, totalImages = images.length, lightboxIndex = 0;
+            function switchImage(i, e) { currentIndex = i; document.getElementById('mainImage').src = images[i]; document.getElementById('currentImageIndex').textContent = i + 1; document.querySelectorAll('.w-20').forEach((t, j) => { t.classList.toggle('border-blue-500', j === i); t.classList.toggle('border-gray-200', j !== i) }); }
+            function nextImage() { currentIndex = (currentIndex + 1) % totalImages; switchImage(currentIndex); }
+            function prevImage() { currentIndex = (currentIndex - 1 + totalImages) % totalImages; switchImage(currentIndex); }
+            function openLightbox() { document.getElementById('lightbox').classList.remove('hidden'); document.getElementById('lightboxImage').src = images[currentIndex]; document.getElementById('lightboxCounter').textContent = (currentIndex + 1) + ' / ' + totalImages; lightboxIndex = currentIndex; }
+            function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
+            function lightboxNext() { lightboxIndex = (lightboxIndex + 1) % totalImages; document.getElementById('lightboxImage').src = images[lightboxIndex]; document.getElementById('lightboxCounter').textContent = (lightboxIndex + 1) + ' / ' + totalImages; }
+            function lightboxPrev() { lightboxIndex = (lightboxIndex - 1 + totalImages) % totalImages; document.getElementById('lightboxImage').src = images[lightboxIndex]; document.getElementById('lightboxCounter').textContent = (lightboxIndex + 1) + ' / ' + totalImages; }
+            document.addEventListener('keydown', function (e) { if (document.getElementById('lightbox').classList.contains('hidden')) return; if (e.key === 'ArrowLeft') lightboxPrev(); else if (e.key === 'ArrowRight') lightboxNext(); else if (e.key === 'Escape') closeLightbox(); });
+            {% endif %}
         </script>
         
         <div class="p-6">
