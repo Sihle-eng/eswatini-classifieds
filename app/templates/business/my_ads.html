@@ -110,8 +110,7 @@
             <!-- Image Preview -->
             <div class="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
                 {% if ad.image_filename %}
-                    <img src="{{ url_for('static', filename='uploads/' + ad.image_filename) }}" 
-                         alt="{{ ad.title }}" class="w-full h-full object-cover">
+                    <img src="{{ ad.image_filename }}" alt="{{ ad.title }}" class="w-full h-full object-cover">
                 {% else %}
                     {% if ad.category == 'employment' %}
                     <img src="{{ url_for('static', filename='images/Employment.jpg') }}" alt="Jobs" class="w-full h-full object-cover">
