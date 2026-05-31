@@ -20,6 +20,7 @@ from sqlalchemy import case
 from app.models import ClientPreference
 from flask_mail import Message
 
+
 import os
 import uuid
 import cloudinary.uploader
