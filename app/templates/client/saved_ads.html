@@ -22,7 +22,7 @@
         <a href="{{ url_for('main.view_ad', posting_id=ad.id) }}" class="block">
             <div class="h-40 {% if ad.payment_plan == 'featured' %}bg-gradient-to-br from-yellow-100 to-yellow-200{% else %}bg-gray-200{% endif %} flex items-center justify-center">
                 {% if ad.image_filename %}
-                    <img src="{{ url_for('static', filename='uploads/' + ad.image_filename) }}" alt="{{ ad.title }}" class="w-full h-full object-cover">
+                <img src="{{ ad.image_filename }}" alt="{{ ad.title }}" class="w-full h-full object-cover">
                 {% else %}
                     {% if ad.category == 'employment' %}
                     <img src="{{ url_for('static', filename='images/Employment.jpg') }}" alt="Jobs" class="w-full h-full object-cover">
