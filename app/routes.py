@@ -1549,10 +1549,6 @@ def admin_bulk_email():
     # GET request – show the form
     return render_template('admin/bulk_email.html')
 
-@main.route('/ping', methods=['GET'])
+@main.route('/ping')
 def ping():
-    # Optional: verify a secret to avoid public abuse
-    secret = request.args.get('secret')
-    if secret != current_app.config.get('CRON_SECRET'):
-        abort(403)
     return "OK", 200
