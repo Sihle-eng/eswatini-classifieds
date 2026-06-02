@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app, abort
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -1548,3 +1548,11 @@ def admin_bulk_email():
 
     # GET request – show the form
     return render_template('admin/bulk_email.html')
+
+@main.route('/ping', methods=['GET'])
+def ping():
+    # Optional: verify a secret to avoid public abuse
+    secret = request.args.get('secret')
+    if secret != current_app.config.get('CRON_SECRET'):
+        abort(403)
+    return "OK", 200
