@@ -25,6 +25,7 @@ from app.models import (
     Lead,
     ForumThread,
     ForumReply,
+    Feedback,
 )
 from datetime import datetime, timedelta
 from app.email_utils import (
@@ -1064,12 +1065,23 @@ def all_reports():
 @main.route('/team/calendar')
 @login_required
 def team_calendar():
-    events = CalendarEvent.query.order_by(CalendarEvent.event_date.asc()).all()
-    return render_template('admin/calendar.html', events=events)
+    admin_emails = ['admin@example.com', 'techcharities@example.com', 'eswatiniclassifieds@gmail.com']
+    contractor = Contractor.query.filter_by(email=current_user.email, active=True).first()
+    can_add_event = (current_user.email in admin_emails) or (contractor and contractor.role == 'community_manager')
+    # Only show team meetings
+    events = CalendarEvent.query.filter_by(calendar_type='team').order_by(CalendarEvent.event_date.asc()).all()
+    return render_template('admin/calendar.html', events=events, can_add_event=can_add_event)
 
 @main.route('/team/calendar/add', methods=['POST'])
-@admin_required
+@login_required
 def add_calendar_event():
+    # Allow admin or community manager to add events
+    admin_emails = ['eswatiniclassifieds@gmail.com']
+    contractor = Contractor.query.filter_by(email=current_user.email, active=True).first()
+    if current_user.email not in admin_emails and (not contractor or contractor.role != 'community_manager'):
+        flash('You do not have permission to add events.', 'error')
+        return redirect(url_for('main.team_calendar'))
+
     title = request.form.get('title')
     description = request.form.get('description')
     event_date = request.form.get('event_date')
@@ -1079,6 +1091,7 @@ def add_calendar_event():
         description=description,
         event_date=datetime.strptime(event_date, '%Y-%m-%d').date(),
         event_time=datetime.strptime(event_time, '%H:%M').time() if event_time else None,
+        calendar_type='team',
         created_by=current_user.id
     )
     db.session.add(event)
@@ -1821,14 +1834,11 @@ def contractor_member_directory(contractor):
     users = User.query.order_by(User.created_at.desc()).all()
     return render_template('contractor/member_directory.html', users=users)
 
-@main.route('/contractor/feedback', methods=['GET', 'POST'])
+@main.route('/contractor/feedback')
 @contractor_required(role='community_manager')
 def contractor_feedback(contractor):
-    if request.method == 'POST':
-        # We'll store feedback in a simple list or print it; you can create a Feedback model later.
-        flash('Feedback submitted. Thank you!', 'success')
-        return redirect(url_for('main.contractor_feedback'))
-    return render_template('contractor/feedback.html')
+    feedback_list = Feedback.query.order_by(Feedback.submitted_at.desc()).all()
+    return render_template('contractor/feedback.html', feedback_list=feedback_list)
 
 # ---- Community Manager: Discussion Forum ----
 @main.route('/contractor/forum', methods=['GET', 'POST'])
@@ -1876,14 +1886,43 @@ def contractor_content_hub(contractor):
     posts = BlogPost.query.order_by(BlogPost.created_at.desc()).all()
     return render_template('contractor/content_hub.html', posts=posts)
 
+@main.route('/contractor/content-hub/edit/<int:post_id>', methods=['GET', 'POST'])
+@contractor_required(role='community_manager')
+def edit_blog_post(contractor, post_id):
+    post = BlogPost.query.get_or_404(post_id)
+    if request.method == 'POST':
+        post.title = request.form.get('title')
+        post.content = request.form.get('content')
+        db.session.commit()
+        flash('Post updated!', 'success')
+        return redirect(url_for('main.contractor_content_hub'))
+    return render_template('contractor/edit_blog_post.html', post=post)
+
+@main.route('/contractor/content-hub/delete/<int:post_id>', methods=['POST'])
+@contractor_required(role='community_manager')
+def delete_blog_post(contractor, post_id):
+    post = BlogPost.query.get_or_404(post_id)
+    db.session.delete(post)
+    db.session.commit()
+    flash('Post deleted.', 'success')
+    return redirect(url_for('main.contractor_content_hub'))
+
 # ---- Community Manager: Analytics ----
 @main.route('/contractor/analytics')
 @contractor_required(role='community_manager')
 def contractor_analytics(contractor):
+    from datetime import datetime, timedelta
     total_users = User.query.count()
     active_ads = Posting.query.filter_by(is_active=True).count()
     total_ads = Posting.query.count()
-    return render_template('contractor/analytics.html', total_users=total_users, active_ads=active_ads, total_ads=total_ads)
+    # New users this month
+    first_day = datetime.utcnow().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    new_users_this_month = User.query.filter(User.created_at >= first_day).count()
+    return render_template('contractor/analytics.html',
+                         total_users=total_users,
+                         active_ads=active_ads,
+                         total_ads=total_ads,
+                         new_users_this_month=new_users_this_month)
 
 # ---- Sales Rep: Email Automation ----
 @main.route('/contractor/email-automation', methods=['GET', 'POST'])
@@ -1912,3 +1951,47 @@ def contractor_email_automation(contractor):
 def contractor_support_inbox(contractor):
     inquiries = ContactInquiry.query.order_by(ContactInquiry.created_at.desc()).all()
     return render_template('contractor/support_inbox.html', inquiries=inquiries)
+
+@main.route('/blog')
+def public_blog():
+    posts = BlogPost.query.order_by(BlogPost.created_at.desc()).all()
+    return render_template('blog/public_blog.html', posts=posts)
+
+@main.route('/contractor/content-calendar', methods=['GET', 'POST'])
+@contractor_required(role='community_manager')
+def contractor_content_calendar(contractor):
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description')
+        event_date = request.form.get('event_date')
+        event_time = request.form.get('event_time')
+
+        event = CalendarEvent(
+            title=title,
+            description=description,
+            event_date=datetime.strptime(event_date, '%Y-%m-%d').date(),
+            event_time=datetime.strptime(event_time, '%H:%M').time() if event_time else None,
+            calendar_type='content',
+            created_by=current_user.id
+        )
+        db.session.add(event)
+        db.session.commit()
+        flash('Content event added!', 'success')
+        return redirect(url_for('main.contractor_content_calendar'))
+
+    # Fetch only content events (not team meetings)
+    events = CalendarEvent.query.filter_by(calendar_type='content').order_by(CalendarEvent.event_date.asc()).all()
+    return render_template('contractor/content_calendar.html', events=events)
+
+@main.route('/feedback', methods=['GET', 'POST'])
+def public_feedback():
+    if request.method == 'POST':
+        feedback = Feedback(
+            satisfaction=request.form.get('satisfaction'),
+            suggestions=request.form.get('suggestions')
+        )
+        db.session.add(feedback)
+        db.session.commit()
+        flash('Thank you for your feedback!', 'success')
+        return redirect(url_for('main.home'))
+    return render_template('feedback/public_form.html')

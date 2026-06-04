@@ -552,6 +552,9 @@
                         <a href="{{ url_for('main.browse_ads') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
                             <i class="fas fa-search mr-1"></i> Browse
                         </a>
+                        <a href="{{ url_for('main.public_blog') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
+                            <i class="fas fa-blog mr-1"></i> Blog
+                        </a>
                         <a href="{{ url_for('main.business_dashboard') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
                             <i class="fas fa-chart-line mr-1"></i> Dashboard
                         </a>
@@ -571,6 +574,9 @@
                         </a>
                         <a href="{{ url_for('main.browse_ads') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
                             <i class="fas fa-search mr-1"></i> Browse
+                        </a>
+                        <a href="{{ url_for('main.public_blog') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
+                            <i class="fas fa-blog mr-1"></i> Blog
                         </a>
                         <a href="{{ url_for('main.client_dashboard') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
                             <i class="fas fa-user mr-1"></i> Dashboard
@@ -639,6 +645,9 @@
                     </a>
                     <a href="{{ url_for('main.browse_ads') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
                         <i class="fas fa-search mr-1"></i> Browse
+                    </a>
+                    <a href="{{ url_for('main.public_blog') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
+                        <i class="fas fa-blog mr-1"></i> Blog
                     </a>
                     <a href="{{ url_for('main.login') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
                         <i class="fas fa-sign-in-alt mr-1"></i> Login
@@ -761,6 +770,9 @@
             <a href="{{ url_for('main.browse_ads') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
                 <i class="fas fa-search w-6 text-blue-600"></i> Browse
             </a>
+            <a href="{{ url_for('main.public_blog') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-blog w-6 text-blue-600"></i> Blog
+            </a>
             
             {% if current_user.user_type == 'business' %}
                 <a href="{{ url_for('main.business_dashboard') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
@@ -802,6 +814,9 @@
             </a>
             <a href="{{ url_for('main.post_ad') }}" class="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 font-bold mt-2">
                 <i class="fas fa-plus-circle w-6"></i> Post Ad
+            </a>
+            <a href="{{ url_for('main.public_blog') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-blog w-6 text-blue-600"></i> Blog
             </a>
         {% endif %}
     </div>

@@ -1,19 +1,42 @@
 {% extends "base.html" %}
-{% block title %}Analytics{% endblock %}
+
+{% block title %}Community Analytics - Eswatini Classifieds{% endblock %}
+
 {% block content %}
-<h2 class="text-2xl font-bold mb-4"><i class="fas fa-chart-line mr-2"></i>Community Analytics</h2>
-<div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-    <div class="bg-white rounded-lg shadow p-4 text-center">
-        <p class="text-sm text-gray-600">Total Users</p>
-        <p class="text-2xl font-bold">{{ total_users }}</p>
+<div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+    <h2 class="text-2xl font-bold mb-2">
+        <i class="fas fa-chart-line mr-2"></i> Community Analytics
+    </h2>
+    <p class="text-gray-700">Key performance indicators for the platform.</p>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="bg-white rounded-lg shadow p-4 md:p-6 text-center">
+        <i class="fas fa-users text-3xl md:text-4xl text-blue-500 mb-3"></i>
+        <div class="text-2xl md:text-3xl font-bold">{{ total_users }}</div>
+        <div class="text-sm md:text-base text-gray-600">Total Users</div>
     </div>
-    <div class="bg-white rounded-lg shadow p-4 text-center">
-        <p class="text-sm text-gray-600">Active Ads</p>
-        <p class="text-2xl font-bold">{{ active_ads }}</p>
+    <div class="bg-white rounded-lg shadow p-4 md:p-6 text-center">
+        <i class="fas fa-check-circle text-3xl md:text-4xl text-green-500 mb-3"></i>
+        <div class="text-2xl md:text-3xl font-bold">{{ active_ads }}</div>
+        <div class="text-sm md:text-base text-gray-600">Active Ads</div>
     </div>
-    <div class="bg-white rounded-lg shadow p-4 text-center">
-        <p class="text-sm text-gray-600">Total Ads</p>
-        <p class="text-2xl font-bold">{{ total_ads }}</p>
+    <div class="bg-white rounded-lg shadow p-4 md:p-6 text-center">
+        <i class="fas fa-clipboard-list text-3xl md:text-4xl text-purple-500 mb-3"></i>
+        <div class="text-2xl md:text-3xl font-bold">{{ total_ads }}</div>
+        <div class="text-sm md:text-base text-gray-600">Total Ads</div>
     </div>
+    <div class="bg-white rounded-lg shadow p-4 md:p-6 text-center">
+        <i class="fas fa-user-plus text-3xl md:text-4xl text-orange-500 mb-3"></i>
+        <div class="text-2xl md:text-3xl font-bold">{{ new_users_this_month }}</div>
+        <div class="text-sm md:text-base text-gray-600">New This Month</div>
+    </div>
+</div>
+
+<!-- Additional charts or tables can be added here later -->
+<div class="bg-white rounded-lg shadow p-6 text-center text-gray-500">
+    <i class="fas fa-chart-bar text-5xl mb-4"></i>
+    <p>Detailed charts and reports coming soon.</p>
 </div>
 {% endblock %}

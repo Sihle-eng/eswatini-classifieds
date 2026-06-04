@@ -244,6 +244,7 @@ class CalendarEvent(db.Model):
     description = db.Column(db.Text)
     event_date = db.Column(db.Date, nullable=False)
     event_time = db.Column(db.Time)
+    calendar_type = db.Column(db.String(20), default='team')  # 'team' or 'content'
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -301,3 +302,10 @@ class ContactInquiry(db.Model):
     sender_phone = db.Column(db.String(30))
     message = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Feedback(db.Model):
+    __tablename__ = 'feedback'
+    id = db.Column(db.Integer, primary_key=True)
+    satisfaction = db.Column(db.String(50))
+    suggestions = db.Column(db.Text)
+    submitted_at = db.Column(db.DateTime, default=datetime.utcnow)

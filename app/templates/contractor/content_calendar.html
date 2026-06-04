@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Content Calendar - Eswatini Classifieds{% endblock %}
+
+{% block content %}
+<div class="bg-purple-50 border border-purple-200 rounded-lg p-6 mb-6">
+    <h2 class="text-2xl font-bold mb-2">
+        <i class="fas fa-calendar-alt mr-2"></i> Content Calendar
+    </h2>
+    <p class="text-gray-700">Plan your public posts, promotions, and community engagements.</p>
+</div>
+
+<!-- Add Content Event Form -->
+<div class="bg-white rounded-lg shadow p-6 mb-6">
+    <h3 class="text-lg font-semibold mb-4">Schedule New Content</h3>
+    <form method="POST" class="flex flex-wrap gap-3">
+        <input type="text" name="title" placeholder="Event Title (e.g., Weekend Promo Post)" required
+            class="flex-1 px-3 py-2 border rounded-lg">
+        <input type="date" name="event_date" required class="px-3 py-2 border rounded-lg">
+        <input type="time" name="event_time" class="px-3 py-2 border rounded-lg" placeholder="Time (optional)">
+        <textarea name="description" placeholder="Details (platform, audience, notes)" rows="2"
+            class="w-full px-3 py-2 border rounded-lg"></textarea>
+        <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">Add to
+            Calendar</button>
+    </form>
+</div>
+
+<!-- Content Events List -->
+<div class="bg-white rounded-lg shadow overflow-x-auto">
+    {% if events %}
+    <table class="w-full min-w-[500px]">
+        <thead class="bg-gray-100 border-b">
+            <tr>
+                <th class="px-4 py-3 text-left text-sm">Date</th>
+                <th class="px-4 py-3 text-left text-sm">Time</th>
+                <th class="px-4 py-3 text-left text-sm">Title</th>
+                <th class="px-4 py-3 text-left text-sm">Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for e in events %}
+            <tr class="border-b hover:bg-gray-50">
+                <td class="px-4 py-3 text-sm align-middle">{{ e.event_date.strftime('%d %b %Y') }}</td>
+                <td class="px-4 py-3 text-sm align-middle">{{ e.event_time.strftime('%H:%M') if e.event_time else 'All
+                    Day' }}</td>
+                <td class="px-4 py-3 text-sm align-middle font-semibold">{{ e.title }}</td>
+                <td class="px-4 py-3 text-sm align-middle">{{ e.description[:80] if e.description else '—' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="p-12 text-center text-gray-500">
+        <i class="fas fa-calendar-alt text-4xl text-gray-300 mb-3 block"></i>
+        No content events scheduled yet.
+    </div>
+    {% endif %}
+</div>
+
+<div class="mt-4">
+    <a href="{{ url_for('main.contractor_dashboard') }}" class="text-purple-600 hover:underline">
+        <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
+    </a>
+</div>
+{% endblock %}
