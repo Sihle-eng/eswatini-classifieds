@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Support Inbox{% endblock %}
+{% block content %}
+<h2 class="text-2xl font-bold mb-4"><i class="fas fa-comment-dots mr-2"></i>Support Inbox</h2>
+<div class="bg-white rounded-lg shadow overflow-x-auto">
+    {% if inquiries %}
+    <table class="w-full min-w-[600px]">
+        <thead class="bg-gray-100 border-b">
+            <tr>
+                <th class="px-4 py-3 text-left text-sm">From</th>
+                <th class="px-4 py-3 text-left text-sm">Message</th>
+                <th class="px-4 py-3 text-left text-sm">Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inq in inquiries %}
+            <tr class="border-b hover:bg-gray-50">
+                <td class="px-4 py-3 text-sm">{{ inq.sender_name }} ({{ inq.sender_email }})</td>
+                <td class="px-4 py-3 text-sm">{{ inq.message[:80] }}...</td>
+                <td class="px-4 py-3 text-sm">{{ inq.created_at.strftime('%d %b %Y') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="p-8 text-center text-gray-500">No inquiries yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

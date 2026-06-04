@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Milestones - Admin{% endblock %}
+
+{% block content %}
+<div class="bg-purple-50 border border-purple-200 rounded-lg p-6 mb-6">
+    <h2 class="text-2xl font-bold mb-2">
+        <i class="fas fa-flag-checkered mr-2"></i>Manage Milestones
+    </h2>
+    <p class="text-gray-700">Track and verify contractor milestones.</p>
+</div>
+
+<!-- Milestones Table -->
+<div class="bg-white rounded-lg shadow overflow-x-auto">
+    {% if milestones %}
+    <table class="w-full min-w-[600px]">
+        <thead class="bg-gray-100 border-b">
+            <tr>
+                <th class="px-4 py-3 text-left text-sm">Contractor</th>
+                <th class="px-4 py-3 text-left text-sm">Milestone</th>
+                <th class="px-4 py-3 text-left text-sm">Description</th>
+                <th class="px-4 py-3 text-left text-sm">Amount</th>
+                <th class="px-4 py-3 text-left text-sm">Status</th>
+                <th class="px-4 py-3 text-left text-sm">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in milestones %}
+            <tr class="border-b hover:bg-gray-50">
+                <td class="px-4 py-3 text-sm align-middle">{{ m.contractor.name }}</td>
+                <td class="px-4 py-3 text-sm align-middle">{{ m.name }}</td>
+                <td class="px-4 py-3 text-sm align-middle">{{ m.description or '—' }}</td>
+                <td class="px-4 py-3 text-sm align-middle font-semibold">SZL {{ "%.2f"|format(m.amount) }}</td>
+                <td class="px-4 py-3 text-sm align-middle">
+                    {% if m.status == 'pending' %}
+                    <span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full text-xs">Pending</span>
+                    {% elif m.status == 'achieved' %}
+                    <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-xs">Achieved</span>
+                    {% elif m.status == 'paid' %}
+                    <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs">Paid</span>
+                    {% endif %}
+                </td>
+                <td class="px-4 py-3 text-sm align-middle">
+                    {% if m.status == 'pending' %}
+                    <form method="POST" action="{{ url_for('main.update_milestone', milestone_id=m.id) }}"
+                        class="inline">
+                        <button name="status" value="achieved"
+                            class="bg-green-600 text-white px-2 py-1 rounded text-xs">Mark Achieved</button>
+                    </form>
+                    {% elif m.status == 'achieved' %}
+                    <form method="POST" action="{{ url_for('main.update_milestone', milestone_id=m.id) }}"
+                        class="inline">
+                        <button name="status" value="paid" class="bg-blue-600 text-white px-2 py-1 rounded text-xs">Mark
+                            Paid</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="p-12 text-center text-gray-500">
+        <i class="fas fa-flag-checkered text-4xl text-gray-300 mb-3 block"></i>
+        No milestones found. Add contractors first.
+    </div>
+    {% endif %}
+</div>
+
+<div class="mt-4">
+    <a href="{{ url_for('main.team_dashboard') }}" class="text-purple-600 hover:underline">
+        <i class="fas fa-arrow-left mr-1"></i> Back to Team Dashboard
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Lead Capture - Eswatini Classifieds{% endblock %}
+{% block content %}
+<h2 class="text-2xl font-bold mb-4"><i class="fas fa-file-signature mr-2"></i>Lead Capture</h2>
+<div class="max-w-md bg-white rounded-lg shadow p-6">
+    <form method="POST">
+        <div class="mb-3"><label class="block text-sm">Full Name</label><input type="text" name="name" required
+                class="w-full px-3 py-2 border rounded-lg"></div>
+        <div class="mb-3"><label class="block text-sm">Business Name</label><input type="text" name="business_name"
+                class="w-full px-3 py-2 border rounded-lg"></div>
+        <div class="mb-3"><label class="block text-sm">Email</label><input type="email" name="email" required
+                class="w-full px-3 py-2 border rounded-lg"></div>
+        <div class="mb-3"><label class="block text-sm">Phone</label><input type="text" name="phone"
+                class="w-full px-3 py-2 border rounded-lg"></div>
+        <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg">Capture Lead</button>
+    </form>
+</div>
+{% endblock %}

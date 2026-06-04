@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Analytics{% endblock %}
+{% block content %}
+<h2 class="text-2xl font-bold mb-4"><i class="fas fa-chart-line mr-2"></i>Community Analytics</h2>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+    <div class="bg-white rounded-lg shadow p-4 text-center">
+        <p class="text-sm text-gray-600">Total Users</p>
+        <p class="text-2xl font-bold">{{ total_users }}</p>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4 text-center">
+        <p class="text-sm text-gray-600">Active Ads</p>
+        <p class="text-2xl font-bold">{{ active_ads }}</p>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4 text-center">
+        <p class="text-sm text-gray-600">Total Ads</p>
+        <p class="text-2xl font-bold">{{ total_ads }}</p>
+    </div>
+</div>
+{% endblock %}

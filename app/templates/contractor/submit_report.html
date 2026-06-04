@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Submit Weekly Report{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <h2 class="text-2xl font-bold mb-6">Submit Weekly Report</h2>
+    <form method="POST" class="bg-white rounded-lg shadow p-6">
+        <div class="mb-4">
+            <label class="block text-gray-700 mb-2">Week Ending (Sunday)</label>
+            <input type="date" name="week_ending" required class="w-full px-3 py-2 border rounded-lg">
+        </div>
+        <div class="mb-4">
+            <label class="block text-gray-700 mb-2">Summary of Activities</label>
+            <textarea name="summary" rows="4" required class="w-full px-3 py-2 border rounded-lg"></textarea>
+        </div>
+        {% if contractor.role == 'community_manager' %}
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="block text-gray-700 mb-2">New Business Contacts</label>
+                <input type="number" name="new_business_contacts" value="0" class="w-full px-3 py-2 border rounded-lg">
+            </div>
+            <div>
+                <label class="block text-gray-700 mb-2">Ads Posted</label>
+                <input type="number" name="ads_posted" value="0" class="w-full px-3 py-2 border rounded-lg">
+            </div>
+        </div>
+        <div class="mb-4">
+            <label class="block text-gray-700 mb-2">Engagement Notes</label>
+            <textarea name="engagement_notes" rows="3" class="w-full px-3 py-2 border rounded-lg"></textarea>
+        </div>
+        {% else %}
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="block text-gray-700 mb-2">New Clients Contacted</label>
+                <input type="number" name="new_clients_contacted" value="0" class="w-full px-3 py-2 border rounded-lg">
+            </div>
+            <div>
+                <label class="block text-gray-700 mb-2">Sales Made</label>
+                <input type="number" name="sales_made" value="0" class="w-full px-3 py-2 border rounded-lg">
+            </div>
+        </div>
+        <div class="mb-4">
+            <label class="block text-gray-700 mb-2">Revenue Generated (SZL)</label>
+            <input type="number" step="0.01" name="revenue_generated" value="0.00"
+                class="w-full px-3 py-2 border rounded-lg">
+        </div>
+        <div class="mb-4">
+            <label class="block text-gray-700 mb-2">Pipeline Notes</label>
+            <textarea name="pipeline_notes" rows="3" class="w-full px-3 py-2 border rounded-lg"></textarea>
+        </div>
+        {% endif %}
+        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Submit
+            Report</button>
+    </form>
+</div>
+{% endblock %}

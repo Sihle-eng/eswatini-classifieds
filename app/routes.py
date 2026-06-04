@@ -3,7 +3,29 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from app import db
-from app.models import User, BusinessProfile, ClientProfile, Posting, Transaction, SavedAd, Report, PostingImage, AdView, DeletionLog
+from app.models import (
+    BlogPost,
+    ContactInquiry,
+    User,
+    BusinessProfile,
+    ClientProfile,
+    Posting,
+    Transaction,
+    SavedAd,
+    Report,
+    PostingImage,
+    AdView,
+    DeletionLog,
+    ClientPreference,
+    Contractor,
+    WeeklyReport,
+    Milestone,
+    Commission,
+    CalendarEvent,
+    Lead,
+    ForumThread,
+    ForumReply,
+)
 from datetime import datetime, timedelta
 from app.email_utils import (
     send_welcome_email,
@@ -220,9 +242,14 @@ def register():
         
         # Log the user in
         login_user(new_user)
+
+
+        contractor = Contractor.query.filter_by(email=email, active=True).first()
+        if contractor:
+            return redirect(url_for('main.contractor_dashboard'))
         
         # Redirect to appropriate dashboard        
-        admin_emails = ['admin@example.com', 'techcharities@example.com', 'eswatiniclassifieds@gmail.com']
+        admin_emails = ['eswatiniclassifieds@gmail.com']
         if email in admin_emails:
             return redirect(url_for('main.admin_dashboard'))
         elif user_type == 'business':
@@ -250,6 +277,11 @@ def login():
         # Log the user in
         login_user(user, remember=remember)
         flash(f'Welcome back, {user.email}!', 'success')
+
+         # Check if user is a contractor and redirect to their dashboard
+        contractor = Contractor.query.filter_by(email=user.email, active=True).first()
+        if contractor:
+            return redirect(url_for('main.contractor_dashboard'))
         
         # Redirect to appropriate dashboard
         admin_emails = ['admin@example.com', 'techcharities@example.com', 'eswatiniclassifieds@gmail.com']
@@ -867,7 +899,17 @@ def contact_seller(posting_id):
     
     # Send email using our new email utility
     try:
-        
+        contact_inquiry = ContactInquiry(
+            posting_id=posting_id,
+            sender_name=name,
+            sender_email=email,
+            sender_phone=phone,
+            message=message
+        )
+        db.session.add(contact_inquiry)
+        db.session.commit()
+
+
         send_contact_inquiry(
             seller_email=business_user.email,
             seller_name=business.company_name,
@@ -878,6 +920,7 @@ def contact_seller(posting_id):
             ad_title=posting.title,
             ad_id=posting_id
         )
+        
         
         flash('✅ Your message has been sent to the seller!', 'success')
     except Exception as e:
@@ -963,6 +1006,120 @@ def toggle_user_status(user_id):
 @main.route('/privacy')
 def privacy():
     return render_template('privacy.html')
+
+# ============================================
+# TEAM MANAGEMENT ROUTES (Admin & Contractor)
+# ============================================
+
+@main.route('/team')
+@admin_required
+def team_dashboard():
+    contractors = Contractor.query.all()
+    return render_template('admin/team_dashboard.html', contractors=contractors)
+
+@main.route('/team/contractor/<int:contractor_id>')
+@admin_required
+def contractor_detail(contractor_id):
+    contractor = Contractor.query.get_or_404(contractor_id)
+    reports = WeeklyReport.query.filter_by(contractor_id=contractor_id).order_by(WeeklyReport.week_ending.desc()).all()
+    milestones = Milestone.query.filter_by(contractor_id=contractor_id).all()
+    commissions = Commission.query.filter_by(contractor_id=contractor_id).order_by(Commission.created_at.desc()).all()
+    return render_template('admin/contractor_detail.html', contractor=contractor, reports=reports, milestones=milestones, commissions=commissions)
+
+@main.route('/team/report', methods=['GET', 'POST'])
+@login_required
+def submit_report():
+    # Find if current user is a contractor (by email)
+    contractor = Contractor.query.filter_by(email=current_user.email).first()
+    if not contractor:
+        flash('You are not registered as a contractor.', 'error')
+        return redirect(url_for('main.home'))
+    if request.method == 'POST':
+        week_ending = request.form.get('week_ending')
+        summary = request.form.get('summary')
+        report = WeeklyReport(
+            contractor_id=contractor.id,
+            week_ending=datetime.strptime(week_ending, '%Y-%m-%d').date(),
+            summary=summary,
+            new_business_contacts=request.form.get('new_business_contacts', 0),
+            ads_posted=request.form.get('ads_posted', 0),
+            engagement_notes=request.form.get('engagement_notes', ''),
+            new_clients_contacted=request.form.get('new_clients_contacted', 0),
+            sales_made=request.form.get('sales_made', 0),
+            revenue_generated=request.form.get('revenue_generated', 0.00),
+            pipeline_notes=request.form.get('pipeline_notes', '')
+        )
+        db.session.add(report)
+        db.session.commit()
+        flash('Report submitted successfully!', 'success')
+        return redirect(url_for('main.submit_report'))
+    return render_template('contractor/submit_report.html', contractor=contractor)
+
+@main.route('/team/reports')
+@admin_required
+def all_reports():
+    reports = WeeklyReport.query.order_by(WeeklyReport.week_ending.desc()).all()
+    return render_template('admin/all_reports.html', reports=reports)
+
+@main.route('/team/calendar')
+@login_required
+def team_calendar():
+    events = CalendarEvent.query.order_by(CalendarEvent.event_date.asc()).all()
+    return render_template('admin/calendar.html', events=events)
+
+@main.route('/team/calendar/add', methods=['POST'])
+@admin_required
+def add_calendar_event():
+    title = request.form.get('title')
+    description = request.form.get('description')
+    event_date = request.form.get('event_date')
+    event_time = request.form.get('event_time')
+    event = CalendarEvent(
+        title=title,
+        description=description,
+        event_date=datetime.strptime(event_date, '%Y-%m-%d').date(),
+        event_time=datetime.strptime(event_time, '%H:%M').time() if event_time else None,
+        created_by=current_user.id
+    )
+    db.session.add(event)
+    db.session.commit()
+    flash('Event added to calendar.', 'success')
+    return redirect(url_for('main.team_calendar'))
+
+@main.route('/team/milestones')
+@admin_required
+def manage_milestones():
+    milestones = Milestone.query.order_by(Milestone.status.asc()).all()
+    return render_template('admin/milestones.html', milestones=milestones)
+
+@main.route('/team/milestone/update/<int:milestone_id>', methods=['POST'])
+@admin_required
+def update_milestone(milestone_id):
+    milestone = Milestone.query.get_or_404(milestone_id)
+    new_status = request.form.get('status')
+    if new_status == 'achieved':
+        milestone.achieved_at = datetime.utcnow()
+    elif new_status == 'paid':
+        milestone.paid_at = datetime.utcnow()
+    milestone.status = new_status
+    db.session.commit()
+    flash('Milestone updated.', 'success')
+    return redirect(url_for('main.manage_milestones'))
+
+@main.route('/team/commissions')
+@admin_required
+def manage_commissions():
+    commissions = Commission.query.order_by(Commission.created_at.desc()).all()
+    return render_template('admin/commissions.html', commissions=commissions)
+
+@main.route('/team/commission/pay/<int:commission_id>', methods=['POST'])
+@admin_required
+def mark_commission_paid(commission_id):
+    commission = Commission.query.get_or_404(commission_id)
+    commission.status = 'paid'
+    db.session.commit()
+    flash('Commission marked as paid.', 'success')
+    return redirect(url_for('main.manage_commissions'))
 
 # ============================================
 # MTN MOMO CALLBACK WEBHOOK
@@ -1552,3 +1709,206 @@ def admin_bulk_email():
 @main.route('/ping')
 def ping():
     return "OK", 200
+
+@main.route('/contractor/dashboard')
+@login_required
+def contractor_dashboard():
+    # Check if current user is a registered contractor
+    contractor = Contractor.query.filter_by(email=current_user.email).first()
+    if not contractor:
+        flash('You are not authorized to access the contractor dashboard.', 'error')
+        return redirect(url_for('main.home'))
+
+    # Fetch milestones, commissions, reports for this contractor
+    milestones = Milestone.query.filter_by(contractor_id=contractor.id).all()
+    commissions = Commission.query.filter_by(contractor_id=contractor.id).order_by(Commission.created_at.desc()).all()
+    reports = WeeklyReport.query.filter_by(contractor_id=contractor.id).order_by(WeeklyReport.week_ending.desc()).all()
+
+    return render_template('contractor/dashboard.html',
+                           contractor=contractor,
+                           milestones=milestones,
+                           commissions=commissions,
+                           reports=reports)
+
+
+# ============================================
+# CONTRACTOR TOOLS
+# ============================================
+
+def contractor_required(role=None):
+    """Decorator to ensure user is an active contractor, optionally of a specific role."""
+    from functools import wraps
+    def decorator(f):
+        @wraps(f)
+        @login_required
+        def decorated_function(*args, **kwargs):
+            contractor = Contractor.query.filter_by(email=current_user.email, active=True).first()
+            if not contractor:
+                flash('Access denied.', 'error')
+                return redirect(url_for('main.home'))
+            if role and contractor.role != role:
+                flash('This tool is not available for your role.', 'error')
+                return redirect(url_for('main.contractor_dashboard'))
+            return f(contractor, *args, **kwargs)
+        return decorated_function
+    return decorator
+
+
+# ---- Sales Rep Tools ----
+
+@main.route('/contractor/crm', methods=['GET', 'POST'])
+@contractor_required(role='sales_rep')
+def contractor_crm(contractor):
+    if request.method == 'POST':
+        lead = Lead(
+            contractor_id=contractor.id,
+            name=request.form.get('name'),
+            business_name=request.form.get('business_name'),
+            email=request.form.get('email'),
+            phone=request.form.get('phone'),
+            notes=request.form.get('notes'),
+            status=request.form.get('status', 'new')
+        )
+        db.session.add(lead)
+        db.session.commit()
+        flash('Lead added successfully.', 'success')
+        return redirect(url_for('main.contractor_crm'))
+    leads = Lead.query.filter_by(contractor_id=contractor.id).order_by(Lead.created_at.desc()).all()
+    return render_template('contractor/crm.html', leads=leads)
+
+@main.route('/contractor/lead-capture', methods=['GET', 'POST'])
+@contractor_required(role='sales_rep')
+def contractor_lead_capture(contractor):
+    if request.method == 'POST':
+        lead = Lead(
+            contractor_id=contractor.id,
+            name=request.form.get('name'),
+            business_name=request.form.get('business_name'),
+            email=request.form.get('email'),
+            phone=request.form.get('phone'),
+            notes='Captured via lead form.',
+            status='new'
+        )
+        db.session.add(lead)
+        db.session.commit()
+        flash('Lead captured!', 'success')
+        return redirect(url_for('main.contractor_lead_capture'))
+    return render_template('contractor/lead_capture.html')
+
+@main.route('/contractor/product-catalog')
+@contractor_required(role='sales_rep')
+def contractor_product_catalog(contractor):
+    packages = [
+        {'name': '7 Days Listing', 'price': 50, 'features': ['7 days visibility', 'Standard placement', 'Edit anytime']},
+        {'name': '30 Days Listing', 'price': 150, 'features': ['30 days visibility', 'Better value', 'Edit anytime']},
+        {'name': 'Featured 14 Days', 'price': 300, 'features': ['Top of search results', 'Highlighted border', '2x more views']},
+    ]
+    return render_template('contractor/product_catalog.html', packages=packages)
+
+@main.route('/contractor/sales-analytics')
+@contractor_required(role='sales_rep')
+def contractor_sales_analytics(contractor):
+    total_commissions = db.session.query(db.func.sum(Commission.amount)).filter_by(contractor_id=contractor.id, status='paid').scalar() or 0
+    pending_commissions = db.session.query(db.func.sum(Commission.amount)).filter_by(contractor_id=contractor.id, status='pending').scalar() or 0
+    leads_count = Lead.query.filter_by(contractor_id=contractor.id).count()
+    return render_template('contractor/sales_analytics.html', total_commissions=total_commissions, pending_commissions=pending_commissions, leads_count=leads_count)
+
+# ---- Community Manager Tools ----
+
+@main.route('/contractor/member-directory')
+@contractor_required(role='community_manager')
+def contractor_member_directory(contractor):
+    users = User.query.order_by(User.created_at.desc()).all()
+    return render_template('contractor/member_directory.html', users=users)
+
+@main.route('/contractor/feedback', methods=['GET', 'POST'])
+@contractor_required(role='community_manager')
+def contractor_feedback(contractor):
+    if request.method == 'POST':
+        # We'll store feedback in a simple list or print it; you can create a Feedback model later.
+        flash('Feedback submitted. Thank you!', 'success')
+        return redirect(url_for('main.contractor_feedback'))
+    return render_template('contractor/feedback.html')
+
+# ---- Community Manager: Discussion Forum ----
+@main.route('/contractor/forum', methods=['GET', 'POST'])
+@contractor_required(role='community_manager')
+def contractor_forum(contractor):
+    if request.method == 'POST':
+        title = request.form.get('title')
+        content = request.form.get('content')
+        if title and content:
+            thread = ForumThread(title=title, content=content, author_id=current_user.id)
+            db.session.add(thread)
+            db.session.commit()
+            flash('Thread created!', 'success')
+            return redirect(url_for('main.contractor_forum'))
+    threads = ForumThread.query.order_by(ForumThread.created_at.desc()).all()
+    return render_template('contractor/forum.html', threads=threads)
+
+@main.route('/contractor/forum/thread/<int:thread_id>', methods=['GET', 'POST'])
+@contractor_required(role='community_manager')
+def contractor_forum_thread(contractor, thread_id):
+    thread = ForumThread.query.get_or_404(thread_id)
+    if request.method == 'POST':
+        content = request.form.get('content')
+        if content:
+            reply = ForumReply(thread_id=thread.id, content=content, author_id=current_user.id)
+            db.session.add(reply)
+            db.session.commit()
+            flash('Reply posted.', 'success')
+            return redirect(url_for('main.contractor_forum_thread', thread_id=thread.id))
+    return render_template('contractor/forum_thread.html', thread=thread)
+
+# ---- Community Manager: Content Hub ----
+@main.route('/contractor/content-hub', methods=['GET', 'POST'])
+@contractor_required(role='community_manager')
+def contractor_content_hub(contractor):
+    if request.method == 'POST':
+        title = request.form.get('title')
+        content = request.form.get('content')
+        if title and content:
+            post = BlogPost(title=title, content=content, author_id=current_user.id)
+            db.session.add(post)
+            db.session.commit()
+            flash('Blog post published!', 'success')
+            return redirect(url_for('main.contractor_content_hub'))
+    posts = BlogPost.query.order_by(BlogPost.created_at.desc()).all()
+    return render_template('contractor/content_hub.html', posts=posts)
+
+# ---- Community Manager: Analytics ----
+@main.route('/contractor/analytics')
+@contractor_required(role='community_manager')
+def contractor_analytics(contractor):
+    total_users = User.query.count()
+    active_ads = Posting.query.filter_by(is_active=True).count()
+    total_ads = Posting.query.count()
+    return render_template('contractor/analytics.html', total_users=total_users, active_ads=active_ads, total_ads=total_ads)
+
+# ---- Sales Rep: Email Automation ----
+@main.route('/contractor/email-automation', methods=['GET', 'POST'])
+@contractor_required(role='sales_rep')
+def contractor_email_automation(contractor):
+    leads = Lead.query.filter_by(contractor_id=contractor.id).all()
+    if request.method == 'POST':
+        subject = request.form.get('subject')
+        body = request.form.get('body')
+        recipient_ids = request.form.getlist('recipients')
+        for lead_id in recipient_ids:
+            lead = Lead.query.get(int(lead_id))
+            if lead and lead.email:
+                try:
+                    msg = Message(subject, recipients=[lead.email], body=body)
+                    mail.send(msg)
+                except Exception as e:
+                    print(f"Email error: {e}")
+        flash('Emails sent.', 'success')
+        return redirect(url_for('main.contractor_email_automation'))
+    return render_template('contractor/email_automation.html', leads=leads)
+
+# ---- Sales Rep: Support Inbox (Live Chat replacement) ----
+@main.route('/contractor/support-inbox')
+@contractor_required(role='sales_rep')
+def contractor_support_inbox(contractor):
+    inquiries = ContactInquiry.query.order_by(ContactInquiry.created_at.desc()).all()
+    return render_template('contractor/support_inbox.html', inquiries=inquiries)

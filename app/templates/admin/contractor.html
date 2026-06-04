@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}{{ contractor.name }} - Contractor Details{% endblock %}
+{% block content %}
+<div class="bg-purple-50 border border-purple-200 rounded-lg p-6 mb-6">
+    <h2 class="text-2xl font-bold mb-2">{{ contractor.name }}</h2>
+    <p class="text-gray-700">{{ contractor.role.replace('_', ' ').title() }} – {{ contractor.email }}</p>
+</div>
+
+<!-- Milestones -->
+<h3 class="text-xl font-bold mb-4">Milestones</h3>
+<div class="bg-white rounded-lg shadow overflow-x-auto mb-6">
+    <table class="w-full min-w-[400px]">
+        <thead class="bg-gray-100 border-b">
+            <tr>
+                <th class="px-4 py-3 text-left text-sm">Name</th>
+                <th class="px-4 py-3 text-left text-sm">Amount</th>
+                <th class="px-4 py-3 text-left text-sm">Status</th>
+                <th class="px-4 py-3 text-left text-sm">Achieved</th>
+                <th class="px-4 py-3 text-left text-sm">Paid</th>
+                <th class="px-4 py-3 text-left text-sm">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in milestones %}
+            <tr class="border-b hover:bg-gray-50">
+                <td class="px-4 py-3 text-sm">{{ m.name }}</td>
+                <td class="px-4 py-3 text-sm">SZL {{ "%.2f"|format(m.amount) }}</td>
+                <td class="px-4 py-3 text-sm">{{ m.status }}</td>
+                <td class="px-4 py-3 text-sm">{{ m.achieved_at.strftime('%d %b %Y') if m.achieved_at else '—' }}</td>
+                <td class="px-4 py-3 text-sm">{{ m.paid_at.strftime('%d %b %Y') if m.paid_at else '—' }}</td>
+                <td class="px-4 py-3 text-sm">
+                    {% if m.status == 'pending' %}
+                    <form method="POST" action="{{ url_for('main.update_milestone', milestone_id=m.id) }}">
+                        <button name="status" value="achieved"
+                            class="bg-green-600 text-white px-2 py-1 rounded text-xs">Mark Achieved</button>
+                    </form>
+                    {% elif m.status == 'achieved' %}
+                    <form method="POST" action="{{ url_for('main.update_milestone', milestone_id=m.id) }}">
+                        <button name="status" value="paid" class="bg-blue-600 text-white px-2 py-1 rounded text-xs">Mark
+                            Paid</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Commissions -->
+<h3 class="text-xl font-bold mb-4">Commissions</h3>
+<div class="bg-white rounded-lg shadow overflow-x-auto mb-6">
+    <table class="w-full min-w-[400px]">
+        <thead class="bg-gray-100 border-b">
+            <tr>
+                <th class="px-4 py-3 text-left text-sm">Description</th>
+                <th class="px-4 py-3 text-left text-sm">Amount</th>
+                <th class="px-4 py-3 text-left text-sm">Rate</th>
+                <th class="px-4 py-3 text-left text-sm">Status</th>
+                <th class="px-4 py-3 text-left text-sm">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in commissions %}
+            <tr class="border-b hover:bg-gray-50">
+                <td class="px-4 py-3 text-sm">{{ c.description }}</td>
+                <td class="px-4 py-3 text-sm">SZL {{ "%.2f"|format(c.amount) }}</td>
+                <td class="px-4 py-3 text-sm">{{ c.rate }}</td>
+                <td class="px-4 py-3 text-sm">{{ c.status }}</td>
+                <td class="px-4 py-3 text-sm">
+                    {% if c.status == 'pending' %}
+                    <form method="POST" action="{{ url_for('main.mark_commission_paid', commission_id=c.id) }}">
+                        <button class="bg-green-600 text-white px-2 py-1 rounded text-xs">Mark Paid</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Weekly Reports -->
+<h3 class="text-xl font-bold mb-4">Weekly Reports</h3>
+<div class="bg-white rounded-lg shadow overflow-x-auto">
+    <table class="w-full min-w-[400px]">
+        <thead class="bg-gray-100 border-b">
+            <tr>
+                <th class="px-4 py-3 text-left text-sm">Week Ending</th>
+                <th class="px-4 py-3 text-left text-sm">Summary</th>
+                <th class="px-4 py-3 text-left text-sm">Metrics</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in reports %}
+            <tr class="border-b hover:bg-gray-50">
+                <td class="px-4 py-3 text-sm">{{ r.week_ending.strftime('%d %b %Y') }}</td>
+                <td class="px-4 py-3 text-sm">{{ r.summary[:100] }}...</td>
+                <td class="px-4 py-3 text-sm">
+                    {% if contractor.role == 'community_manager' %}
+                    Contacts: {{ r.new_business_contacts }}, Ads: {{ r.ads_posted }}
+                    {% else %}
+                    Clients: {{ r.new_clients_contacted }}, Sales: {{ r.sales_made }}, Revenue: SZL {{
+                    "%.2f"|format(r.revenue_generated) }}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<a href="{{ url_for('main.team_dashboard') }}" class="mt-4 inline-block text-purple-600 hover:underline">← Back to Team
+    Dashboard</a>
+{% endblock %}

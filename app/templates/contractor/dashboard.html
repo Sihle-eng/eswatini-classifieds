@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}Contractor Dashboard - Eswatini Classifieds{% endblock %}
+
+{% block content %}
+<div class="bg-purple-50 border border-purple-200 rounded-lg p-6 mb-6">
+    <h2 class="text-2xl font-bold mb-2">
+        <i class="fas fa-user-tie mr-2"></i> Welcome, {{ contractor.name }}
+    </h2>
+    <p class="text-gray-700">
+        Role: <strong>{{ contractor.role.replace('_', ' ').title() }}</strong> |
+        Email: {{ contractor.email }}
+    </p>
+</div>
+
+<!-- Milestones & Commissions (both roles) -->
+<div class="grid md:grid-cols-2 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-xl font-bold mb-4"><i class="fas fa-flag-checkered mr-2"></i>My Milestones</h3>
+        {% if milestones %}
+        <div class="space-y-3">
+            {% for m in milestones %}
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div>
+                    <p class="font-semibold">{{ m.name }}</p>
+                    <p class="text-sm text-gray-500">{{ m.description or 'No description' }}</p>
+                </div>
+                <div class="text-right">
+                    <p class="font-bold text-lg">SZL {{ "%.2f"|format(m.amount) }}</p>
+                    <span class="text-xs px-2 py-1 rounded-full 
+                        {% if m.status == 'pending' %}bg-yellow-100 text-yellow-800
+                        {% elif m.status == 'achieved' %}bg-green-100 text-green-800
+                        {% else %}bg-blue-100 text-blue-800{% endif %}">
+                        {{ m.status|title }}
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-500">No milestones assigned yet.</p>
+        {% endif %}
+    </div>
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-xl font-bold mb-4"><i class="fas fa-percent mr-2"></i>My Commissions</h3>
+        {% if commissions %}
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[300px]">
+                <thead class="bg-gray-100 border-b">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-sm">Description</th>
+                        <th class="px-4 py-2 text-left text-sm">Amount</th>
+                        <th class="px-4 py-2 text-left text-sm">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in commissions %}
+                    <tr class="border-b">
+                        <td class="px-4 py-2 text-sm">{{ c.description }}</td>
+                        <td class="px-4 py-2 text-sm font-semibold">SZL {{ "%.2f"|format(c.amount) }}</td>
+                        <td class="px-4 py-2 text-sm">
+                            {% if c.status == 'paid' %}
+                            <span class="text-green-600">Paid</span>
+                            {% else %}
+                            <span class="text-yellow-600">Pending</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-gray-500">No commissions earned yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- COMMUNITY MANAGER TOOLS -->
+<!-- ============================================ -->
+{% if contractor.role == 'community_manager' %}
+<h2 class="text-xl font-bold mb-4"><i class="fas fa-users mr-2"></i>Community Management Tools</h2>
+<div class="grid md:grid-cols-3 gap-4 mb-8">
+    <a href=" {{ url_for('main.contractor_member_directory') }}" class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+        <i class="fas fa-address-book text-3xl text-blue-500 mb-2"></i>
+        <h4 class="font-semibold">Member Directory</h4>
+        <p class="text-sm text-gray-600">Searchable list of members with profiles.</p>
+    </a>
+    <a href="{{ url_for('main.contractor_forum') }}" class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+        <i class="fas fa-comments text-3xl text-blue-500 mb-2"></i>
+        <h4 class="font-semibold">Discussion Forum</h4>
+        <p class="text-sm text-gray-600">Threads, Q&A, and announcements.</p>
+    </a>
+    <a href="{{ url_for('main.team_calendar') }}" class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+        <i class="fas fa-calendar-alt text-3xl text-blue-500 mb-2"></i>
+        <h4 class="font-semibold">Event Calendar</h4>
+        <p class="text-sm text-gray-600">View scheduled webinars and meetups.</p>
+    </a>
+    <a href="{{ url_for('main.contractor_content_hub') }}" class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+        <i class="fas fa-blog text-3xl text-blue-500 mb-2"></i>
+        <h4 class="font-semibold">Content Hub</h4>
+        <p class="text-sm text-gray-600">Blog posts, guides, and resources.</p>
+    </a>
+    <a href="{{ url_for('main.contractor_feedback') }}" class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+        <i class="fas fa-poll text-3xl text-blue-500 mb-2"></i>
+        <h4 class="font-semibold">Feedback Forms</h4>
+        <p class="text-sm text-gray-600">Surveys and polls for members.</p>
+    </a>
+    <a href="{{ url_for('main.contractor_analytics') }}" class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+        <i class="fas fa-chart-line text-3xl text-blue-500 mb-2"></i>
+        <h4 class="font-semibold">Analytics</h4>
+        <p class="text-sm text-gray-600">Engagement metrics and retention.</p>
+    </a>
+</div>
+{% endif %}
+
+<!-- ============================================ -->
+<!-- SALES REP TOOLS -->
+<!-- ============================================ -->
+{% if contractor.role == 'sales_rep' %}
+<h2 class="text-xl font-bold mb-4"><i class="fas fa-chart-pie mr-2"></i>Sales Tools</h2>
+<div class="grid md:grid-cols-3 gap-4 mb-8">
+    <a href="{{ url_for('main.contractor_crm') }}" class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+        <i class="fas fa-address-card text-3xl text-orange-500 mb-2"></i>
+        <h4 class="font-semibold">CRM</h4>
+        <p class="text-sm text-gray-600">Lead tracking and customer profiles.</p>
+    </a>
+    <a href="{{ url_for('main.contractor_lead_capture') }}" class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+        <i class="fas fa-file-signature text-3xl text-orange-500 mb-2"></i>
+        <h4 class="font-semibold">Lead Capture</h4>
+        <p class="text-sm text-gray-600">Forms to collect prospect info.</p>
+    </a>
+    <a href="{{ url_for('main.contractor_email_automation') }}" class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+        <i class="fas fa-envelope-open-text text-3xl text-orange-500 mb-2"></i>
+        <h4 class="font-semibold">Email Automation</h4>
+        <p class="text-sm text-gray-600">Triggered campaigns and follow‑ups.</p>
+    </a>
+    <a href="{{ url_for('main.contractor_product_catalog') }}" class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+        <i class="fas fa-boxes text-3xl text-orange-500 mb-2"></i>
+        <h4 class="font-semibold">Product Catalog</h4>
+        <p class="text-sm text-gray-600">Offerings with pricing and details.</p>
+    </a>
+    <a href="{{ url_for('main.contractor_sales_analytics') }}" class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+        <i class="fas fa-chart-bar text-3xl text-orange-500 mb-2"></i>
+        <h4 class="font-semibold">Sales Analytics</h4>
+        <p class="text-sm text-gray-600">Conversion rates and pipeline.</p>
+    </a>
+    <a href="{{ url_for('main.contractor_support_inbox') }}" class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+        <i class="fas fa-comment-dots text-3xl text-orange-500 mb-2"></i>
+        <h4 class="font-semibold">Live Chat</h4>
+        <p class="text-sm text-gray-600">Instant support for prospects.</p>
+    </a>
+</div>
+{% endif %}
+
+<!-- Weekly Report Form -->
+<div class="bg-white rounded-lg shadow p-6 mb-6">
+    <h3 class="text-xl font-bold mb-4"><i class="fas fa-file-alt mr-2"></i>Submit Weekly Report</h3>
+    <form method="POST" action="{{ url_for('main.submit_report') }}">
+        <div class="mb-3">
+            <label class="block text-gray-700 text-sm mb-1">Week Ending (Sunday)</label>
+            <input type="date" name="week_ending" required class="w-full px-3 py-2 border rounded-lg">
+        </div>
+        <div class="mb-3">
+            <label class="block text-gray-700 text-sm mb-1">Summary of Activities</label>
+            <textarea name="summary" rows="3" required class="w-full px-3 py-2 border rounded-lg"></textarea>
+        </div>
+        {% if contractor.role == 'community_manager' %}
+        <div class="grid grid-cols-2 gap-3 mb-3">
+            <div>
+                <label class="block text-gray-700 text-sm mb-1">New Business Contacts</label>
+                <input type="number" name="new_business_contacts" value="0" class="w-full px-3 py-2 border rounded-lg">
+            </div>
+            <div>
+                <label class="block text-gray-700 text-sm mb-1">Ads Posted</label>
+                <input type="number" name="ads_posted" value="0" class="w-full px-3 py-2 border rounded-lg">
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="block text-gray-700 text-sm mb-1">Engagement Notes</label>
+            <textarea name="engagement_notes" rows="2" class="w-full px-3 py-2 border rounded-lg"></textarea>
+        </div>
+        {% else %}
+        <div class="grid grid-cols-2 gap-3 mb-3">
+            <div>
+                <label class="block text-gray-700 text-sm mb-1">New Clients Contacted</label>
+                <input type="number" name="new_clients_contacted" value="0" class="w-full px-3 py-2 border rounded-lg">
+            </div>
+            <div>
+                <label class="block text-gray-700 text-sm mb-1">Sales Made</label>
+                <input type="number" name="sales_made" value="0" class="w-full px-3 py-2 border rounded-lg">
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="block text-gray-700 text-sm mb-1">Revenue Generated (SZL)</label>
+            <input type="number" step="0.01" name="revenue_generated" value="0.00"
+                class="w-full px-3 py-2 border rounded-lg">
+        </div>
+        <div class="mb-3">
+            <label class="block text-gray-700 text-sm mb-1">Pipeline Notes</label>
+            <textarea name="pipeline_notes" rows="2" class="w-full px-3 py-2 border rounded-lg"></textarea>
+        </div>
+        {% endif %}
+        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Submit
+            Report</button>
+    </form>
+</div>
+
+<!-- Recent Reports -->
+<div class="bg-white rounded-lg shadow p-6">
+    <h3 class="text-xl font-bold mb-4"><i class="fas fa-history mr-2"></i>Recent Reports</h3>
+    {% if reports %}
+    <div class="space-y-3">
+        {% for r in reports[:5] %}
+        <div class="p-3 bg-gray-50 rounded-lg">
+            <p class="text-sm text-gray-500">Week ending {{ r.week_ending.strftime('%d %b %Y') }}</p>
+            <p class="text-sm">{{ r.summary[:100] }}...</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-gray-500">No reports submitted yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

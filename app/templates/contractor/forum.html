@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Discussion Forum{% endblock %}
+{% block content %}
+<h2 class="text-2xl font-bold mb-4"><i class="fas fa-comments mr-2"></i>Discussion Forum</h2>
+<div class="mb-6 bg-white rounded-lg shadow p-6">
+    <form method="POST">
+        <input type="text" name="title" class="w-full px-3 py-2 border rounded-lg mb-3" placeholder="Thread title"
+            required>
+        <textarea name="content" rows="4" class="w-full px-3 py-2 border rounded-lg mb-3"
+            placeholder="Start a discussion..." required></textarea>
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Post Thread</button>
+    </form>
+</div>
+{% for thread in threads %}
+<div class="bg-white rounded-lg shadow p-4 mb-3">
+    <a href="{{ url_for('main.contractor_forum_thread', thread_id=thread.id) }}" class="text-lg font-semibold">{{
+        thread.title }}</a>
+    <p class="text-sm text-gray-500">{{ thread.created_at.strftime('%d %b %Y') }} by {{ thread.author.email }}</p>
+    <p class="text-gray-700 mt-2">{{ thread.content[:150] }}...</p>
+</div>
+{% endfor %}
+{% endblock %}

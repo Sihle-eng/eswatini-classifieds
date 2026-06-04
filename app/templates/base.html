@@ -521,12 +521,27 @@
                         <a href="{{ url_for('main.home') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
                             <i class="fas fa-eye mr-1"></i> View Site
                         </a>
+                        <a href="{{ url_for('main.team_dashboard') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
+                            <i class="fas fa-users mr-1"></i> Team
+                        </a>
                         <a href="{{ url_for('main.admin_bulk_email') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
                             <i class="fas fa-mail-bulk mr-1"></i> Bulk Email
                         </a>
                          <a href="{{ url_for('main.admin_deletions') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
                             <i class="fas fa-trash-alt mr-1"></i> Deletions
                         </a>
+
+                    <!-- ============================================ -->
+                    <!-- CONTRACTOR NAVIGATION -->
+                    <!-- ============================================ -->
+                    {% elif current_user.email in ['vkhetsa@gmail.com', 'lwandiswazikalala@gmail.com'] %}
+                    <a href="{{ url_for('main.contractor_dashboard') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
+                        <i class="fas fa-user-tie mr-1"></i> My Dashboard
+                    </a>
+                    <a href="{{ url_for('main.team_calendar') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
+                        <i class="fas fa-calendar-alt mr-1"></i> Calendar
+                    </a>
+                    
                     <!-- ============================================ -->
                     <!-- BUSINESS NAVIGATION -->
                     <!-- ============================================ -->
@@ -580,8 +595,10 @@
                                 <p class="text-xs text-gray-500">Signed in as</p>
                                 <p class="text-sm font-medium truncate">{{ current_user.email }}</p>
                                 <span class="inline-block mt-1 px-2 py-0.5 text-xs rounded-full 
-                                    {% if current_user.email in ['admin@example.com', 'techcharities@example.com', 'eswatiniclassifieds@gmail.com'] %}
+                                    {% if current_user.email in ['eswatiniclassifieds@gmail.com'] %}
                                         bg-yellow-100 text-yellow-800">Admin
+                                    {% elif current_user.email in ['vkhetsa@gmail.com', 'lwandiswazikalala@gmail.com'] %}
+                                        bg-purple-100 text-purple-800">Contractor
                                     {% elif current_user.user_type == 'business' %}
                                         bg-blue-100 text-blue-800">Business
                                     {% else %}
@@ -683,6 +700,9 @@
             <a href="{{ url_for('main.home') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
                 <i class="fas fa-eye w-6 text-gray-600"></i> View Site
             </a>
+            <a href="{{ url_for('main.team_dashboard') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-users w-6 text-purple-600"></i> Team
+            </a>
             <a href="{{ url_for('main.admin_bulk_email') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
                 <i class="fas fa-mail-bulk w-6 text-purple-600"></i> Bulk Email
             </a>
@@ -695,6 +715,31 @@
             <a href="{{ url_for('main.admin_deletions') }}" class="flex items-center gap-3 p-3 rounded-lg text-red-600 hover:bg-red-50">
                 <i class="fas fa-trash-alt w-6"></i> Deletions
             </a>
+        <!-- ============================================ -->
+        <!-- CONTRACTOR MOBILE MENU -->
+        <!-- ============================================ -->
+        {% elif current_user.is_authenticated and current_user.email in ['vkhetsa@gmail.com', 'lwandiswazikalala@gmail.com'] %}
+        <div class="bg-purple-100 rounded-xl p-4 mb-4">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-user-tie text-3xl text-purple-600"></i>
+                <div>
+                    <p class="font-medium">{{ current_user.email.split('@')[0] }}</p>
+                    <p class="text-xs text-purple-700">Contractor</p>
+                </div>
+            </div>
+        </div>
+        <a href="{{ url_for('main.contractor_dashboard') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-purple-50">
+            <i class="fas fa-tachometer-alt w-6 text-purple-600"></i> My Dashboard
+        </a>
+        <a href="{{ url_for('main.submit_report') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
+            <i class="fas fa-file-alt w-6 text-blue-600"></i> Submit Report
+        </a>
+        <a href="{{ url_for('main.team_calendar') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
+            <i class="fas fa-calendar-alt w-6 text-blue-600"></i> Calendar
+        </a>
+        <a href="{{ url_for('main.logout') }}" class="flex items-center gap-3 p-3 rounded-lg text-red-600 hover:bg-red-50">
+            <i class="fas fa-sign-out-alt w-6"></i> Sign Out
+        </a>
         
         <!-- ============================================ -->
         <!-- REGULAR USER MOBILE MENU -->
