@@ -1,75 +1,199 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Eswatini Classifieds{% endblock %}</title>
-    
+
     <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="180x180" href="{{ url_for('static', filename='images/Eswatini Classifieds.png') }}">  
-     
+    <link rel="icon" type="image/png" sizes="180x180"
+        href="{{ url_for('static', filename='images/Eswatini Classifieds.png') }}">
+
     <!-- ============================================ -->
     <!-- SEO META TAGS -->
     <!-- ============================================ -->
-    <meta name="description" content="Eswatini Classifieds - Find jobs, cars, property, and services across Eswatini. Buy, sell, and connect locally.">
+    <meta name="description"
+        content="Eswatini Classifieds - Find jobs, cars, property, and services across Eswatini. Buy, sell, and connect locally.">
     <meta name="keywords" content="Eswatini, classifieds, jobs, cars, property, Mbabane, Manzini, Swaziland, buy, sell">
     <meta name="author" content="Eswatini Classifieds">
     <meta name="robots" content="index, follow">
-    
+
     <!-- ============================================ -->
     <!-- SOCIAL MEDIA META TAGS (Open Graph) -->
     <!-- ============================================ -->
     <meta property="og:title" content="Eswatini Classifieds - Find Everything in Eswatini">
-    <meta property="og:description" content="Find jobs, cars, property, and services across Eswatini. Buy, sell, and connect locally.">
+    <meta property="og:description"
+        content="Find jobs, cars, property, and services across Eswatini. Buy, sell, and connect locally.">
     <meta property="og:image" content="{{ url_for('static', filename='images/logo.png', _external=True) }}">
     <meta property="og:url" content="{{ request.url }}">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Eswatini Classifieds">
     <meta property="og:locale" content="en_SZ">
-    
+
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Eswatini Classifieds - Find Everything in Eswatini">
     <meta name="twitter:description" content="Find jobs, cars, property, and services across Eswatini.">
     <meta name="twitter:image" content="{{ url_for('static', filename='images/logo.png', _external=True) }}">
-        
+
     <!-- Google Fonts - Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
+    <!-- AOS (Animate On Scroll) Library - for pop-up scroll animations -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
     <!-- Custom Premium CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    
+
     <style>
         /* ============================================ */
-        /* PREMIUM NAVIGATION STYLES */
+        /* PREMIUM NAVIGATION STYLES (Keep existing) */
         /* ============================================ */
-        
+
         :root {
             --primary-blue: #3A75C4;
             --primary-yellow: #FFD100;
             --dark-bg: #0f172a;
         }
-        
+
         body {
             font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
         }
-        
+
+        /* ============================================ */
+        /* NEW: POP-UP / ALLURING ANIMATIONS */
+        /* ============================================ */
+
+        /* Base reveal class - hidden initially, then animated */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+            transition: all 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        .scroll-reveal.revealed {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* Stagger children inside a container */
+        .stagger-children>* {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .stagger-children.revealed>*:nth-child(1) {
+            transition-delay: 0.05s;
+        }
+
+        .stagger-children.revealed>*:nth-child(2) {
+            transition-delay: 0.1s;
+        }
+
+        .stagger-children.revealed>*:nth-child(3) {
+            transition-delay: 0.15s;
+        }
+
+        .stagger-children.revealed>*:nth-child(4) {
+            transition-delay: 0.2s;
+        }
+
+        .stagger-children.revealed>*:nth-child(5) {
+            transition-delay: 0.25s;
+        }
+
+        .stagger-children.revealed>*:nth-child(6) {
+            transition-delay: 0.3s;
+        }
+
+        .stagger-children.revealed>* {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Hover "pop" effect for cards and buttons */
+        .hover-pop {
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        .hover-pop:hover {
+            transform: scale(1.03) translateY(-5px);
+            box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Glow effect on focus / hover */
+        .glow-on-hover:hover {
+            box-shadow: 0 0 15px var(--primary-yellow), 0 0 25px var(--primary-blue);
+            transition: box-shadow 0.3s ease;
+        }
+
+        /* Floating background animation (subtle) */
+        @keyframes floatBG {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .animated-gradient-bg {
+            background: linear-gradient(135deg, #f8fafc, #ffffff, #f1f5f9);
+            background-size: 200% 200%;
+            animation: floatBG 10s ease infinite;
+        }
+
+        /* Pulse animation for badges */
+        @keyframes softPulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+        }
+
+        .pulse-badge {
+            animation: softPulse 2s infinite;
+        }
+
+        /* ============================================ */
+        /* PREMIUM NAVIGATION STYLES (unchanged below) */
+        /* ============================================ */
+
         .premium-nav {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             position: sticky;
             top: 0;
             z-index: 1000;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
-        
+
         .nav-link {
             position: relative;
             color: #e2e8f0;
@@ -78,7 +202,7 @@
             padding: 0.5rem 0;
             text-decoration: none;
         }
-        
+
         .nav-link::after {
             content: '';
             position: absolute;
@@ -91,39 +215,39 @@
             transition: width 0.3s ease;
             border-radius: 2px;
         }
-        
+
         .nav-link:hover {
             color: white;
         }
-        
+
         .nav-link:hover::after {
             width: 100%;
         }
-        
+
         .user-menu-trigger {
             display: flex;
             align-items: center;
             gap: 0.5rem;
             padding: 0.5rem 1rem;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s ease;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         .user-menu-trigger:hover {
-            background: rgba(255,255,255,0.15);
-            border-color: rgba(255,209,0,0.5);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 209, 0, 0.5);
         }
-        
+
         .dropdown-menu {
             position: absolute;
             top: 100%;
             right: 0;
             background: white;
             border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
             min-width: 220px;
             opacity: 0;
             visibility: hidden;
@@ -132,13 +256,13 @@
             overflow: hidden;
             border: 1px solid #e2e8f0;
         }
-        
+
         .dropdown-menu.active {
             opacity: 1;
             visibility: visible;
             transform: translateY(0);
         }
-        
+
         .dropdown-item {
             display: flex;
             align-items: center;
@@ -149,17 +273,17 @@
             transition: all 0.2s ease;
             border-bottom: 1px solid #f1f5f9;
         }
-        
+
         .dropdown-item:hover {
             background: linear-gradient(90deg, #f8fafc, white);
             color: #3A75C4;
             padding-left: 1.5rem;
         }
-        
+
         .dropdown-item:last-child {
             border-bottom: none;
         }
-        
+
         /* Post Ad Button */
         .btn-post-ad {
             background: linear-gradient(135deg, #FFD100, #FFA500);
@@ -174,17 +298,17 @@
             display: inline-flex;
             align-items: center;
         }
-        
+
         .btn-post-ad:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(255, 209, 0, 0.4);
             background: linear-gradient(135deg, #FFE44D, #FFB833);
         }
-        
+
         .btn-post-ad::after {
             display: none !important;
         }
-        
+
         /* Mobile Menu */
         .mobile-menu {
             position: fixed;
@@ -194,36 +318,36 @@
             max-width: 85%;
             height: 100vh;
             background: white;
-            box-shadow: -10px 0 30px rgba(0,0,0,0.15);
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.15);
             transition: right 0.3s ease;
             z-index: 1001;
             padding: 1.5rem;
             overflow-y: auto;
         }
-        
+
         .mobile-menu.active {
             right: 0;
         }
-        
+
         .mobile-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(4px);
             opacity: 0;
             visibility: hidden;
             transition: all 0.3s ease;
             z-index: 1000;
         }
-        
+
         .mobile-overlay.active {
             opacity: 1;
             visibility: visible;
         }
-        
+
         .hamburger {
             display: none;
             flex-direction: column;
@@ -233,7 +357,7 @@
             background: transparent;
             border: none;
         }
-        
+
         .hamburger span {
             width: 25px;
             height: 3px;
@@ -241,19 +365,19 @@
             border-radius: 3px;
             transition: all 0.3s ease;
         }
-        
+
         .hamburger.active span:nth-child(1) {
             transform: rotate(45deg) translate(5px, 6px);
         }
-        
+
         .hamburger.active span:nth-child(2) {
             opacity: 0;
         }
-        
+
         .hamburger.active span:nth-child(3) {
             transform: rotate(-45deg) translate(5px, -6px);
         }
-        
+
         /* Search Section */
         .search-section {
             background: white;
@@ -262,27 +386,27 @@
             position: sticky;
             top: 72px;
             z-index: 90;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
-        
+
         .search-container {
             max-width: 1280px;
             margin: 0 auto;
             padding: 0 1.5rem;
         }
-        
+
         .search-form {
             display: flex;
             gap: 0.75rem;
             flex-wrap: wrap;
         }
-        
+
         .search-input-wrapper {
             flex: 1;
             min-width: 200px;
             position: relative;
         }
-        
+
         .search-icon {
             position: absolute;
             left: 1rem;
@@ -290,7 +414,7 @@
             transform: translateY(-50%);
             color: #64748b;
         }
-        
+
         .search-input {
             width: 100%;
             padding: 0.875rem 1rem 0.875rem 2.75rem;
@@ -299,13 +423,13 @@
             font-size: 1rem;
             transition: all 0.3s ease;
         }
-        
+
         .search-input:focus {
             outline: none;
             border-color: #3A75C4;
             box-shadow: 0 0 0 4px rgba(58, 117, 196, 0.1);
         }
-        
+
         .search-select {
             padding: 0.875rem 2rem 0.875rem 1rem;
             border: 2px solid #e2e8f0;
@@ -314,7 +438,7 @@
             background: white;
             cursor: pointer;
         }
-        
+
         .search-btn {
             padding: 0.875rem 2rem;
             background: #3A75C4;
@@ -325,11 +449,11 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        
+
         .search-btn:hover {
             background: #2a5a9e;
         }
-        
+
         /* Premium Footer */
         .premium-footer {
             background: #0f172a;
@@ -337,7 +461,7 @@
             padding: 3rem 0 0;
             margin-top: 4rem;
         }
-        
+
         .footer-container {
             max-width: 1280px;
             margin: 0 auto;
@@ -345,44 +469,45 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 3rem;
-        }       
+        }
+
         /* Footer Social Icons */
         .footer-social {
             display: flex;
             gap: 0.75rem;
         }
-        
+
         /* Center social icons on mobile */
         @media (max-width: 768px) {
             .footer-social {
                 justify-content: center;
             }
         }
-        
+
         .footer-section h4 {
             color: white;
             margin-bottom: 1.25rem;
         }
-        
+
         .footer-links {
             list-style: none;
             padding: 0;
         }
-        
+
         .footer-links li {
             margin-bottom: 0.625rem;
         }
-        
+
         .footer-links a {
             color: #9ca3af;
             text-decoration: none;
             transition: color 0.2s;
         }
-        
+
         .footer-links a:hover {
             color: #FFD100;
         }
-        
+
         .footer-bottom {
             text-align: center;
             padding: 1.5rem;
@@ -390,7 +515,7 @@
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             color: #6b7280;
         }
-        
+
         /* Flash Messages */
         .flash-message {
             display: flex;
@@ -400,25 +525,25 @@
             margin-bottom: 0.75rem;
             animation: slideDown 0.3s ease;
         }
-        
+
         .flash-message.success {
             background: #d1fae5;
             color: #065f46;
             border-left: 4px solid #10b981;
         }
-        
+
         .flash-message.error {
             background: #fee2e2;
             color: #991b1b;
             border-left: 4px solid #ef4444;
         }
-        
+
         .flash-message.info {
             background: #dbeafe;
             color: #1e40af;
             border-left: 4px solid #3A75C4;
         }
-        
+
         .flash-message button {
             background: none;
             border: none;
@@ -427,50 +552,113 @@
             opacity: 0.5;
             margin-left: auto;
         }
-        
+
         @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        
+
         @keyframes slideIn {
-            from { opacity: 0; transform: translateX(100%); }
-            to { opacity: 1; transform: translateX(0); }
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
-        
+
         /* Responsive */
         @media (max-width: 768px) {
             .desktop-nav {
                 display: none !important;
             }
-            
+
             .hamburger {
                 display: flex !important;
             }
-            
-            .premium-nav .container > div {
+
+            .premium-nav .container>div {
                 height: 60px;
             }
-            
+
             .search-section {
                 top: 60px;
             }
-            
+
             .search-form {
                 flex-direction: column;
             }
-            
+
             .search-select,
             .search-btn {
                 width: 100%;
             }
-            
+
             .footer-container {
                 grid-template-columns: 1fr;
                 text-align: center;
             }
         }
-        
+        /* Tablet navigation fix (769px - 1024px) */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            /* Reduce horizontal gap between nav items */
+            .desktop-nav {
+                gap: 0.5rem !important;
+            }
+            
+            /* Make nav links more compact */
+            .nav-link {
+                padding: 0.5rem 0.7rem !important;
+                font-size: 0.85rem !important;
+            }
+            
+            /* Optional: hide the text label on icons, show only icons to save space */
+            .nav-link span {
+                display: none;
+            }
+            
+            .nav-link i {
+                margin-right: 0;
+                font-size: 1.1rem;
+            }
+            
+            /* Keep the "Post Ad" button and user menu visible */
+            .btn-post-ad {
+                padding: 0.5rem 1rem !important;
+                font-size: 0.85rem;
+            }
+            
+            .btn-post-ad span {
+                display: inline !important; /* ensure text reappears if we hid spans globally */
+            }
+            
+            .user-menu-trigger {
+                padding: 0.4rem 0.8rem;
+            }
+            
+            .user-menu-trigger span {
+                display: inline-block !important;
+                max-width: 80px;
+            }
+            
+            /* If you still have overflow, allow horizontal scroll only for nav */
+            .desktop-nav {
+                overflow-x: auto;
+                overflow-y: hidden;
+                scrollbar-width: thin;
+                padding-bottom: 5px;
+            }
+        }
         @media (min-width: 769px) {
             .hamburger {
                 display: none !important;
@@ -478,114 +666,130 @@
         }
     </style>
 </head>
-<body class="bg-gray-50">
 
-<!-- ============================================ -->
-<!-- PREMIUM NAVIGATION -->
-<!-- ============================================ -->
-<nav class="premium-nav">
-    <div class="container mx-auto px-4">
-        <div class="flex items-center justify-between h-16 md:h-20">
-            
-            <!-- Logo -->
-            <a href="{{ url_for('main.home') }}" class="flex items-center gap-3 group">
-                <img src="{{ url_for('static', filename='images/Eswatini Classifieds.png') }}" 
-                     alt="Eswatini Classifieds" 
-                     class="h-12 md:h-16 w-auto rounded-lg group-hover:scale-105 transition-transform duration-300"
-                     onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';">
-                <span class="text-3xl" style="display:none;">🇸🇿</span>
-                <div>
-                    <div class="text-white font-bold text-lg leading-tight">Eswatini</div>
-                    <div class="text-yellow-400 font-semibold text-sm tracking-wide">CLASSIFIEDS</div>
-                </div>
-            </a>
-            
-            <!-- Desktop Navigation --> 
-            <div class="desktop-nav flex items-center gap-6">
-                
-                {% if current_user.is_authenticated %}
-                    
+<body class="bg-gray-50 animated-gradient-bg">
+
+    <!-- ============================================ -->
+    <!-- PREMIUM NAVIGATION (unchanged) -->
+    <!-- ============================================ -->
+    <nav class="premium-nav">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16 md:h-20">
+
+                <!-- Logo -->
+                <a href="{{ url_for('main.home') }}" class="flex items-center gap-3 group">
+                    <img src="{{ url_for('static', filename='images/Eswatini Classifieds.png') }}"
+                        alt="Eswatini Classifieds"
+                        class="h-12 md:h-16 w-auto rounded-lg group-hover:scale-105 transition-transform duration-300"
+                        onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span class="text-3xl" style="display:none;">🇸🇿</span>
+                    <div>
+                        <div class="text-white font-bold text-lg leading-tight">Eswatini</div>
+                        <div class="text-yellow-400 font-semibold text-sm tracking-wide">CLASSIFIEDS</div>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation -->
+                <div class="desktop-nav flex items-center gap-6">
+
+                    {% if current_user.is_authenticated %}
+
                     <!-- ============================================ -->
                     <!-- ADMIN NAVIGATION -->
                     <!-- ============================================ -->
-                    {% if current_user.email in ['admin@example.com', 'techcharities@example.com', 'eswatiniclassifieds@gmail.com'] %}
-                        <a href="{{ url_for('main.admin_dashboard') }}" class="nav-link text-yellow-400 px-3 py-2 text-sm font-medium">
-                            <i class="fas fa-tachometer-alt mr-1"></i> Dashboard
-                        </a>
-                        <a href="{{ url_for('main.admin_users') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
-                            <i class="fas fa-users mr-1"></i> Users
-                        </a>
-                        <a href="{{ url_for('main.admin_reports') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
-                            <i class="fas fa-flag mr-1"></i> Reports
-                        </a>
-                        <a href="{{ url_for('main.home') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
-                            <i class="fas fa-eye mr-1"></i> View Site
-                        </a>
-                        <a href="{{ url_for('main.team_dashboard') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
-                            <i class="fas fa-users mr-1"></i> Team
-                        </a>
-                        <a href="{{ url_for('main.admin_bulk_email') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
-                            <i class="fas fa-mail-bulk mr-1"></i> Bulk Email
-                        </a>
-                         <a href="{{ url_for('main.admin_deletions') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
-                            <i class="fas fa-trash-alt mr-1"></i> Deletions
-                        </a>
+                    {% if current_user.email in ['admin@example.com', 'techcharities@example.com',
+                    'eswatiniclassifieds@gmail.com'] %}
+                    <a href="{{ url_for('main.admin_dashboard') }}"
+                        class="nav-link text-yellow-400 px-3 py-2 text-sm font-medium">
+                        <i class="fas fa-tachometer-alt mr-1"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('main.admin_users') }}"
+                        class="nav-link text-white px-3 py-2 text-sm font-medium">
+                        <i class="fas fa-users mr-1"></i> Users
+                    </a>
+                    <a href="{{ url_for('main.admin_reports') }}"
+                        class="nav-link text-white px-3 py-2 text-sm font-medium">
+                        <i class="fas fa-flag mr-1"></i> Reports
+                    </a>
+                    <a href="{{ url_for('main.home') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
+                        <i class="fas fa-eye mr-1"></i> View Site
+                    </a>
+                    <a href="{{ url_for('main.team_dashboard') }}"
+                        class="nav-link text-white px-3 py-2 text-sm font-medium">
+                        <i class="fas fa-users mr-1"></i> Team
+                    </a>
+                    <a href="{{ url_for('main.admin_bulk_email') }}"
+                        class="nav-link text-white px-3 py-2 text-sm font-medium">
+                        <i class="fas fa-mail-bulk mr-1"></i> Bulk Email
+                    </a>
+                    <a href="{{ url_for('main.admin_deletions') }}"
+                        class="nav-link text-white px-3 py-2 text-sm font-medium">
+                        <i class="fas fa-trash-alt mr-1"></i> Deletions
+                    </a>
 
                     <!-- ============================================ -->
                     <!-- CONTRACTOR NAVIGATION -->
                     <!-- ============================================ -->
                     {% elif current_user.email in ['vkhetsa@gmail.com', 'lwandiswazikalala@gmail.com'] %}
-                    <a href="{{ url_for('main.contractor_dashboard') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
+                    <a href="{{ url_for('main.contractor_dashboard') }}"
+                        class="nav-link text-white px-3 py-2 text-sm font-medium">
                         <i class="fas fa-user-tie mr-1"></i> My Dashboard
                     </a>
-                    <a href="{{ url_for('main.team_calendar') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
+                    <a href="{{ url_for('main.team_calendar') }}"
+                        class="nav-link text-white px-3 py-2 text-sm font-medium">
                         <i class="fas fa-calendar-alt mr-1"></i> Calendar
                     </a>
-                    
+
                     <!-- ============================================ -->
                     <!-- BUSINESS NAVIGATION -->
                     <!-- ============================================ -->
                     {% elif current_user.user_type == 'business' %}
-                        <a href="{{ url_for('main.home') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
-                            <i class="fas fa-home mr-1"></i> Home
-                        </a>
-                        <a href="{{ url_for('main.browse_ads') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
-                            <i class="fas fa-search mr-1"></i> Browse
-                        </a>
-                        <a href="{{ url_for('main.public_blog') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
-                            <i class="fas fa-blog mr-1"></i> Blog
-                        </a>
-                        <a href="{{ url_for('main.business_dashboard') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
-                            <i class="fas fa-chart-line mr-1"></i> Dashboard
-                        </a>
-                        <a href="{{ url_for('main.my_ads') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
-                            <i class="fas fa-list mr-1"></i> My Ads
-                        </a>
-                        <a href="{{ url_for('main.post_ad') }}" class="btn-post-ad">
-                            <i class="fas fa-plus-circle mr-1"></i> Post Ad
-                        </a>
-                    
+                    <a href="{{ url_for('main.home') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
+                        <i class="fas fa-home mr-1"></i> Home
+                    </a>
+                    <a href="{{ url_for('main.browse_ads') }}"
+                        class="nav-link text-white px-3 py-2 text-sm font-medium">
+                        <i class="fas fa-search mr-1"></i> Browse
+                    </a>
+                    <a href="{{ url_for('main.public_blog') }}"
+                        class="nav-link text-white px-3 py-2 text-sm font-medium">
+                        <i class="fas fa-blog mr-1"></i> Blog
+                    </a>
+                    <a href="{{ url_for('main.business_dashboard') }}"
+                        class="nav-link text-white px-3 py-2 text-sm font-medium">
+                        <i class="fas fa-chart-line mr-1"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('main.my_ads') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
+                        <i class="fas fa-list mr-1"></i> My Ads
+                    </a>
+                    <a href="{{ url_for('main.post_ad') }}" class="btn-post-ad">
+                        <i class="fas fa-plus-circle mr-1"></i> Post Ad
+                    </a>
+
                     <!-- ============================================ -->
                     <!-- CLIENT NAVIGATION -->
                     <!-- ============================================ -->
                     {% else %}
-                        <a href="{{ url_for('main.home') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
-                            <i class="fas fa-home mr-1"></i> Home
-                        </a>
-                        <a href="{{ url_for('main.browse_ads') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
-                            <i class="fas fa-search mr-1"></i> Browse
-                        </a>
-                        <a href="{{ url_for('main.public_blog') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
-                            <i class="fas fa-blog mr-1"></i> Blog
-                        </a>
-                        <a href="{{ url_for('main.client_dashboard') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
-                            <i class="fas fa-user mr-1"></i> Dashboard
-                        </a>
-                        <a href="{{ url_for('main.saved_ads') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
-                            <i class="fas fa-bookmark mr-1"></i> Saved
-                        </a>
+                    <a href="{{ url_for('main.home') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
+                        <i class="fas fa-home mr-1"></i> Home
+                    </a>
+                    <a href="{{ url_for('main.browse_ads') }}"
+                        class="nav-link text-white px-3 py-2 text-sm font-medium">
+                        <i class="fas fa-search mr-1"></i> Browse
+                    </a>
+                    <a href="{{ url_for('main.public_blog') }}"
+                        class="nav-link text-white px-3 py-2 text-sm font-medium">
+                        <i class="fas fa-blog mr-1"></i> Blog
+                    </a>
+                    <a href="{{ url_for('main.client_dashboard') }}"
+                        class="nav-link text-white px-3 py-2 text-sm font-medium">
+                        <i class="fas fa-user mr-1"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('main.saved_ads') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
+                        <i class="fas fa-bookmark mr-1"></i> Saved
+                    </a>
                     {% endif %}
-                    
+
                     <!-- User Dropdown (All users) -->
                     <div class="relative">
                         <div class="user-menu-trigger" onclick="toggleDropdown()">
@@ -595,7 +799,7 @@
                             </span>
                             <i class="fas fa-chevron-down text-xs text-gray-400"></i>
                         </div>
-                        
+
                         <div id="userDropdown" class="dropdown-menu">
                             <div class="px-4 py-3 border-b border-gray-100">
                                 <p class="text-xs text-gray-500">Signed in as</p>
@@ -603,50 +807,55 @@
                                 <span class="inline-block mt-1 px-2 py-0.5 text-xs rounded-full 
                                     {% if current_user.email in ['eswatiniclassifieds@gmail.com'] %}
                                         bg-yellow-100 text-yellow-800">Admin
-                                    {% elif current_user.email in ['vkhetsa@gmail.com', 'lwandiswazikalala@gmail.com'] %}
-                                        bg-purple-100 text-purple-800">Contractor
+                                    {% elif current_user.email in ['vkhetsa@gmail.com', 'lwandiswazikalala@gmail.com']
+                                    %}
+                                    bg-purple-100 text-purple-800">Contractor
                                     {% elif current_user.user_type == 'business' %}
-                                        bg-blue-100 text-blue-800">Business
+                                    bg-blue-100 text-blue-800">Business
                                     {% else %}
-                                        bg-green-100 text-green-800">Client
+                                    bg-green-100 text-green-800">Client
                                     {% endif %}
                                 </span>
                             </div>
-                            
+
                             {% if current_user.user_type == 'business' %}
-                                <a href="{{ url_for('main.edit_business_profile') }}" class="dropdown-item">
-                                    <i class="fas fa-building text-gray-500"></i> Edit Profile
-                                </a>
-                                <a href="{{ url_for('main.my_ads') }}" class="dropdown-item">
-                                    <i class="fas fa-list text-gray-500"></i> My Ads
-                                </a>
+                            <a href="{{ url_for('main.edit_business_profile') }}" class="dropdown-item">
+                                <i class="fas fa-building text-gray-500"></i> Edit Profile
+                            </a>
+                            <a href="{{ url_for('main.my_ads') }}" class="dropdown-item">
+                                <i class="fas fa-list text-gray-500"></i> My Ads
+                            </a>
                             {% else %}
-                                <a href="{{ url_for('main.saved_ads') }}" class="dropdown-item">
-                                    <i class="fas fa-bookmark text-gray-500"></i> Saved Ads
-                                </a>
+                            <a href="{{ url_for('main.saved_ads') }}" class="dropdown-item">
+                                <i class="fas fa-bookmark text-gray-500"></i> Saved Ads
+                            </a>
                             {% endif %}
-                            
+
                             <div class="border-t border-gray-100"></div>
-                            
-                            <a href="{{ url_for('main.logout') }}" class="dropdown-item text-red-600 hover:text-red-700">
+
+                            <a href="{{ url_for('main.logout') }}"
+                                class="dropdown-item text-red-600 hover:text-red-700">
                                 <i class="fas fa-sign-out-alt"></i> Sign Out
                             </a>
                             <div class="border-t border-gray-100"></div>
-                            <a href="{{url_for('main.delete_account_page')}}" class="dropdown-item text-red-600 hover:text-red-700">
-                                 <i class="fas fa-trash-alt"></i> Delete Account
+                            <a href="{{url_for('main.delete_account_page')}}"
+                                class="dropdown-item text-red-600 hover:text-red-700">
+                                <i class="fas fa-trash-alt"></i> Delete Account
                             </a>
 
                         </div>
                     </div>
-                    
-                {% else %}
+
+                    {% else %}
                     <a href="{{ url_for('main.home') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
                         <i class="fas fa-home mr-1"></i> Home
                     </a>
-                    <a href="{{ url_for('main.browse_ads') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
+                    <a href="{{ url_for('main.browse_ads') }}"
+                        class="nav-link text-white px-3 py-2 text-sm font-medium">
                         <i class="fas fa-search mr-1"></i> Browse
                     </a>
-                    <a href="{{ url_for('main.public_blog') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
+                    <a href="{{ url_for('main.public_blog') }}"
+                        class="nav-link text-white px-3 py-2 text-sm font-medium">
                         <i class="fas fa-blog mr-1"></i> Blog
                     </a>
                     <a href="{{ url_for('main.login') }}" class="nav-link text-white px-3 py-2 text-sm font-medium">
@@ -658,35 +867,36 @@
                     <a href="{{ url_for('main.post_ad') }}" class="btn-post-ad">
                         <i class="fas fa-plus-circle mr-1"></i> Post Ad
                     </a>
-                {% endif %}
+                    {% endif %}
+                </div>
+
+                <!-- Mobile Hamburger -->
+                <button class="hamburger" onclick="toggleMobileMenu()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
             </div>
-            
-            <!-- Mobile Hamburger -->
-            <button class="hamburger" onclick="toggleMobileMenu()">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
         </div>
-    </div>
-</nav>
+    </nav>
 
-<!-- Mobile Overlay -->
-<div class="mobile-overlay" onclick="closeMobileMenu()"></div>
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" onclick="closeMobileMenu()"></div>
 
-<!-- Mobile Menu -->
-<div class="mobile-menu">
-    <div class="flex items-center justify-between mb-6">
-        <span class="text-xl font-bold text-gray-800">Menu</span>
-        <button onclick="closeMobileMenu()" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
-    </div>
-    
-    <div class="space-y-1">
-        
-        <!-- ============================================ -->
-        <!-- ADMIN MOBILE MENU -->
-        <!-- ============================================ -->
-        {% if current_user.is_authenticated and current_user.email in ['admin@example.com', 'techcharities@example.com', 'eswatiniclassifieds@gmail.com'] %}
+    <!-- Mobile Menu -->
+    <div class="mobile-menu">
+        <div class="flex items-center justify-between mb-6">
+            <span class="text-xl font-bold text-gray-800">Menu</span>
+            <button onclick="closeMobileMenu()" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+        </div>
+
+        <div class="space-y-1">
+
+            <!-- ============================================ -->
+            <!-- ADMIN MOBILE MENU -->
+            <!-- ============================================ -->
+            {% if current_user.is_authenticated and current_user.email in ['admin@example.com',
+            'techcharities@example.com', 'eswatiniclassifieds@gmail.com'] %}
             <div class="bg-yellow-100 rounded-xl p-4 mb-4">
                 <div class="flex items-center gap-3">
                     <i class="fas fa-shield-alt text-3xl text-yellow-600"></i>
@@ -696,64 +906,76 @@
                     </div>
                 </div>
             </div>
-            
-            <a href="{{ url_for('main.admin_dashboard') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-yellow-50">
+
+            <a href="{{ url_for('main.admin_dashboard') }}"
+                class="flex items-center gap-3 p-3 rounded-lg hover:bg-yellow-50">
                 <i class="fas fa-tachometer-alt w-6 text-yellow-600"></i> Dashboard
             </a>
-            <a href="{{ url_for('main.admin_users') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
+            <a href="{{ url_for('main.admin_users') }}"
+                class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
                 <i class="fas fa-users w-6 text-blue-600"></i> Manage Users
             </a>
-            <a href="{{ url_for('main.admin_reports') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
+            <a href="{{ url_for('main.admin_reports') }}"
+                class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
                 <i class="fas fa-flag w-6 text-red-600"></i> Reports
             </a>
             <a href="{{ url_for('main.home') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
                 <i class="fas fa-eye w-6 text-gray-600"></i> View Site
             </a>
-            <a href="{{ url_for('main.team_dashboard') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
+            <a href="{{ url_for('main.team_dashboard') }}"
+                class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
                 <i class="fas fa-users w-6 text-purple-600"></i> Team
             </a>
-            <a href="{{ url_for('main.admin_bulk_email') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
+            <a href="{{ url_for('main.admin_bulk_email') }}"
+                class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
                 <i class="fas fa-mail-bulk w-6 text-purple-600"></i> Bulk Email
             </a>
-            
+
             <div class="border-t my-3"></div>
-            
-            <a href="{{ url_for('main.logout') }}" class="flex items-center gap-3 p-3 rounded-lg text-red-600 hover:bg-red-50">
+
+            <a href="{{ url_for('main.logout') }}"
+                class="flex items-center gap-3 p-3 rounded-lg text-red-600 hover:bg-red-50">
                 <i class="fas fa-sign-out-alt w-6"></i> Sign Out
             </a>
-            <a href="{{ url_for('main.admin_deletions') }}" class="flex items-center gap-3 p-3 rounded-lg text-red-600 hover:bg-red-50">
+            <a href="{{ url_for('main.admin_deletions') }}"
+                class="flex items-center gap-3 p-3 rounded-lg text-red-600 hover:bg-red-50">
                 <i class="fas fa-trash-alt w-6"></i> Deletions
             </a>
-        <!-- ============================================ -->
-        <!-- CONTRACTOR MOBILE MENU -->
-        <!-- ============================================ -->
-        {% elif current_user.is_authenticated and current_user.email in ['vkhetsa@gmail.com', 'lwandiswazikalala@gmail.com'] %}
-        <div class="bg-purple-100 rounded-xl p-4 mb-4">
-            <div class="flex items-center gap-3">
-                <i class="fas fa-user-tie text-3xl text-purple-600"></i>
-                <div>
-                    <p class="font-medium">{{ current_user.email.split('@')[0] }}</p>
-                    <p class="text-xs text-purple-700">Contractor</p>
+            <!-- ============================================ -->
+            <!-- CONTRACTOR MOBILE MENU -->
+            <!-- ============================================ -->
+            {% elif current_user.is_authenticated and current_user.email in ['vkhetsa@gmail.com',
+            'lwandiswazikalala@gmail.com'] %}
+            <div class="bg-purple-100 rounded-xl p-4 mb-4">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-user-tie text-3xl text-purple-600"></i>
+                    <div>
+                        <p class="font-medium">{{ current_user.email.split('@')[0] }}</p>
+                        <p class="text-xs text-purple-700">Contractor</p>
+                    </div>
                 </div>
             </div>
-        </div>
-        <a href="{{ url_for('main.contractor_dashboard') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-purple-50">
-            <i class="fas fa-tachometer-alt w-6 text-purple-600"></i> My Dashboard
-        </a>
-        <a href="{{ url_for('main.submit_report') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
-            <i class="fas fa-file-alt w-6 text-blue-600"></i> Submit Report
-        </a>
-        <a href="{{ url_for('main.team_calendar') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
-            <i class="fas fa-calendar-alt w-6 text-blue-600"></i> Calendar
-        </a>
-        <a href="{{ url_for('main.logout') }}" class="flex items-center gap-3 p-3 rounded-lg text-red-600 hover:bg-red-50">
-            <i class="fas fa-sign-out-alt w-6"></i> Sign Out
-        </a>
-        
-        <!-- ============================================ -->
-        <!-- REGULAR USER MOBILE MENU -->
-        <!-- ============================================ -->
-        {% elif current_user.is_authenticated %}
+            <a href="{{ url_for('main.contractor_dashboard') }}"
+                class="flex items-center gap-3 p-3 rounded-lg hover:bg-purple-50">
+                <i class="fas fa-tachometer-alt w-6 text-purple-600"></i> My Dashboard
+            </a>
+            <a href="{{ url_for('main.submit_report') }}"
+                class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-file-alt w-6 text-blue-600"></i> Submit Report
+            </a>
+            <a href="{{ url_for('main.team_calendar') }}"
+                class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-calendar-alt w-6 text-blue-600"></i> Calendar
+            </a>
+            <a href="{{ url_for('main.logout') }}"
+                class="flex items-center gap-3 p-3 rounded-lg text-red-600 hover:bg-red-50">
+                <i class="fas fa-sign-out-alt w-6"></i> Sign Out
+            </a>
+
+            <!-- ============================================ -->
+            <!-- REGULAR USER MOBILE MENU -->
+            <!-- ============================================ -->
+            {% elif current_user.is_authenticated %}
             <div class="bg-gray-100 rounded-xl p-4 mb-4">
                 <div class="flex items-center gap-3">
                     <i class="fas fa-user-circle text-3xl text-blue-600"></i>
@@ -763,182 +985,234 @@
                     </div>
                 </div>
             </div>
-            
+
             <a href="{{ url_for('main.home') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
                 <i class="fas fa-home w-6 text-blue-600"></i> Home
             </a>
             <a href="{{ url_for('main.browse_ads') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
                 <i class="fas fa-search w-6 text-blue-600"></i> Browse
             </a>
-            <a href="{{ url_for('main.public_blog') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
+            <a href="{{ url_for('main.public_blog') }}"
+                class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
                 <i class="fas fa-blog w-6 text-blue-600"></i> Blog
             </a>
-            
+
             {% if current_user.user_type == 'business' %}
-                <a href="{{ url_for('main.business_dashboard') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
-                    <i class="fas fa-chart-line w-6 text-blue-600"></i> Dashboard
-                </a>
-                <a href="{{ url_for('main.my_ads') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
-                    <i class="fas fa-list w-6 text-blue-600"></i> My Ads
-                </a>
-                <a href="{{ url_for('main.post_ad') }}" class="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 font-bold">
-                    <i class="fas fa-plus-circle w-6"></i> Post New Ad
-                </a>
+            <a href="{{ url_for('main.business_dashboard') }}"
+                class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-chart-line w-6 text-blue-600"></i> Dashboard
+            </a>
+            <a href="{{ url_for('main.my_ads') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-list w-6 text-blue-600"></i> My Ads
+            </a>
+            <a href="{{ url_for('main.post_ad') }}"
+                class="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 font-bold">
+                <i class="fas fa-plus-circle w-6"></i> Post New Ad
+            </a>
             {% else %}
-                <a href="{{ url_for('main.client_dashboard') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
-                    <i class="fas fa-user w-6 text-blue-600"></i> Dashboard
-                </a>
-                <a href="{{ url_for('main.saved_ads') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
-                    <i class="fas fa-bookmark w-6 text-blue-600"></i> Saved Ads
-                </a>
+            <a href="{{ url_for('main.client_dashboard') }}"
+                class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-user w-6 text-blue-600"></i> Dashboard
+            </a>
+            <a href="{{ url_for('main.saved_ads') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-bookmark w-6 text-blue-600"></i> Saved Ads
+            </a>
             {% endif %}
-            
+
             <div class="border-t my-3"></div>
-            <a href="{{ url_for('main.delete_account_page') }}" class="flex items-center gap-3 p-3 rounded-lg text-red-600 hover:bg-red-50">
+            <a href="{{ url_for('main.delete_account_page') }}"
+                class="flex items-center gap-3 p-3 rounded-lg text-red-600 hover:bg-red-50">
                 <i class="fas fa-trash-alt w-6"></i> Delete Account
             </a>
-            
-            <a href="{{ url_for('main.logout') }}" class="flex items-center gap-3 p-3 rounded-lg text-red-600 hover:bg-red-50">
+
+            <a href="{{ url_for('main.logout') }}"
+                class="flex items-center gap-3 p-3 rounded-lg text-red-600 hover:bg-red-50">
                 <i class="fas fa-sign-out-alt w-6"></i> Sign Out
             </a>
-        
-        <!-- ============================================ -->
-        <!-- GUEST MOBILE MENU -->
-        <!-- ============================================ -->
-        {% else %}
+
+            <!-- ============================================ -->
+            <!-- GUEST MOBILE MENU -->
+            <!-- ============================================ -->
+            {% else %}
             <a href="{{ url_for('main.login') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
                 <i class="fas fa-sign-in-alt w-6 text-blue-600"></i> Login
             </a>
-            <a href="{{ url_for('main.register') }}" class="flex items-center gap-3 p-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+            <a href="{{ url_for('main.register') }}"
+                class="flex items-center gap-3 p-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
                 <i class="fas fa-user-plus w-6"></i> Create Account
             </a>
-            <a href="{{ url_for('main.post_ad') }}" class="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 font-bold mt-2">
+            <a href="{{ url_for('main.post_ad') }}"
+                class="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 font-bold mt-2">
                 <i class="fas fa-plus-circle w-6"></i> Post Ad
             </a>
-            <a href="{{ url_for('main.public_blog') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
+            <a href="{{ url_for('main.public_blog') }}"
+                class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
                 <i class="fas fa-blog w-6 text-blue-600"></i> Blog
             </a>
-        {% endif %}
-    </div>
-</div>
-
-<!-- Flash Messages -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        <div class="container mx-auto px-4 py-3">
-            {% for category, message in messages %}
-                <div class="flash-message {{ category }}">
-                    <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }} mr-2"></i>
-                    {{ message }}
-                    <button onclick="this.parentElement.remove()">&times;</button>
-                </div>
-            {% endfor %}
+            {% endif %}
         </div>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="container mx-auto px-4 py-3">
+        {% for category, message in messages %}
+        <div class="flash-message {{ category }} scroll-reveal" data-aos="fade-right">
+            <i
+                class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }} mr-2"></i>
+            {{ message }}
+            <button onclick="this.parentElement.remove()">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
     {% endif %}
-{% endwith %}
+    {% endwith %}
 
-<!-- Main Content -->
-<main>
-    {% block content %}{% endblock %}
-</main>
+    <!-- Main Content - with dynamic pop-up reveal -->
+    <main class="scroll-reveal" data-aos="fade-up" data-aos-duration="800">
+        {% block content %}{% endblock %}
+    </main>
 
-<!-- Premium Footer -->
-<footer class="premium-footer">
-    <div class="footer-container">
-        <div class="footer-section">
-            <h4><i class="fas fa-store mr-2"></i> Eswatini Classifieds</h4>
-            <p class="text-sm text-gray-300 mb-4">Connecting buyers and sellers across Eswatini since 2026.</p>
-            <div class="flex gap-3 footer-social">
-                <a href="https://www.facebook.com/eswatiniclassifieds" class="text-gray-300 hover:text-yellow-400 transition"><i class="fab fa-facebook text-xl"></i></a>
-                <a href="https://wa.me/26879708243" class="text-gray-300 hover:text-yellow-400 transition"><i class="fab fa-whatsapp text-xl"></i></a>
-                <a href="https://www.instagram.com/eswatiniclassifieds/" class="text-gray-300 hover:text-yellow-400 transition"><i class="fab fa-instagram text-xl"></i></a>
+    <!-- Premium Footer with reveal animation -->
+    <footer class="premium-footer scroll-reveal" data-aos="zoom-in-up" data-aos-duration="1000">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4><i class="fas fa-store mr-2"></i> Eswatini Classifieds</h4>
+                <p class="text-sm text-gray-300 mb-4">Connecting buyers and sellers across Eswatini since 2026.</p>
+                <div class="flex gap-3 footer-social">
+                    <a href="https://www.facebook.com/eswatiniclassifieds"
+                        class="text-gray-300 hover:text-yellow-400 transition"><i
+                            class="fab fa-facebook text-xl"></i></a>
+                    <a href="https://wa.me/26879708243" class="text-gray-300 hover:text-yellow-400 transition"><i
+                            class="fab fa-whatsapp text-xl"></i></a>
+                    <a href="https://www.instagram.com/eswatiniclassifieds/"
+                        class="text-gray-300 hover:text-yellow-400 transition"><i
+                            class="fab fa-instagram text-xl"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul class="footer-links">
+                    <li><a href="{{ url_for('main.home') }}">Home</a></li>
+                    <li><a href="{{ url_for('main.browse_ads') }}">Browse Ads</a></li>
+                    <li><a href="{{ url_for('main.post_ad') }}">Post Ad</a></li>
+                    <li><a href="{{ url_for('main.privacy') }}">Privacy Policy</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Categories</h4>
+                <ul class="footer-links">
+                    <li><a href="{{ url_for('main.home', category='employment') }}">Jobs</a></li>
+                    <li><a href="{{ url_for('main.home', category='motors') }}">Motors</a></li>
+                    <li><a href="{{ url_for('main.home', category='property') }}">Property</a></li>
+                    <li><a href="{{ url_for('main.home', category='services') }}">Services</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <ul class="footer-links">
+                    <li><i class="fas fa-map-marker-alt mr-2"></i> Mbabane, Eswatini</li>
+                    <li><i class="fas fa-phone mr-2"></i> +268 7970 8243</li>
+                    <li><i class="fas fa-envelope mr-2"></i> eswatiniclassifieds@gmail.com</li>
+                </ul>
             </div>
         </div>
-        
-        <div class="footer-section">
-            <h4>Quick Links</h4>
-            <ul class="footer-links">
-                <li><a href="{{ url_for('main.home') }}">Home</a></li>
-                <li><a href="{{ url_for('main.browse_ads') }}">Browse Ads</a></li>
-                <li><a href="{{ url_for('main.post_ad') }}">Post Ad</a></li>
-                <li><a href="{{ url_for('main.privacy') }}">Privacy Policy</a></li>
-            </ul>
-        </div>
-        
-        <div class="footer-section">
-            <h4>Categories</h4>
-            <ul class="footer-links">
-                <li><a href="{{ url_for('main.home', category='employment') }}">Jobs</a></li>
-                <li><a href="{{ url_for('main.home', category='motors') }}">Motors</a></li>
-                <li><a href="{{ url_for('main.home', category='property') }}">Property</a></li>
-                <li><a href="{{ url_for('main.home', category='services') }}">Services</a></li>
-            </ul>
-        </div>
-        
-        <div class="footer-section">
-            <h4>Contact</h4>
-            <ul class="footer-links">
-                <li><i class="fas fa-map-marker-alt mr-2"></i> Mbabane, Eswatini</li>
-                <li><i class="fas fa-phone mr-2"></i> +268 7970 8243</li>
-                <li><i class="fas fa-envelope mr-2"></i> eswatiniclassifieds@gmail.com</li>
-            </ul>
-        </div>
-    </div>
-    
-    <div class="footer-bottom">
-        <p>&copy; 2026 Eswatini Classifieds. All rights reserved.</p>
-    </div>
-</footer>
 
-<!-- JavaScript -->
-<script>
-    function toggleDropdown() {
-        const dropdown = document.getElementById('userDropdown');
-        dropdown.classList.toggle('active');
-        
-        document.addEventListener('click', function closeDropdown(e) {
-            if (!e.target.closest('.user-menu-trigger') && !e.target.closest('#userDropdown')) {
-                dropdown.classList.remove('active');
-                document.removeEventListener('click', closeDropdown);
+        <div class="footer-bottom">
+            <p>&copy; 2026 Eswatini Classifieds. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript for Dropdown and Mobile Menu (keep existing) -->
+    <script>
+        function toggleDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('active');
+
+            document.addEventListener('click', function closeDropdown(e) {
+                if (!e.target.closest('.user-menu-trigger') && !e.target.closest('#userDropdown')) {
+                    dropdown.classList.remove('active');
+                    document.removeEventListener('click', closeDropdown);
+                }
+            });
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.querySelector('.mobile-menu');
+            const overlay = document.querySelector('.mobile-overlay');
+            const hamburger = document.querySelector('.hamburger');
+
+            menu.classList.toggle('active');
+            overlay.classList.toggle('active');
+            hamburger.classList.toggle('active');
+            document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : '';
+        }
+
+        function closeMobileMenu() {
+            const menu = document.querySelector('.mobile-menu');
+            const overlay = document.querySelector('.mobile-overlay');
+            const hamburger = document.querySelector('.hamburger');
+
+            menu.classList.remove('active');
+            overlay.classList.remove('active');
+            hamburger.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const mobileLinks = document.querySelectorAll('.mobile-menu a');
+            mobileLinks.forEach(link => {
+                link.addEventListener('click', closeMobileMenu);
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    closeMobileMenu();
+                }
+            });
+
+            // Initialize AOS (Animate On Scroll)
+            AOS.init({
+                duration: 800,
+                once: true,        // Animation happens only once
+                offset: 120,       // Trigger earlier
+                easing: 'ease-out-cubic',
+                mirror: false
+            });
+
+            // Additional custom scroll reveal for any element with class 'scroll-reveal'
+            // (AOS already does similar, but this ensures fallback)
+            const revealElements = document.querySelectorAll('.scroll-reveal:not([data-aos])');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('revealed');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+            revealElements.forEach(el => observer.observe(el));
+
+            // Make all cards, grid items, and category pills pop on hover
+            const popElements = document.querySelectorAll('.card, .product-card, .ad-card, .modern-ad-card, .featured-card, .category-pill, .btn-post-ad, .nav-cta');
+            popElements.forEach(el => {
+                el.classList.add('hover-pop');
+            });
+
+            // Add staggered reveal to category grid if exists
+            const categoryGrid = document.querySelector('.categories-grid, .grid-container, .products-grid, .ads-grid');
+            if (categoryGrid && !categoryGrid.classList.contains('stagger-children')) {
+                categoryGrid.classList.add('stagger-children');
+                observer.observe(categoryGrid);
             }
         });
-    }
-    
-    function toggleMobileMenu() {
-        const menu = document.querySelector('.mobile-menu');
-        const overlay = document.querySelector('.mobile-overlay');
-        const hamburger = document.querySelector('.hamburger');
-        
-        menu.classList.toggle('active');
-        overlay.classList.toggle('active');
-        hamburger.classList.toggle('active');
-        document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : '';
-    }
-    
-    function closeMobileMenu() {
-        const menu = document.querySelector('.mobile-menu');
-        const overlay = document.querySelector('.mobile-overlay');
-        const hamburger = document.querySelector('.hamburger');
-        
-        menu.classList.remove('active');
-        overlay.classList.remove('active');
-        hamburger.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-    
-    document.addEventListener('DOMContentLoaded', function() {
-        const mobileLinks = document.querySelectorAll('.mobile-menu a');
-        mobileLinks.forEach(link => {
-            link.addEventListener('click', closeMobileMenu);
-        });
-        
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeMobileMenu();
-            }
-        });
-    });
-</script>
+    </script>
 
 </body>
+
 </html>
