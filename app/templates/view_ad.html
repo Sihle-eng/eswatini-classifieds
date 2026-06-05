@@ -4,166 +4,351 @@
 
 {% block content %}
 <div class="max-w-4xl mx-auto">
-    
+
     <!-- Back Button -->
     <a href="javascript:history.back()" class="inline-block mb-4 text-blue-600 hover:underline">
         <i class="fas fa-arrow-left mr-1"></i> Back to listings
     </a>
-    
+
     <!-- Main Ad Card -->
     <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
-        
-                <!-- Image Gallery Section -->
-                <div class="mb-6">
-                    {% set images = posting.images if posting.images else [] %}
-                
-                    {% if images %}
-                    <div class="relative bg-gray-100 rounded-lg overflow-hidden mb-4">
-                        <img id="mainImage" src="{{ images[0].filename }}" alt="{{ posting.title }}"
-                            class="w-full h-64 md:h-96 object-contain cursor-pointer" onclick="openLightbox()">
-                        <div class="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white px-3 py-1 rounded-full text-sm">
-                            <i class="fas fa-camera mr-1"></i> <span id="currentImageIndex">1</span> / {{ images|length }}
-                        </div>
-                        {% if images|length > 1 %}
-                        <button onclick="prevImage()"
-                            class="absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white w-10 h-10 rounded-full hover:bg-opacity-70 transition"><i
-                                class="fas fa-chevron-left"></i></button>
-                        <button onclick="nextImage()"
-                            class="absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white w-10 h-10 rounded-full hover:bg-opacity-70 transition"><i
-                                class="fas fa-chevron-right"></i></button>
-                        {% endif %}
-                    </div>
-                    {% if images|length > 1 %}
-                    <div class="flex gap-2 overflow-x-auto pb-2">
-                        {% for img in images %}
-                        <div class="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 cursor-pointer {{ 'border-blue-500' if loop.first else 'border-gray-200 hover:border-blue-300' }}"
-                            onclick="switchImage({{ loop.index0 }}, this)">
-                            <img src="{{ img.filename }}" alt="Thumbnail {{ loop.index }}" class="w-full h-full object-cover">
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                    {% else %}
-                    <!-- No Images Available (no change here) -->
-                    <div
-                        class="h-64 {% if posting.payment_plan == 'featured' %}bg-gradient-to-br from-yellow-100 to-yellow-200{% else %}bg-gray-100{% endif %} flex items-center justify-center rounded-lg">
-                        <div class="text-center text-gray-400">
-                            <i class="fas fa-image text-6xl block mb-3"></i>
-                            <span class="text-lg font-medium">No Image Available</span>
-                            <p class="text-sm mt-1">The seller did not upload any images for this ad.</p>
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
 
-        <!-- Lightbox Modal -->
-        <div id="lightbox" class="hidden fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center" onclick="closeLightbox()">
-            <span class="absolute top-4 right-4 text-white text-3xl cursor-pointer hover:text-gray-300" onclick="closeLightbox()">&times;</span>
-            <button class="absolute left-4 text-white text-4xl hover:text-gray-300" onclick="event.stopPropagation(); lightboxPrev()"><i class="fas fa-chevron-left"></i></button>
-            <img id="lightboxImage" src="" alt="Lightbox" class="max-h-[90vh] max-w-[90vw] object-contain">
-            <button class="absolute right-4 text-white text-4xl hover:text-gray-300" onclick="event.stopPropagation(); lightboxNext()"><i class="fas fa-chevron-right"></i></button>
-            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white bg-black bg-opacity-60 px-4 py-2 rounded-full"><span id="lightboxCounter">1 / 1</span></div>
+        <!-- ============================================ -->
+        <!-- IMAGE GALLERY SECTION – FIXED LIGHTBOX -->
+        <!-- ============================================ -->
+        <div class="mb-6">
+            {% set images = posting.images if posting.images else [] %}
+
+            {% if images %}
+            <div class="relative bg-gray-100 rounded-lg overflow-hidden mb-4">
+                <img id="mainImage" src="{{ images[0].filename }}" alt="{{ posting.title }}"
+                    class="w-full h-64 md:h-96 object-contain cursor-pointer" onclick="openLightbox()"
+                    onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/placeholder.jpg') }}';">
+                <div class="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white px-3 py-1 rounded-full text-sm">
+                    <i class="fas fa-camera mr-1"></i> <span id="currentImageIndex">1</span> / {{ images|length }}
+                </div>
+                {% if images|length > 1 %}
+                <button onclick="prevImage()"
+                    class="absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white w-10 h-10 rounded-full hover:bg-opacity-70 transition">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button onclick="nextImage()"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white w-10 h-10 rounded-full hover:bg-opacity-70 transition">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                {% endif %}
+            </div>
+
+            {% if images|length > 1 %}
+            <div class="flex gap-2 overflow-x-auto pb-2">
+                {% for img in images %}
+                <div class="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 cursor-pointer {{ 'border-blue-500' if loop.first else 'border-gray-200 hover:border-blue-300' }}"
+                    onclick="switchImage({{ loop.index0 }}, this)">
+                    <img src="{{ img.filename }}" alt="Thumbnail {{ loop.index }}" class="w-full h-full object-cover"
+                        onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/placeholder.jpg') }}';">
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% else %}
+            <!-- No Images Available -->
+            <div
+                class="h-64 {% if posting.payment_plan == 'featured' %}bg-gradient-to-br from-yellow-100 to-yellow-200{% else %}bg-gray-100{% endif %} flex items-center justify-center rounded-lg">
+                <div class="text-center text-gray-400">
+                    <i class="fas fa-image text-6xl block mb-3"></i>
+                    <span class="text-lg font-medium">No Image Available</span>
+                    <p class="text-sm mt-1">The seller did not upload any images for this ad.</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ============================================ -->
+        <!-- LIGHTBOX MODAL – FULLY FIXED -->
+        <!-- ============================================ -->
+        <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden items-center justify-center"
+            onclick="closeLightbox()">
+            <span class="absolute top-4 right-4 text-white text-3xl cursor-pointer hover:text-gray-300 z-50"
+                onclick="closeLightbox()">&times;</span>
+            <button class="absolute left-4 text-white text-4xl hover:text-gray-300 z-50"
+                onclick="event.stopPropagation(); lightboxPrev()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <img id="lightboxImage" src="" alt="Lightbox" class="max-h-[90vh] max-w-[90vw] object-contain"
+                onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/placeholder.jpg') }}';">
+            <button class="absolute right-4 text-white text-4xl hover:text-gray-300 z-50"
+                onclick="event.stopPropagation(); lightboxNext()">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <div
+                class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white bg-black bg-opacity-60 px-4 py-2 rounded-full z-50">
+                <span id="lightboxCounter">1 / 1</span>
+            </div>
         </div>
 
         <script>
+            // Ensure the images array is properly populated from the server
             {% if images %}
-            const images = [{% for img in images %}"{{ img.filename }}", {% endfor %}];
-            let currentIndex = 0, totalImages = images.length, lightboxIndex = 0;
-            function switchImage(i, e) { currentIndex = i; document.getElementById('mainImage').src = images[i]; document.getElementById('currentImageIndex').textContent = i + 1; document.querySelectorAll('.w-20').forEach((t, j) => { t.classList.toggle('border-blue-500', j === i); t.classList.toggle('border-gray-200', j !== i) }); }
-            function nextImage() { currentIndex = (currentIndex + 1) % totalImages; switchImage(currentIndex); }
-            function prevImage() { currentIndex = (currentIndex - 1 + totalImages) % totalImages; switchImage(currentIndex); }
-            function openLightbox() { document.getElementById('lightbox').classList.remove('hidden'); document.getElementById('lightboxImage').src = images[currentIndex]; document.getElementById('lightboxCounter').textContent = (currentIndex + 1) + ' / ' + totalImages; lightboxIndex = currentIndex; }
-            function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
-            function lightboxNext() { lightboxIndex = (lightboxIndex + 1) % totalImages; document.getElementById('lightboxImage').src = images[lightboxIndex]; document.getElementById('lightboxCounter').textContent = (lightboxIndex + 1) + ' / ' + totalImages; }
-            function lightboxPrev() { lightboxIndex = (lightboxIndex - 1 + totalImages) % totalImages; document.getElementById('lightboxImage').src = images[lightboxIndex]; document.getElementById('lightboxCounter').textContent = (lightboxIndex + 1) + ' / ' + totalImages; }
-            document.addEventListener('keydown', function (e) { if (document.getElementById('lightbox').classList.contains('hidden')) return; if (e.key === 'ArrowLeft') lightboxPrev(); else if (e.key === 'ArrowRight') lightboxNext(); else if (e.key === 'Escape') closeLightbox(); });
+            // Build array of image URLs – each from the 'filename' attribute
+            const images = [
+                {% for img in images %}
+            "{{ img.filename }}",
+                {% endfor %}
+            ];
+            let currentIndex = 0;
+            let totalImages = images.length;
+            let lightboxIndex = 0;
+
+            // Switch main image to a specific index
+            function switchImage(index, thumbnailElement = null) {
+                if (index < 0 || index >= totalImages) return;
+                currentIndex = index;
+                const mainImg = document.getElementById('mainImage');
+                if (mainImg) {
+                    mainImg.src = images[currentIndex];
+                    mainImg.onerror = function () { this.src = "{{ url_for('static', filename='images/placeholder.jpg') }}"; };
+                }
+                document.getElementById('currentImageIndex').textContent = currentIndex + 1;
+                // Update thumbnail borders
+                const thumbnails = document.querySelectorAll('.w-20');
+                thumbnails.forEach((thumb, i) => {
+                    if (i === currentIndex) {
+                        thumb.classList.add('border-blue-500');
+                        thumb.classList.remove('border-gray-200');
+                    } else {
+                        thumb.classList.add('border-gray-200');
+                        thumb.classList.remove('border-blue-500');
+                    }
+                });
+            }
+
+            function nextImage() {
+                if (totalImages === 0) return;
+                currentIndex = (currentIndex + 1) % totalImages;
+                switchImage(currentIndex);
+            }
+
+            function prevImage() {
+                if (totalImages === 0) return;
+                currentIndex = (currentIndex - 1 + totalImages) % totalImages;
+                switchImage(currentIndex);
+            }
+
+            // Lightbox functions
+            function openLightbox() {
+                const lightbox = document.getElementById('lightbox');
+                const lightboxImg = document.getElementById('lightboxImage');
+                const counterSpan = document.getElementById('lightboxCounter');
+                if (lightbox && lightboxImg) {
+                    lightbox.classList.remove('hidden');
+                    lightbox.classList.add('flex');  // ensure flex display
+                    lightboxImg.src = images[currentIndex];
+                    lightboxIndex = currentIndex;
+                    if (counterSpan) counterSpan.textContent = (lightboxIndex + 1) + ' / ' + totalImages;
+                }
+            }
+
+            function closeLightbox() {
+                const lightbox = document.getElementById('lightbox');
+                if (lightbox) {
+                    lightbox.classList.add('hidden');
+                    lightbox.classList.remove('flex');
+                }
+            }
+
+            function lightboxNext() {
+                if (totalImages === 0) return;
+                lightboxIndex = (lightboxIndex + 1) % totalImages;
+                const lightboxImg = document.getElementById('lightboxImage');
+                if (lightboxImg) {
+                    lightboxImg.src = images[lightboxIndex];
+                    lightboxImg.onerror = function () { this.src = "{{ url_for('static', filename='images/placeholder.jpg') }}"; };
+                }
+                document.getElementById('lightboxCounter').textContent = (lightboxIndex + 1) + ' / ' + totalImages;
+            }
+
+            function lightboxPrev() {
+                if (totalImages === 0) return;
+                lightboxIndex = (lightboxIndex - 1 + totalImages) % totalImages;
+                const lightboxImg = document.getElementById('lightboxImage');
+                if (lightboxImg) {
+                    lightboxImg.src = images[lightboxIndex];
+                    lightboxImg.onerror = function () { this.src = "{{ url_for('static', filename='images/placeholder.jpg') }}"; };
+                }
+                document.getElementById('lightboxCounter').textContent = (lightboxIndex + 1) + ' / ' + totalImages;
+            }
+
+            // Keyboard navigation for lightbox
+            document.addEventListener('keydown', function (e) {
+                const lightbox = document.getElementById('lightbox');
+                if (lightbox && !lightbox.classList.contains('hidden')) {
+                    if (e.key === 'ArrowLeft') {
+                        lightboxPrev();
+                    } else if (e.key === 'ArrowRight') {
+                        lightboxNext();
+                    } else if (e.key === 'Escape') {
+                        closeLightbox();
+                    }
+                }
+            });
+
+            // Initialize thumbnail borders on page load
+            document.addEventListener('DOMContentLoaded', function () {
+                if (totalImages > 0) {
+                    switchImage(0); // ensure first thumbnail is highlighted
+                }
+            });
+            {% else %}
+            // No images: define dummy functions to avoid JS errors
+            function openLightbox() { alert("No images to display."); }
+            function closeLightbox() { }
+            function nextImage() { }
+            function prevImage() { }
+            function lightboxNext() { }
+            function lightboxPrev() { }
             {% endif %}
         </script>
-        
+
+        <!-- ============================================ -->
+        <!-- AD DETAILS (rest of your template unchanged) -->
+        <!-- ============================================ -->
         <div class="p-6">
             <div class="flex justify-between items-start mb-4">
                 <h1 class="text-2xl md:text-3xl font-bold">{{ posting.title }}</h1>
                 <div class="flex gap-2">
                     {% if posting.payment_plan == 'featured' %}
-                    <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold"><i class="fas fa-star mr-1"></i> Featured</span>
+                    <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold"><i
+                            class="fas fa-star mr-1"></i> Featured</span>
                     {% endif %}
                     {% if is_expired %}
                     <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold">Expired</span>
                     {% elif posting.is_active %}
-                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold"><i class="fas fa-check-circle mr-1"></i> Active</span>
+                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold"><i
+                            class="fas fa-check-circle mr-1"></i> Active</span>
                     {% else %}
                     <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-semibold">Pending</span>
                     {% endif %}
                 </div>
             </div>
-            
+
             {% if posting.salary_price %}
             <div class="mb-4"><span class="text-2xl font-bold text-blue-600">{{ posting.salary_price }}</span></div>
             {% endif %}
-            
+
             <div class="grid md:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
-                <div><p class="text-gray-500 text-sm">Category</p><p class="font-semibold">{{ posting.category|title }}</p></div>
-                <div><p class="text-gray-500 text-sm">Location</p><p class="font-semibold"><i class="fas fa-map-marker-alt text-gray-500 mr-1"></i> {{ posting.location_city }}</p></div>
-                <div><p class="text-gray-500 text-sm">Posted</p><p class="font-semibold">{{ posting.created_at.strftime('%d %B %Y at %H:%M') }}</p></div>
-                <div><p class="text-gray-500 text-sm">Expires</p><p class="font-semibold">{{ posting.expires_at.strftime('%d %B %Y') }}</p></div>
-                <div><p class="text-gray-500 text-sm">Views</p><p class="font-semibold"><i class="fas fa-eye text-gray-500 mr-1"></i> {{ posting.views_count or 0 }}</p></div>
-                <div><p class="text-gray-500 text-sm">Ad ID</p><p class="font-semibold">#{{ posting.id }}</p></div>
+                <div>
+                    <p class="text-gray-500 text-sm">Category</p>
+                    <p class="font-semibold">{{ posting.category|title }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-sm">Location</p>
+                    <p class="font-semibold"><i class="fas fa-map-marker-alt text-gray-500 mr-1"></i> {{
+                        posting.location_city }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-sm">Posted</p>
+                    <p class="font-semibold">{{ posting.created_at.strftime('%d %B %Y at %H:%M') }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-sm">Expires</p>
+                    <p class="font-semibold">{{ posting.expires_at.strftime('%d %B %Y') }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-sm">Views</p>
+                    <p class="font-semibold"><i class="fas fa-eye text-gray-500 mr-1"></i> {{ posting.views_count or 0
+                        }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-sm">Ad ID</p>
+                    <p class="font-semibold">#{{ posting.id }}</p>
+                </div>
             </div>
-            
+
             <div class="mb-6">
                 <h3 class="text-xl font-bold mb-3">Description</h3>
-                <div class="prose max-w-none"><p class="whitespace-pre-line text-gray-700">{{ posting.description }}</p></div>
+                <div class="prose max-w-none">
+                    <p class="whitespace-pre-line text-gray-700">{{ posting.description }}</p>
+                </div>
             </div>
-            
+
             <div class="border-t pt-6">
                 <h3 class="text-xl font-bold mb-4">Contact Information</h3>
                 <div class="bg-blue-50 rounded-lg p-4">
                     <p class="font-semibold text-lg mb-2">{{ business.company_name if business else 'Business' }}</p>
-                    {% if business and business.phone_number %}<p class="mb-2"><i class="fas fa-phone text-gray-500 mr-1"></i> {{ business.phone_number }}</p>{% endif %}
-                    <p class="mb-2"><i class="fas fa-map-marker-alt text-gray-500 mr-1"></i> {{ business.city if business else posting.location_city }}</p>
-                    {% if business and business.address %}<p class="text-gray-600 text-sm">{{ business.address }}</p>{% endif %}
-                    
+                    {% if business and business.phone_number %}<p class="mb-2"><i
+                            class="fas fa-phone text-gray-500 mr-1"></i> {{ business.phone_number }}</p>{% endif %}
+                    <p class="mb-2"><i class="fas fa-map-marker-alt text-gray-500 mr-1"></i> {{ business.city if
+                        business else posting.location_city }}</p>
+                    {% if business and business.address %}<p class="text-gray-600 text-sm">{{ business.address }}</p>{%
+                    endif %}
+
                     <div class="mt-4 flex flex-col sm:flex-row gap-3">
-                        <button onclick="document.getElementById('contactModal').classList.remove('hidden')" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"><i class="fas fa-envelope mr-1"></i> Contact Seller</button>
+                        <button onclick="document.getElementById('contactModal').classList.remove('hidden')"
+                            class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"><i
+                                class="fas fa-envelope mr-1"></i> Contact Seller</button>
                         {% if current_user.is_authenticated and current_user.user_type == 'client' %}
-                            {% if is_saved %}
-                            <a href="{{ url_for('main.unsave_ad', posting_id=posting.id) }}" class="border border-red-600 text-red-600 px-6 py-2 rounded-lg hover:bg-red-50 transition"><i class="fas fa-bookmark mr-1"></i> Saved (Remove)</a>
-                            {% else %}
-                            <a href="{{ url_for('main.save_ad', posting_id=posting.id) }}" class="border border-blue-600 text-blue-600 px-6 py-2 rounded-lg hover:bg-blue-50 transition"><i class="far fa-bookmark mr-1"></i> Save Ad</a>
-                            {% endif %}
+                        {% if is_saved %}
+                        <a href="{{ url_for('main.unsave_ad', posting_id=posting.id) }}"
+                            class="border border-red-600 text-red-600 px-6 py-2 rounded-lg hover:bg-red-50 transition"><i
+                                class="fas fa-bookmark mr-1"></i> Saved (Remove)</a>
+                        {% else %}
+                        <a href="{{ url_for('main.save_ad', posting_id=posting.id) }}"
+                            class="border border-blue-600 text-blue-600 px-6 py-2 rounded-lg hover:bg-blue-50 transition"><i
+                                class="far fa-bookmark mr-1"></i> Save Ad</a>
+                        {% endif %}
                         {% elif not current_user.is_authenticated %}
-                            <a href="{{ url_for('main.login') }}" class="border border-blue-600 text-blue-600 px-6 py-2 rounded-lg hover:bg-blue-50 transition"><i class="fas fa-sign-in-alt mr-1"></i> Login to Save</a>
+                        <a href="{{ url_for('main.login') }}"
+                            class="border border-blue-600 text-blue-600 px-6 py-2 rounded-lg hover:bg-blue-50 transition"><i
+                                class="fas fa-sign-in-alt mr-1"></i> Login to Save</a>
                         {% endif %}
                     </div>
                 </div>
             </div>
-            
+
             <div class="border-t pt-4 mt-4">
                 <p class="text-sm text-gray-600 mb-3"><i class="fas fa-share-alt mr-1"></i> Share this ad:</p>
                 <div class="flex flex-wrap gap-2">
-                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url|urlencode }}" target="_blank" rel="noopener noreferrer" class="bg-[#1877F2] text-white px-4 py-2 rounded-lg text-sm hover:bg-[#0d6ae0] transition flex items-center gap-2"><i class="fab fa-facebook"></i> Share</a>
-                    <a href="https://wa.me/?text={{ posting.title|urlencode }}%20on%20Eswatini%20Classifieds:%20{{ request.url|urlencode }}" target="_blank" rel="noopener noreferrer" class="bg-[#25D366] text-white px-4 py-2 rounded-lg text-sm hover:bg-[#1faa52] transition flex items-center gap-2"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-                    <a href="https://twitter.com/intent/tweet?text={{ posting.title|urlencode }}&url={{ request.url|urlencode }}" target="_blank" rel="noopener noreferrer" class="bg-[#1DA1F2] text-white px-4 py-2 rounded-lg text-sm hover:bg-[#0c85d0] transition flex items-center gap-2"><i class="fab fa-twitter"></i> Twitter</a>
-                    <button onclick="copyShareLink()" class="bg-gray-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 transition flex items-center gap-2"><i class="fas fa-copy"></i> Copy Link</button>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url|urlencode }}" target="_blank"
+                        rel="noopener noreferrer"
+                        class="bg-[#1877F2] text-white px-4 py-2 rounded-lg text-sm hover:bg-[#0d6ae0] transition flex items-center gap-2"><i
+                            class="fab fa-facebook"></i> Share</a>
+                    <a href="https://wa.me/?text={{ posting.title|urlencode }}%20on%20Eswatini%20Classifieds:%20{{ request.url|urlencode }}"
+                        target="_blank" rel="noopener noreferrer"
+                        class="bg-[#25D366] text-white px-4 py-2 rounded-lg text-sm hover:bg-[#1faa52] transition flex items-center gap-2"><i
+                            class="fab fa-whatsapp"></i> WhatsApp</a>
+                    <a href="https://twitter.com/intent/tweet?text={{ posting.title|urlencode }}&url={{ request.url|urlencode }}"
+                        target="_blank" rel="noopener noreferrer"
+                        class="bg-[#1DA1F2] text-white px-4 py-2 rounded-lg text-sm hover:bg-[#0c85d0] transition flex items-center gap-2"><i
+                            class="fab fa-twitter"></i> Twitter</a>
+                    <button onclick="copyShareLink()"
+                        class="bg-gray-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 transition flex items-center gap-2"><i
+                            class="fas fa-copy"></i> Copy Link</button>
                 </div>
-                <div id="copyMessage" class="hidden mt-2 text-green-600 text-sm"><i class="fas fa-check-circle mr-1"></i> Link copied!</div>
+                <div id="copyMessage" class="hidden mt-2 text-green-600 text-sm"><i
+                        class="fas fa-check-circle mr-1"></i> Link copied!</div>
             </div>
-            
+
             <div class="mt-4 text-right">
-                <button onclick="document.getElementById('reportModal').classList.remove('hidden')" class="text-gray-400 text-sm hover:text-red-600"><i class="fas fa-flag mr-1"></i> Report this ad</button>
+                <button onclick="document.getElementById('reportModal').classList.remove('hidden')"
+                    class="text-gray-400 text-sm hover:text-red-600"><i class="fas fa-flag mr-1"></i> Report this
+                    ad</button>
             </div>
         </div>
     </div>
-    
+
     {% if similar_ads %}
     <div class="mb-8 px-4 md:px-8">
-        <h3 class="text-lg font-semibold text-gray-700 mb-4 pb-2 border-b border-gray-200">Similar Listings in {{ posting.location_city }}</h3>
+        <h3 class="text-lg font-semibold text-gray-700 mb-4 pb-2 border-b border-gray-200">Similar Listings in {{
+            posting.location_city }}</h3>
         <div class="grid md:grid-cols-3 gap-4">
             {% for similar in similar_ads %}
             <a href="{{ url_for('main.view_ad', posting_id=similar.id) }}" class="block">
                 <div class="bg-white rounded-lg shadow hover:shadow-lg transition p-4">
-                    <h4 class="font-semibold mb-2">{{ similar.title[:40] }}{% if similar.title|length > 40 %}...{% endif %}</h4>
-                    {% if similar.salary_price %}<p class="text-blue-600 text-sm mb-2">{{ similar.salary_price }}</p>{% endif %}
+                    <h4 class="font-semibold mb-2">{{ similar.title[:40] }}{% if similar.title|length > 40 %}...{% endif
+                        %}</h4>
+                    {% if similar.salary_price %}<p class="text-blue-600 text-sm mb-2">{{ similar.salary_price }}</p>{%
+                    endif %}
                     <p class="text-gray-500 text-xs">{{ similar.created_at.strftime('%d %b %Y') }}</p>
                 </div>
             </a>
@@ -175,35 +360,46 @@
 </div>
 
 <!-- ============================================ -->
-<!-- CONTACT SELLER MODAL - COMPACT -->
+<!-- CONTACT SELLER MODAL (unchanged) -->
 <!-- ============================================ -->
 <div id="contactModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[80vh] flex flex-col">
         <div class="flex justify-between items-center p-4 border-b flex-shrink-0">
             <h3 class="text-lg font-bold"><i class="fas fa-envelope mr-2"></i> Contact Seller</h3>
-            <button onclick="document.getElementById('contactModal').classList.add('hidden')" class="text-gray-500 hover:text-gray-700 text-2xl leading-none w-8 h-8 flex items-center justify-center">&times;</button>
+            <button onclick="document.getElementById('contactModal').classList.add('hidden')"
+                class="text-gray-500 hover:text-gray-700 text-2xl leading-none w-8 h-8 flex items-center justify-center">&times;</button>
         </div>
         <div class="p-4 overflow-y-auto flex-1">
             <form method="POST" action="{{ url_for('main.contact_seller', posting_id=posting.id) }}">
                 <div class="mb-3">
                     <label class="block text-gray-700 text-sm font-medium mb-1">Your Name *</label>
-                    <input type="text" name="name" required value="{{ current_user.client_profile.full_name if current_user.is_authenticated and current_user.user_type == 'client' else '' }}" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 text-sm">
+                    <input type="text" name="name" required
+                        value="{{ current_user.client_profile.full_name if current_user.is_authenticated and current_user.user_type == 'client' else '' }}"
+                        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 text-sm">
                 </div>
                 <div class="mb-3">
                     <label class="block text-gray-700 text-sm font-medium mb-1">Your Email *</label>
-                    <input type="email" name="email" required value="{{ current_user.email if current_user.is_authenticated else '' }}" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 text-sm">
+                    <input type="email" name="email" required
+                        value="{{ current_user.email if current_user.is_authenticated else '' }}"
+                        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 text-sm">
                 </div>
                 <div class="mb-3">
                     <label class="block text-gray-700 text-sm font-medium mb-1">Phone Number</label>
-                    <input type="tel" name="phone" placeholder="+268 7XXX XXXX" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 text-sm">
+                    <input type="tel" name="phone" placeholder="+268 7XXX XXXX"
+                        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 text-sm">
                 </div>
                 <div class="mb-3">
                     <label class="block text-gray-700 text-sm font-medium mb-1">Message *</label>
-                    <textarea name="message" required rows="3" placeholder="I'm interested in this ad. Please contact me." class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 text-sm resize-none"></textarea>
+                    <textarea name="message" required rows="3"
+                        placeholder="I'm interested in this ad. Please contact me."
+                        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 text-sm resize-none"></textarea>
                 </div>
                 <div class="flex gap-2 pt-2">
-                    <button type="submit" class="flex-1 bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition text-sm font-medium"><i class="fas fa-paper-plane mr-1"></i> Send Message</button>
-                    <button type="button" onclick="document.getElementById('contactModal').classList.add('hidden')" class="px-4 py-2.5 border rounded-lg hover:bg-gray-50 transition text-sm">Cancel</button>
+                    <button type="submit"
+                        class="flex-1 bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition text-sm font-medium"><i
+                            class="fas fa-paper-plane mr-1"></i> Send Message</button>
+                    <button type="button" onclick="document.getElementById('contactModal').classList.add('hidden')"
+                        class="px-4 py-2.5 border rounded-lg hover:bg-gray-50 transition text-sm">Cancel</button>
                 </div>
             </form>
         </div>
@@ -211,19 +407,21 @@
 </div>
 
 <!-- ============================================ -->
-<!-- REPORT AD MODAL - COMPACT -->
+<!-- REPORT AD MODAL (unchanged) -->
 <!-- ============================================ -->
 <div id="reportModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[80vh] flex flex-col">
         <div class="flex justify-between items-center p-4 border-b flex-shrink-0">
             <h3 class="text-lg font-bold"><i class="fas fa-flag text-red-500 mr-2"></i> Report Advertisement</h3>
-            <button onclick="document.getElementById('reportModal').classList.add('hidden')" class="text-gray-500 hover:text-gray-700 text-2xl leading-none w-8 h-8 flex items-center justify-center">&times;</button>
+            <button onclick="document.getElementById('reportModal').classList.add('hidden')"
+                class="text-gray-500 hover:text-gray-700 text-2xl leading-none w-8 h-8 flex items-center justify-center">&times;</button>
         </div>
         <div class="p-4 overflow-y-auto flex-1">
             <form method="POST" action="{{ url_for('main.report_ad', posting_id=posting.id) }}">
                 <div class="mb-3">
                     <label class="block text-gray-700 text-sm font-medium mb-1">Reason for Report *</label>
-                    <select name="reason" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 text-sm">
+                    <select name="reason" required
+                        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 text-sm">
                         <option value="">-- Select a reason --</option>
                         <option value="spam">Spam or misleading</option>
                         <option value="inappropriate">Inappropriate content</option>
@@ -235,11 +433,15 @@
                 </div>
                 <div class="mb-3">
                     <label class="block text-gray-700 text-sm font-medium mb-1">Additional Details</label>
-                    <textarea name="details" rows="3" placeholder="Please provide more information..." class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 text-sm resize-none"></textarea>
+                    <textarea name="details" rows="3" placeholder="Please provide more information..."
+                        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 text-sm resize-none"></textarea>
                 </div>
                 <div class="flex gap-2 pt-2">
-                    <button type="submit" class="flex-1 bg-red-600 text-white py-2.5 rounded-lg hover:bg-red-700 transition text-sm font-medium"><i class="fas fa-paper-plane mr-1"></i> Submit Report</button>
-                    <button type="button" onclick="document.getElementById('reportModal').classList.add('hidden')" class="px-4 py-2.5 border rounded-lg hover:bg-gray-50 transition text-sm">Cancel</button>
+                    <button type="submit"
+                        class="flex-1 bg-red-600 text-white py-2.5 rounded-lg hover:bg-red-700 transition text-sm font-medium"><i
+                            class="fas fa-paper-plane mr-1"></i> Submit Report</button>
+                    <button type="button" onclick="document.getElementById('reportModal').classList.add('hidden')"
+                        class="px-4 py-2.5 border rounded-lg hover:bg-gray-50 transition text-sm">Cancel</button>
                 </div>
             </form>
         </div>
@@ -247,13 +449,13 @@
 </div>
 
 <script>
-function copyShareLink() {
-    navigator.clipboard.writeText(window.location.href).then(() => {
-        const msg = document.getElementById('copyMessage');
-        msg.classList.remove('hidden');
-        setTimeout(() => msg.classList.add('hidden'), 2000);
-    });
-}
+    function copyShareLink() {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            const msg = document.getElementById('copyMessage');
+            msg.classList.remove('hidden');
+            setTimeout(() => msg.classList.add('hidden'), 2000);
+        });
+    }
 </script>
 
 {% endblock %}
