@@ -1,21 +1,159 @@
 {% extends "base.html" %}
 {% block title %}Blog - Eswatini Classifieds{% endblock %}
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold mb-8"><i class="fas fa-blog mr-2"></i>Our Blog</h1>
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-8 text-center md:text-left">
+        <i class="fas fa-blog text-blue-600 mr-2"></i>Our Blog
+    </h1>
+
     {% if posts %}
     {% for post in posts %}
-    <article class="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 class="text-2xl font-bold mb-2">{{ post.title }}</h2>
-        <p class="text-sm text-gray-500 mb-4">
-            By {{ post.author.email if post.author else 'Eswatini Classifieds' }} on {{ post.created_at.strftime('%d %B
-            %Y') }}
-        </p>
-        <div class="prose max-w-none">{{ post.content | safe }}</div>
+    <article
+        class="bg-white rounded-2xl shadow-lg overflow-hidden mb-10 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1">
+        <!-- Post header -->
+        <div class="p-6 pb-3">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">{{ post.title }}</h2>
+            <p class="text-sm text-gray-500 mb-3 flex items-center gap-2">
+                <i class="fas fa-user-circle"></i>
+                {{ post.author.email if post.author else 'Eswatini Classifieds' }}
+                <span class="mx-1">•</span>
+                <i class="far fa-calendar-alt"></i>
+                {{ post.created_at.strftime('%d %B %Y') }}
+            </p>
+        </div>
+
+        <!-- Media gallery (if any) -->
+        {% if post.media %}
+        <div class="media-gallery px-6 pb-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {% for media in post.media %}
+                <div class="media-item relative overflow-hidden rounded-xl shadow-md transition-all duration-300 hover:shadow-lg hover:scale-[1.02] group cursor-pointer"
+                    data-url="{{ media.file_url }}" data-type="{{ media.file_type }}">
+                    {% if media.file_type == 'image' %}
+                    <img src="{{ media.file_url }}" alt="Blog image"
+                        class="w-full h-48 object-cover transition duration-500 group-hover:scale-105" loading="lazy">
+                    <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-30 transition"></div>
+                    <div
+                        class="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                        <i class="fas fa-expand"></i> <span>Zoom</span>
+                    </div>
+                    {% elif media.file_type == 'video' %}
+                    <video controls class="w-full h-48 object-cover rounded-xl">
+                        <source src="{{ media.file_url }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    {% else %}
+                    <div class="w-full h-48 bg-gray-100 flex items-center justify-center rounded-xl">
+                        <i class="fas fa-file fa-3x text-gray-400"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Post content -->
+        <div class="p-6 pt-0">
+            <div class="prose max-w-none text-gray-700 leading-relaxed">
+                {{ post.content | safe }}
+            </div>
+        </div>
     </article>
     {% endfor %}
     {% else %}
-    <p class="text-gray-500 text-center py-12">No blog posts yet. Check back soon!</p>
+    <div class="bg-blue-50 border border-blue-200 rounded-2xl p-12 text-center">
+        <i class="fas fa-newspaper text-5xl text-blue-400 mb-4"></i>
+        <p class="text-gray-600 text-lg">No blog posts yet. Check back soon!</p>
+    </div>
     {% endif %}
 </div>
+
+<!-- Lightbox Modal (for images) -->
+<div id="lightbox"
+    class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden items-center justify-center p-4 transition-all duration-300">
+    <button id="closeLightbox"
+        class="absolute top-4 right-6 text-white text-4xl hover:text-gray-300 transition">&times;</button>
+    <img id="lightboxImg" src="" alt="Full size image"
+        class="max-w-full max-h-full object-contain rounded-lg shadow-2xl">
+</div>
+
+<!-- Lazy loading and lightbox script -->
+<script>
+    // Lazy loading already handled by loading="lazy" attribute
+
+    // Lightbox functionality
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const closeLightbox = document.getElementById('closeLightbox');
+
+    // Add click event to all image media items
+    document.querySelectorAll('.media-item[data-type="image"]').forEach(item => {
+        item.addEventListener('click', () => {
+            const imgUrl = item.getAttribute('data-url');
+            lightboxImg.src = imgUrl;
+            lightbox.classList.remove('hidden');
+            lightbox.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        });
+    });
+
+    // Close lightbox
+    function closeModal() {
+        lightbox.classList.add('hidden');
+        lightbox.classList.remove('flex');
+        lightboxImg.src = '';
+        document.body.style.overflow = 'auto';
+    }
+
+    closeLightbox.addEventListener('click', closeModal);
+    lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !lightbox.classList.contains('hidden')) closeModal();
+    });
+
+    // Additional fade-in animation for articles
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('opacity-100', 'translate-y-0');
+                entry.target.classList.remove('opacity-0', 'translate-y-8');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('article').forEach(article => {
+        article.classList.add('transition-all', 'duration-700', 'opacity-0', 'translate-y-8');
+        observer.observe(article);
+    });
+</script>
+
+<style>
+    /* Ensure videos are responsive */
+    .media-item video {
+        background-color: #000;
+    }
+
+    .prose {
+        line-height: 1.75;
+        font-size: 1rem;
+    }
+
+    .prose p {
+        margin-bottom: 1.25em;
+    }
+
+    .media-gallery .grid {
+        gap: 1rem;
+    }
+
+    @media (max-width: 640px) {
+        .media-gallery .grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
 {% endblock %}

@@ -11,10 +11,13 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    overflow-x: hidden;
+    /* Prevents horizontal shift from any overflowing element */
 }
 
 html {
-    scroll-behavior: smooth;
+    overflow-y: scroll;
+    /* Always show vertical scrollbar to avoid width shift */
 }
 
 /* ============================================ */
@@ -69,7 +72,7 @@ a {
     flex-direction: column;
     height: 100%;
     width: 100%;
-    min-width: 0; /* Prevents overflow issues */
+    min-width: 0;
     background: #fff;
     border-radius: 0.5rem;
     overflow: hidden;
@@ -83,42 +86,37 @@ a {
 .ad-image-container {
     width: 100%;
     position: relative;
-    background-color: #f3f4f6; /* Light gray background while loading */
+    background-color: #f3f4f6;
     overflow: hidden;
 }
 
-/* Different aspect ratios for different devices - images won't be cut off */
 .card-image-container {
     aspect-ratio: 16 / 9;
 }
 
-/* Image styling - CONTAIN instead of COVER to prevent cutting off */
 .card-image-container img,
 .product-image-container img,
 .ad-image-container img {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* Changed from 'cover' to 'contain' - shows entire image */
+    object-fit: contain;
     object-position: center;
-    background-color: #f3f4f6; /* Background color for transparent areas */
+    background-color: #f3f4f6;
 }
 
-/* Alternative: Use 'cover' with smart positioning if you prefer fill */
 .card-image-container img.cover-fit,
 .product-image-container img.cover-fit,
 .ad-image-container img.cover-fit {
-    object-fit: cover; /* Use this class if you want images to fill the box */
+    object-fit: cover;
     object-position: center;
 }
 
-/* For important images that must show completely without any cutoff */
 .card-image-container img.contain-fit,
 .product-image-container img.contain-fit,
 .ad-image-container img.contain-fit {
     object-fit: contain;
 }
 
-/* Background image fallback for product images */
 .card-image-container.has-bg-image,
 .product-image-container.has-bg-image,
 .ad-image-container.has-bg-image {
@@ -127,9 +125,7 @@ a {
     background-repeat: no-repeat;
 }
 
-/* ============================================ */
-/* ENHANCED IMAGE QUALITY
-/* ============================================ */
+/* Enhanced image quality */
 .card-image-container img,
 .product-image-container img,
 .ad-image-container img {
@@ -138,8 +134,9 @@ a {
     image-rendering: high-quality;
 }
 
-/* For high DPI screens (Retina) */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+
     .card-image-container img,
     .product-image-container img,
     .ad-image-container img {
@@ -147,7 +144,6 @@ a {
     }
 }
 
-/* Consistent card content area */
 .card-content,
 .product-content,
 .ad-content {
@@ -157,7 +153,6 @@ a {
     padding: 1rem;
 }
 
-/* Fix for grid layouts to ensure equal height cards */
 .grid-container,
 .products-grid,
 .ads-grid {
@@ -166,17 +161,15 @@ a {
     gap: 1.5rem;
 }
 
-/* Ensure all cards in grid have same height */
-.grid-container > *,
-.products-grid > *,
-.ads-grid > * {
+.grid-container>*,
+.products-grid>*,
+.ads-grid>* {
     height: 100%;
 }
 
 /* ============================================ */
 /* FIXED NAVIGATION FOR MOBILE - PREVENTS ITEMS STACKING
 /* ============================================ */
-/* Desktop navigation */
 .nav-container,
 .main-nav {
     display: flex;
@@ -194,16 +187,14 @@ a {
     flex-wrap: wrap;
 }
 
-/* Mobile navigation fixes */
 @media (max-width: 768px) {
-    /* Hamburger menu approach - prevents stacking */
+
     .nav-container,
     .main-nav {
         flex-direction: column;
         align-items: stretch;
     }
-    
-    /* If using mobile menu button */
+
     .nav-toggle {
         display: block;
         position: absolute;
@@ -211,8 +202,7 @@ a {
         right: 1rem;
         z-index: 1000;
     }
-    
-    /* Hidden menu by default on mobile */
+
     .nav-links,
     .nav-menu {
         display: none;
@@ -220,14 +210,12 @@ a {
         width: 100%;
         gap: 0.5rem;
     }
-    
-    /* Show menu when active */
+
     .nav-links.active,
     .nav-menu.active {
         display: flex;
     }
-    
-    /* Make nav items full width on mobile */
+
     .nav-links a,
     .nav-menu a,
     .nav-links button,
@@ -236,28 +224,27 @@ a {
         text-align: center;
         padding: 0.75rem;
     }
-    
-    /* Alternative: Horizontal scroll for nav if needed */
+
     .nav-scrollable {
         overflow-x: auto;
         overflow-y: hidden;
         white-space: nowrap;
         -webkit-overflow-scrolling: touch;
     }
-    
+
     .nav-scrollable .nav-links {
         display: inline-flex;
         flex-wrap: nowrap;
     }
 }
 
-/* For tablet navigation */
 @media (min-width: 769px) and (max-width: 1024px) {
+
     .nav-links,
     .nav-menu {
         gap: 0.75rem;
     }
-    
+
     .nav-links a,
     .nav-menu a,
     .nav-links button,
@@ -268,31 +255,29 @@ a {
 }
 
 /* ============================================ */
-/* RESPONSIVE GRID FIXES FOR LAPTOP AND TABLET
+/* RESPONSIVE GRID FIXES
 /* ============================================ */
-/* Laptop view (1024px to 1366px) */
 @media (min-width: 1024px) and (max-width: 1366px) {
+
     .grid-container,
     .products-grid,
     .ads-grid {
         grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
         gap: 1.25rem;
     }
-    
-    /* Adjust card sizes for laptop */
+
     .card,
     .product-card,
     .ad-card {
         font-size: 0.95rem;
     }
-    
+
     .card-content,
     .product-content,
     .ad-content {
         padding: 0.875rem;
     }
-    
-    /* Maintain aspect ratio for laptop */
+
     .card-image-container,
     .product-image-container,
     .ad-image-container {
@@ -300,29 +285,27 @@ a {
     }
 }
 
-/* Tablet view (768px to 1024px) */
 @media (min-width: 768px) and (max-width: 1024px) {
+
     .grid-container,
     .products-grid,
     .ads-grid {
         grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
         gap: 1rem;
     }
-    
-    /* Consistent card sizing on tablet */
+
     .card,
     .product-card,
     .ad-card {
         font-size: 0.9rem;
     }
-    
+
     .card-content,
     .product-content,
     .ad-content {
         padding: 0.75rem;
     }
-    
-    /* Fix image container sizes on tablet - show full image */
+
     .card-image-container,
     .product-image-container,
     .ad-image-container {
@@ -330,31 +313,29 @@ a {
     }
 }
 
-/* Mobile view (below 768px) */
 @media (max-width: 767px) {
+
     .grid-container,
     .products-grid,
     .ads-grid {
-        grid-template-columns: 1fr; /* Single column on mobile */
+        grid-template-columns: 1fr;
         gap: 1rem;
         padding: 0 1rem;
     }
-    
-    /* Consistent card sizing on mobile */
+
     .card,
     .product-card,
     .ad-card {
         max-width: 100%;
         margin: 0 auto;
     }
-    
+
     .card-content,
     .product-content,
     .ad-content {
         padding: 0.75rem;
     }
-    
-    /* Adjust image aspect ratio for mobile - shows full image */
+
     .card-image-container,
     .product-image-container,
     .ad-image-container {
@@ -362,9 +343,7 @@ a {
     }
 }
 
-/* ============================================ */
-/* FLEXBOX FALLBACK FOR CONSISTENT CARD HEIGHTS
-/* ============================================ */
+/* Flexbox fallback */
 .flex-grid {
     display: flex;
     flex-wrap: wrap;
@@ -378,14 +357,11 @@ a {
     min-width: 250px;
 }
 
-/* Ensure consistent height in flexbox layout */
-.flex-grid-item > * {
+.flex-grid-item>* {
     height: 100%;
 }
 
-/* ============================================ */
-/* PREVENT CONTENT OVERFLOW
-/* ============================================ */
+/* Prevent content overflow */
 .card-title,
 .product-title,
 .ad-title {
@@ -403,7 +379,6 @@ a {
     overflow: hidden;
 }
 
-/* For multi-line truncation fallback */
 .card-description.truncate,
 .product-description.truncate,
 .ad-description.truncate {
@@ -412,9 +387,7 @@ a {
     position: relative;
 }
 
-/* ============================================ */
-/* IMAGE HOVER ZOOM - IMPROVED
-/* ============================================ */
+/* Image hover zoom */
 .image-zoom {
     overflow: hidden;
     position: relative;
@@ -424,7 +397,7 @@ a {
     transition: transform 0.5s ease;
     width: 100%;
     height: 100%;
-    object-fit: contain; /* Maintains image integrity on zoom */
+    object-fit: contain;
 }
 
 .image-zoom:hover img {
@@ -432,13 +405,14 @@ a {
 }
 
 /* ============================================ */
-/* FADE IN ANIMATION
+/* ANIMATIONS
 /* ============================================ */
 @keyframes fadeIn {
     from {
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -464,39 +438,15 @@ a {
     opacity: 0;
 }
 
-/* ============================================ */
-/* SLIDE IN ANIMATIONS
-/* ============================================ */
 @keyframes slideInLeft {
     from {
         opacity: 0;
         transform: translateX(-30px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
-    }
-}
-
-@keyframes slideInRight {
-    from {
-        opacity: 0;
-        transform: translateX(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
     }
 }
 
@@ -504,21 +454,45 @@ a {
     animation: slideInLeft 0.5s ease forwards;
 }
 
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
 .slide-in-right {
     animation: slideInRight 0.5s ease forwards;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .slide-in-up {
     animation: slideInUp 0.5s ease forwards;
 }
 
-/* ============================================ */
-/* PULSE ANIMATIONS
-/* ============================================ */
 @keyframes pulse-slow {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 1;
     }
+
     50% {
         opacity: 0.5;
     }
@@ -529,9 +503,12 @@ a {
 }
 
 @keyframes pulse-glow {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
     }
+
     50% {
         box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
     }
@@ -541,13 +518,13 @@ a {
     animation: pulse-glow 2s ease-in-out infinite;
 }
 
-/* ============================================ */
-/* BOUNCE ANIMATION
-/* ============================================ */
 @keyframes bounce {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0);
     }
+
     50% {
         transform: translateY(-5px);
     }
@@ -557,17 +534,25 @@ a {
     animation: bounce 1s ease infinite;
 }
 
-/* ============================================ */
-/* SHAKE ANIMATION (FOR ERRORS)
-/* ============================================ */
 @keyframes shake {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateX(0);
     }
-    10%, 30%, 50%, 70%, 90% {
+
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
         transform: translateX(-5px);
     }
-    20%, 40%, 60%, 80% {
+
+    20%,
+    40%,
+    60%,
+    80% {
         transform: translateX(5px);
     }
 }
@@ -576,13 +561,11 @@ a {
     animation: shake 0.5s ease;
 }
 
-/* ============================================ */
-/* SPIN ANIMATION
-/* ============================================ */
 @keyframes spin {
     from {
         transform: rotate(0deg);
     }
+
     to {
         transform: rotate(360deg);
     }
@@ -592,9 +575,7 @@ a {
     animation: spin 3s linear infinite;
 }
 
-/* ============================================ */
-/* BUTTON HOVER EFFECTS
-/* ============================================ */
+/* Button hover effects */
 .btn-hover-slide {
     position: relative;
     overflow: hidden;
@@ -633,14 +614,15 @@ a {
     transform: scale(0.95);
 }
 
-/* ============================================ */
-/* FEATURED AD GLOW EFFECT
-/* ============================================ */
+/* Featured ad glow */
 @keyframes featuredGlow {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 0 10px rgba(234, 179, 8, 0.3), 0 0 20px rgba(234, 179, 8, 0.2);
         border-color: rgba(234, 179, 8, 0.5);
     }
+
     50% {
         box-shadow: 0 0 20px rgba(234, 179, 8, 0.5), 0 0 30px rgba(234, 179, 8, 0.3);
         border-color: rgba(234, 179, 8, 0.8);
@@ -651,13 +633,12 @@ a {
     animation: featuredGlow 2s ease-in-out infinite;
 }
 
-/* ============================================ */
-/* SKELETON LOADING ANIMATION
-/* ============================================ */
+/* Skeleton loading */
 @keyframes skeleton {
     0% {
         background-position: -200px 0;
     }
+
     100% {
         background-position: calc(200px + 100%) 0;
     }
@@ -669,7 +650,6 @@ a {
     animation: skeleton 1.5s ease-in-out infinite;
 }
 
-/* Skeleton for images */
 .image-skeleton {
     position: absolute;
     top: 0;
@@ -681,9 +661,7 @@ a {
     animation: skeleton 1.5s ease-in-out infinite;
 }
 
-/* ============================================ */
-/* MODAL TRANSITIONS
-/* ============================================ */
+/* Modal transitions */
 .modal-enter {
     opacity: 0;
     transform: scale(0.95);
@@ -706,9 +684,7 @@ a {
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-/* ============================================ */
-/* RIPPLE EFFECT FOR BUTTONS
-/* ============================================ */
+/* Ripple effect */
 .ripple {
     position: relative;
     overflow: hidden;
@@ -734,9 +710,7 @@ a {
     transition: 0s;
 }
 
-/* ============================================ */
-/* FLOATING LABEL ANIMATION
-/* ============================================ */
+/* Floating label */
 .floating-label-group {
     position: relative;
 }
@@ -753,21 +727,20 @@ a {
     padding: 0 4px;
 }
 
-.floating-input:focus + .floating-label,
-.floating-input:not(:placeholder-shown) + .floating-label {
+.floating-input:focus+.floating-label,
+.floating-input:not(:placeholder-shown)+.floating-label {
     top: 0;
     transform: translateY(-50%) scale(0.85);
     color: #3b82f6;
 }
 
-/* ============================================ */
-/* TOAST NOTIFICATION SLIDE
-/* ============================================ */
+/* Toast notifications */
 @keyframes toastSlideIn {
     from {
         opacity: 0;
         transform: translateX(100%);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -779,6 +752,7 @@ a {
         opacity: 1;
         transform: translateX(0);
     }
+
     to {
         opacity: 0;
         transform: translateX(100%);
@@ -793,22 +767,24 @@ a {
     animation: toastSlideOut 0.3s ease forwards;
 }
 
-/* ============================================ */
-/* HEART BEAT ANIMATION (FOR SAVE BUTTON)
-/* ============================================ */
+/* Heart beat */
 @keyframes heartBeat {
     0% {
         transform: scale(1);
     }
+
     14% {
         transform: scale(1.3);
     }
+
     28% {
         transform: scale(1);
     }
+
     42% {
         transform: scale(1.3);
     }
+
     70% {
         transform: scale(1);
     }
@@ -818,13 +794,12 @@ a {
     animation: heartBeat 1s ease;
 }
 
-/* ============================================ */
-/* CHECKMARK DRAW ANIMATION
-/* ============================================ */
+/* Checkmark draw */
 @keyframes checkmark {
     0% {
         stroke-dashoffset: 100;
     }
+
     100% {
         stroke-dashoffset: 0;
     }
@@ -842,16 +817,16 @@ a {
     animation: checkmark 0.3s ease-out 0.3s forwards;
 }
 
-/* ============================================ */
-/* GRADIENT TEXT ANIMATION
-/* ============================================ */
+/* Gradient text */
 @keyframes gradientShift {
     0% {
         background-position: 0% 50%;
     }
+
     50% {
         background-position: 100% 50%;
     }
+
     100% {
         background-position: 0% 50%;
     }
@@ -866,9 +841,7 @@ a {
     animation: gradientShift 3s ease infinite;
 }
 
-/* ============================================ */
-/* IMAGE GALLERY TRANSITIONS
-/* ============================================ */
+/* Image gallery transitions */
 .gallery-image {
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
@@ -883,7 +856,6 @@ a {
     transform: scale(1);
 }
 
-/* Thumbnail hover effect */
 .thumbnail-hover {
     transition: transform 0.2s ease, border-color 0.2s ease;
 }
@@ -893,14 +865,11 @@ a {
     border-color: #3b82f6 !important;
 }
 
-/* Lightbox transition */
 .lightbox-transition {
     transition: opacity 0.3s ease;
 }
 
-/* ============================================ */
-/* PAGE TRANSITIONS
-/* ============================================ */
+/* Page transitions */
 .page-enter {
     opacity: 0;
 }
@@ -919,9 +888,7 @@ a {
     transition: opacity 0.3s ease;
 }
 
-/* ============================================ */
-/* SCROLL REVEAL
-/* ============================================ */
+/* Scroll reveal */
 .scroll-reveal {
     opacity: 0;
     transform: translateY(20px);
@@ -933,9 +900,7 @@ a {
     transform: translateY(0);
 }
 
-/* ============================================ */
-/* LOADING SPINNER
-/* ============================================ */
+/* Loading spinner */
 .spinner {
     width: 40px;
     height: 40px;
@@ -945,9 +910,7 @@ a {
     animation: spin 1s linear infinite;
 }
 
-/* ============================================ */
-/* CUSTOM SCROLLBAR
-/* ============================================ */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -967,34 +930,37 @@ a {
     background: #555;
 }
 
-/* ============================================ */
-/* RESPONSIVE FONT SIZES
-/* ============================================ */
+/* Responsive font sizes */
 @media (max-width: 640px) {
     h1 {
         font-size: 1.75rem;
     }
+
     h2 {
         font-size: 1.5rem;
     }
+
     h3 {
         font-size: 1.25rem;
     }
 }
 
-/* ============================================ */
-/* PRINT STYLES
-/* ============================================ */
+/* Print styles */
 @media print {
-    header, footer, nav, button, .no-print {
+
+    header,
+    footer,
+    nav,
+    button,
+    .no-print {
         display: none !important;
     }
-    
+
     body {
         background: white;
         color: black;
     }
-    
+
     a {
         text-decoration: none;
         color: black;
@@ -1004,8 +970,6 @@ a {
 /* ============================================ */
 /* MODERN ADVERTISING MARKETPLACE LAYOUT
 /* ============================================ */
-
-/* Hero Banner */
 .hero-banner {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
     position: relative;
@@ -1023,9 +987,14 @@ a {
     opacity: 0.5;
 }
 
-/* ============================================ */
-/* FEATURED CAROUSEL - AUTO-ROTATING SLIDER
-/* ============================================ */
+.hero-banner,
+.premium-footer,
+.search-section,
+.stats-banner {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
 .featured-carousel {
     position: relative;
     overflow: hidden;
@@ -1047,7 +1016,6 @@ a {
     animation: scrollCarousel 30s linear infinite;
 }
 
-/* Pause animation on hover */
 .carousel-container:hover .carousel-track {
     animation-play-state: paused;
 }
@@ -1056,6 +1024,7 @@ a {
     0% {
         transform: translateX(0);
     }
+
     100% {
         transform: translateX(calc(-280px * 6 - 1.5rem * 6));
     }
@@ -1070,7 +1039,6 @@ a {
     transform: translateY(-8px);
 }
 
-/* Featured Card - Premium Look */
 .featured-card {
     background: white;
     border-radius: 16px;
@@ -1104,9 +1072,6 @@ a {
     box-shadow: 0 4px 10px rgba(255, 209, 0, 0.3);
 }
 
-/* ============================================ */
-/* MODERN AD CARD
-/* ============================================ */
 .modern-ad-card {
     background: white;
     border-radius: 16px;
@@ -1124,7 +1089,6 @@ a {
     transform: translateY(-4px);
 }
 
-/* Image Container - FIXED HEIGHT, NO CUTOFF */
 .modern-card-image {
     height: 200px;
     width: 100%;
@@ -1149,7 +1113,6 @@ a {
     transform: scale(1.08);
 }
 
-/* Category Tag */
 .card-category-tag {
     position: absolute;
     top: 12px;
@@ -1166,7 +1129,6 @@ a {
     z-index: 10;
 }
 
-/* Card Content */
 .modern-card-content {
     padding: 1.25rem;
     flex: 1;
@@ -1224,9 +1186,6 @@ a {
     margin-top: auto;
 }
 
-/* ============================================ */
-/* SECTION HEADERS
-/* ============================================ */
 .section-header {
     display: flex;
     align-items: center;
@@ -1266,9 +1225,6 @@ a {
     gap: 0.75rem;
 }
 
-/* ============================================ */
-/* CATEGORY PILLS - INTERACTIVE
-/* ============================================ */
 .category-pill {
     display: inline-flex;
     align-items: center;
@@ -1276,7 +1232,7 @@ a {
     padding: 0.75rem 1.5rem;
     background: white;
     border-radius: 50px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
     border: 1px solid #e2e8f0;
     font-weight: 500;
@@ -1296,9 +1252,6 @@ a {
     border-color: #3A75C4;
 }
 
-/* ============================================ */
-/* STATS BANNER
-/* ============================================ */
 .stats-banner {
     background: linear-gradient(135deg, #3A75C4 0%, #1e40af 100%);
     border-radius: 24px;
@@ -1315,7 +1268,7 @@ a {
     right: -10%;
     width: 300px;
     height: 300px;
-    background: radial-gradient(circle, rgba(255,209,0,0.2) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255, 209, 0, 0.2) 0%, transparent 70%);
     border-radius: 50%;
 }
 
@@ -1336,43 +1289,35 @@ a {
     letter-spacing: 1px;
 }
 
-/* ============================================ */
-/* RESPONSIVE FIXES
-/* ============================================ */
+/* Responsive fixes */
 @media (max-width: 768px) {
     .carousel-slide {
         flex: 0 0 260px;
     }
-    
+
     .modern-card-image {
         height: 160px;
     }
-    
+
     .section-title {
         font-size: 1.5rem;
     }
-    
+
     .stats-banner {
         padding: 1.5rem;
     }
-    
+
     .stat-number {
         font-size: 1.75rem;
     }
 }
 
-/* ============================================ */
-/* LOADING STATES
-/* ============================================ */
 .image-loading {
     background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
     background-size: 200% 100%;
     animation: skeleton 1.5s ease-in-out infinite;
 }
 
-/* ============================================ */
-/* QUICK ACTIONS
-/* ============================================ */
 .quick-save-btn {
     position: absolute;
     top: 12px;
@@ -1384,7 +1329,7 @@ a {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     cursor: pointer;
     transition: all 0.2s ease;
     z-index: 20;
@@ -1404,10 +1349,8 @@ a {
 }
 
 /* ============================================ */
-/* PREMIUM NAVIGATION - ADD TO EXISTING CSS
+/* PREMIUM NAVIGATION
 /* ============================================ */
-
-/* Design Tokens */
 :root {
     --primary-blue: #3A75C4;
     --primary-yellow: #FFD100;
@@ -1428,9 +1371,6 @@ a {
     --radius-full: 9999px;
 }
 
-/* ============================================ */
-/* PREMIUM NAVIGATION BAR
-/* ============================================ */
 .premium-nav {
     background: linear-gradient(135deg, var(--dark-bg) 0%, #1e293b 100%);
     position: sticky;
@@ -1449,7 +1389,6 @@ a {
     height: 70px;
 }
 
-/* Logo */
 .nav-logo {
     display: flex;
     align-items: center;
@@ -1481,7 +1420,6 @@ a {
     text-transform: uppercase;
 }
 
-/* Navigation Links */
 .nav-links {
     display: flex;
     align-items: center;
@@ -1525,7 +1463,6 @@ a {
     width: 80%;
 }
 
-/* Post Ad CTA Button */
 .nav-cta {
     background: linear-gradient(135deg, var(--primary-yellow), #FFA500);
     color: var(--dark-bg) !important;
@@ -1546,7 +1483,6 @@ a {
     display: none !important;
 }
 
-/* User Menu */
 .user-menu-wrapper {
     position: relative;
 }
@@ -1687,7 +1623,6 @@ a {
     margin: 0.25rem 0;
 }
 
-/* Mobile Menu */
 .mobile-menu-toggle {
     display: none;
     flex-direction: column;
@@ -1840,7 +1775,6 @@ a {
     color: var(--dark-bg) !important;
 }
 
-/* Search Bar */
 .search-section {
     background: white;
     border-bottom: 1px solid var(--gray-200);
@@ -1926,28 +1860,27 @@ a {
     box-shadow: var(--shadow-lg);
 }
 
-/* Responsive Navigation */
 @media (max-width: 768px) {
     .nav-links {
         display: none;
     }
-    
+
     .mobile-menu-toggle {
         display: flex;
     }
-    
+
     .nav-container {
         height: 60px;
     }
-    
+
     .search-section {
         top: 60px;
     }
-    
+
     .search-form {
         flex-direction: column;
     }
-    
+
     .search-select {
         width: 100%;
     }
@@ -1957,12 +1890,12 @@ a {
     .nav-link span {
         display: none;
     }
-    
+
     .nav-link i {
         margin-right: 0;
         font-size: 1.1rem;
     }
-    
+
     .nav-cta span {
         display: inline !important;
     }
@@ -2060,9 +1993,7 @@ a {
     font-size: 0.875rem;
 }
 
-/* ============================================ */
-/* FLASH MESSAGES
-/* ============================================ */
+/* Flash messages */
 .flash-message {
     display: flex;
     align-items: center;
@@ -2119,15 +2050,13 @@ a {
         opacity: 0;
         transform: translateY(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
 
-/* ============================================ */
-/* TOAST NOTIFICATIONS
-/* ============================================ */
 .toast-notification {
     position: fixed;
     bottom: 20px;
@@ -2162,15 +2091,14 @@ a {
         opacity: 0;
         transform: translateX(100%);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
     }
 }
 
-/* ============================================ */
-/* UTILITY CLASSES
-/* ============================================ */
+/* Utility classes */
 .container {
     max-width: 1280px;
     margin: 0 auto;
@@ -2192,17 +2120,12 @@ a {
     background: linear-gradient(135deg, var(--primary-blue) 0%, #1e40af 100%);
 }
 
-/* ============================================ */
-/* CONTENT BREATHING ROOM
-/* ============================================ */
-
-/* All main content gets side padding */
-main > *:not(.hero-banner):not(.premium-footer):not(.search-section):not(.stats-banner .stats-banner) {
+/* CONTENT BREATHING ROOM */
+main {
     padding-left: 1.5rem;
     padding-right: 1.5rem;
 }
 
-/* Grid containers should not have extra padding */
 .product-grid,
 .grid-container,
 .ads-grid {
@@ -2210,14 +2133,12 @@ main > *:not(.hero-banner):not(.premium-footer):not(.search-section):not(.stats-
     padding-right: 0 !important;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
     .container {
         padding: 0 1rem;
     }
-    
+
     main {
         padding: 1.5rem 1rem;
     }
 }
-

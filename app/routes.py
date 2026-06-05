@@ -6,6 +6,7 @@ from app import db
 from app.models import (
     BlogPost,
     ContactInquiry,
+    ProductPackage,
     User,
     BusinessProfile,
     ClientProfile,
@@ -26,6 +27,7 @@ from app.models import (
     ForumThread,
     ForumReply,
     Feedback,
+    PostMedia,
 )
 from datetime import datetime, timedelta
 from app.email_utils import (
@@ -1103,7 +1105,32 @@ def add_calendar_event():
 @admin_required
 def manage_milestones():
     milestones = Milestone.query.order_by(Milestone.status.asc()).all()
-    return render_template('admin/milestones.html', milestones=milestones)
+    contractors = Contractor.query.all()  # <-- add this line
+    return render_template('admin/milestones.html', milestones=milestones, contractors=contractors)
+
+@main.route('/team/milestone/create', methods=['POST'])
+@admin_required
+def create_milestone():
+    contractor_id = request.form.get('contractor_id')
+    name = request.form.get('name')
+    description = request.form.get('description')
+    amount = request.form.get('amount')
+
+    if not contractor_id or not name or not amount:
+        flash('Contractor, name and amount are required.', 'error')
+        return redirect(url_for('main.manage_milestones'))
+
+    milestone = Milestone(
+        contractor_id=contractor_id,
+        name=name,
+        description=description,
+        amount=float(amount),
+        status='pending'
+    )
+    db.session.add(milestone)
+    db.session.commit()
+    flash(f'Milestone "{name}" assigned to contractor.', 'success')
+    return redirect(url_for('main.manage_milestones'))
 
 @main.route('/team/milestone/update/<int:milestone_id>', methods=['POST'])
 @admin_required
@@ -1726,17 +1753,13 @@ def ping():
 @main.route('/contractor/dashboard')
 @login_required
 def contractor_dashboard():
-    # Check if current user is a registered contractor
     contractor = Contractor.query.filter_by(email=current_user.email).first()
     if not contractor:
-        flash('You are not authorized to access the contractor dashboard.', 'error')
+        flash('You are not authorized.', 'error')
         return redirect(url_for('main.home'))
-
-    # Fetch milestones, commissions, reports for this contractor
     milestones = Milestone.query.filter_by(contractor_id=contractor.id).all()
-    commissions = Commission.query.filter_by(contractor_id=contractor.id).order_by(Commission.created_at.desc()).all()
+    commissions = Commission.query.filter_by(contractor_id=contractor.id).all()
     reports = WeeklyReport.query.filter_by(contractor_id=contractor.id).order_by(WeeklyReport.week_ending.desc()).all()
-
     return render_template('contractor/dashboard.html',
                            contractor=contractor,
                            milestones=milestones,
@@ -1808,16 +1831,6 @@ def contractor_lead_capture(contractor):
         return redirect(url_for('main.contractor_lead_capture'))
     return render_template('contractor/lead_capture.html')
 
-@main.route('/contractor/product-catalog')
-@contractor_required(role='sales_rep')
-def contractor_product_catalog(contractor):
-    packages = [
-        {'name': '7 Days Listing', 'price': 50, 'features': ['7 days visibility', 'Standard placement', 'Edit anytime']},
-        {'name': '30 Days Listing', 'price': 150, 'features': ['30 days visibility', 'Better value', 'Edit anytime']},
-        {'name': 'Featured 14 Days', 'price': 300, 'features': ['Top of search results', 'Highlighted border', '2x more views']},
-    ]
-    return render_template('contractor/product_catalog.html', packages=packages)
-
 @main.route('/contractor/sales-analytics')
 @contractor_required(role='sales_rep')
 def contractor_sales_analytics(contractor):
@@ -1888,14 +1901,41 @@ def contractor_content_hub(contractor):
 
 @main.route('/contractor/content-hub/edit/<int:post_id>', methods=['GET', 'POST'])
 @contractor_required(role='community_manager')
-def edit_blog_post(contractor, post_id):
+def contractor_edit_post(contractor, post_id):
     post = BlogPost.query.get_or_404(post_id)
+    
     if request.method == 'POST':
+        # Update title and content
         post.title = request.form.get('title')
         post.content = request.form.get('content')
+        
+        # Delete selected media (checkboxes)
+        delete_ids = request.form.getlist('delete_media')
+        if delete_ids:
+            PostMedia.query.filter(PostMedia.id.in_(delete_ids)).delete(synchronize_session=False)
+            flash(f'Removed {len(delete_ids)} media file(s).', 'info')
+        
+        # Add new media
+        if 'new_media' in request.files:
+            files = request.files.getlist('new_media')
+            valid = [f for f in files if f.filename != '']
+            if valid:
+                # Get current max order
+                max_order = db.session.query(db.func.max(PostMedia.order)).filter_by(post_id=post.id).scalar() or -1
+                order = max_order + 1
+                for file in valid[:10]:
+                    url, mime = save_content_media(file)
+                    if url:
+                        media = PostMedia(post_id=post.id, file_url=url, file_type=mime or file.content_type, order=order)
+                        db.session.add(media)
+                        order += 1
+                db.session.commit()
+                flash(f'Added {len(valid)} new media file(s).', 'success')
+        
         db.session.commit()
         flash('Post updated!', 'success')
         return redirect(url_for('main.contractor_content_hub'))
+    
     return render_template('contractor/edit_blog_post.html', post=post)
 
 @main.route('/contractor/content-hub/delete/<int:post_id>', methods=['POST'])
@@ -1995,3 +2035,164 @@ def public_feedback():
         flash('Thank you for your feedback!', 'success')
         return redirect(url_for('main.home'))
     return render_template('feedback/public_form.html')
+
+def save_content_media(file):
+    """Upload a media file to Cloudinary and return (secure_url, mime_type)"""
+    if file and file.filename != '':
+        try:
+            upload_result = cloudinary.uploader.upload(
+                file,
+                resource_type = "auto",          # detects image or video
+                folder = "content_hub"           # optional: organise in Cloudinary
+            )
+            return upload_result['secure_url'], upload_result['resource_type']
+        except Exception as e:
+            print(f"Cloudinary content upload error: {e}")
+            return None, None
+    return None, None
+
+@main.route('/content/create', methods=['POST'])
+@login_required
+def create_content_post():
+    title = request.form.get('title')
+    content = request.form.get('content')
+    if not title or not content:
+        flash('Title and content are required.', 'error')
+        return redirect(url_for('main.content_hub'))
+    
+    # Create the blog post
+    post = BlogPost(
+        title=title,
+        content=content,
+        author_id=current_user.id
+    )
+    db.session.add(post)
+    db.session.commit()
+    
+    # Handle uploaded media (if any)
+    if 'media' in request.files:
+        files = request.files.getlist('media')
+        valid_files = [f for f in files if f.filename != '']
+        if valid_files:
+            order = 0
+            for file in valid_files[:10]:   # max 10 files
+                url, mime_type = save_content_media(file)
+                if url:
+                    media = PostMedia(
+                        post_id=post.id,
+                        file_url=url,
+                        file_type=mime_type or file.content_type,
+                        order=order
+                    )
+                    db.session.add(media)
+                    order += 1
+            db.session.commit()
+            flash(f'{order} media file(s) uploaded.', 'success')
+    
+    flash('Post published successfully!', 'success')
+    return redirect(url_for('main.content_hub'))
+
+@main.route('/content-hub')
+@login_required
+def content_hub():
+    posts = BlogPost.query.order_by(BlogPost.created_at.desc()).all()
+    return render_template('content_hub.html', posts=posts)
+
+@main.route('/contractor/content-hub/create', methods=['POST'])
+@contractor_required(role='community_manager')
+def contractor_create_post(contractor):
+    title = request.form.get('title')
+    content = request.form.get('content')
+    if not title or not content:
+        flash('Title and content are required.', 'error')
+        return redirect(url_for('main.contractor_content_hub'))
+    
+    post = BlogPost(
+        title=title,
+        content=content,
+        author_id=current_user.id   # or contractor.user_id depending on your User model
+    )
+    db.session.add(post)
+    db.session.commit()
+    
+    # Handle uploaded media
+    if 'media' in request.files:
+        files = request.files.getlist('media')
+        valid_files = [f for f in files if f.filename != '']
+        if valid_files:
+            order = 0
+            for file in valid_files[:10]:
+                url, mime_type = save_content_media(file)  # your helper from earlier
+                if url:
+                    media = PostMedia(
+                        post_id=post.id,
+                        file_url=url,
+                        file_type=mime_type or file.content_type,
+                        order=order
+                    )
+                    db.session.add(media)
+                    order += 1
+            db.session.commit()
+            flash(f'{order} media file(s) uploaded.', 'success')
+    
+    flash('Post published successfully!', 'success')
+    return redirect(url_for('main.contractor_content_hub'))
+
+@main.route('/contractor/content-hub/delete/<int:post_id>', methods=['POST'])
+@contractor_required(role='community_manager')
+def contractor_delete_post(contractor, post_id):
+    post = BlogPost.query.get_or_404(post_id)
+    db.session.delete(post)
+    db.session.commit()
+    flash('Post and all its media deleted.', 'success')
+    return redirect(url_for('main.contractor_content_hub'))
+
+# ============================================
+# PRODUCT CATALOG (Sales Rep)
+# ============================================
+
+@main.route('/contractor/product-catalog')
+@contractor_required(role='sales_rep')
+def contractor_product_catalog(contractor):
+    packages = ProductPackage.query.filter_by(is_active=True).all()
+    return render_template('contractor/product_catalog.html', packages=packages)
+
+@main.route('/contractor/product-catalog/create', methods=['POST'])
+@contractor_required(role='sales_rep')
+def contractor_product_create(contractor):
+    name = request.form.get('name')
+    price = request.form.get('price')
+    features = request.form.get('features')
+    if not name or not price:
+        flash('Name and price are required.', 'error')
+        return redirect(url_for('main.contractor_product_catalog'))
+    package = ProductPackage(
+        name=name,
+        price=float(price),
+        features=features,
+        created_by=current_user.id
+    )
+    db.session.add(package)
+    db.session.commit()
+    flash(f'Package "{name}" created.', 'success')
+    return redirect(url_for('main.contractor_product_catalog'))
+
+@main.route('/contractor/product-catalog/edit/<int:package_id>', methods=['POST'])
+@contractor_required(role='sales_rep')
+def contractor_product_edit(contractor, package_id):
+    package = ProductPackage.query.get_or_404(package_id)
+    package.name = request.form.get('name')
+    package.price = float(request.form.get('price'))
+    package.features = request.form.get('features')
+    db.session.commit()
+    flash('Package updated.', 'success')
+    return redirect(url_for('main.contractor_product_catalog'))
+
+@main.route('/contractor/product-catalog/delete/<int:package_id>', methods=['POST'])
+@contractor_required(role='sales_rep')
+def contractor_product_delete(contractor, package_id):
+    package = ProductPackage.query.get_or_404(package_id)
+    db.session.delete(package)
+    db.session.commit()
+    flash('Package deleted.', 'success')
+    return redirect(url_for('main.contractor_product_catalog'))

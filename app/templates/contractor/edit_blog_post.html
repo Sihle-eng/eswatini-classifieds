@@ -1,18 +1,91 @@
 {% extends "base.html" %}
-{% block title %}Edit Blog Post{% endblock %}
+{% block title %}Edit Content - Contractor Panel{% endblock %}
 {% block content %}
-<h2 class="text-2xl font-bold mb-4">Edit Post</h2>
-<form method="POST" class="bg-white rounded-lg shadow p-6">
-    <div class="mb-3">
-        <label class="block text-sm">Title</label>
-        <input type="text" name="title" value="{{ post.title }}" class="w-full px-3 py-2 border rounded-lg" required>
-    </div>
-    <div class="mb-3">
-        <label class="block text-sm">Content</label>
-        <textarea name="content" rows="8" class="w-full px-3 py-2 border rounded-lg"
-            required>{{ post.content }}</textarea>
-    </div>
-    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Update</button>
-    <a href="{{ url_for('main.contractor_content_hub') }}" class="ml-2 text-gray-600">Cancel</a>
-</form>
+<div class="max-w-4xl mx-auto">
+    <h2 class="text-2xl font-bold mb-6"><i class="fas fa-edit text-blue-600 mr-2"></i>Edit Post</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <div class="mb-4">
+            <label class="block text-sm font-medium mb-1">Title *</label>
+            <input type="text" name="title" value="{{ post.title }}" class="w-full px-3 py-2 border rounded-lg"
+                required>
+        </div>
+        <div class="mb-4">
+            <label class="block text-sm font-medium mb-1">Content *</label>
+            <textarea name="content" rows="8" class="w-full px-3 py-2 border rounded-lg"
+                required>{{ post.content }}</textarea>
+        </div>
+
+        <!-- Existing Media with delete checkboxes -->
+        {% if post.media %}
+        <div class="mb-4">
+            <label class="block text-sm font-medium mb-2">Current Media (check to delete)</label>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {% for media in post.media %}
+                <div class="relative border rounded-lg p-1 bg-gray-50">
+                    <label class="absolute top-1 left-1 bg-white rounded-full p-0.5 shadow z-10">
+                        <input type="checkbox" name="delete_media" value="{{ media.id }}">
+                    </label>
+                    {% if media.file_type == 'image' %}
+                    <img src="{{ media.file_url }}" class="w-full h-28 object-cover rounded">
+                    {% elif media.file_type == 'video' %}
+                    <video controls class="w-full h-28 object-cover rounded">
+                        <source src="{{ media.file_url }}" type="video/mp4">
+                    </video>
+                    {% else %}
+                    <div class="w-full h-28 flex items-center justify-center bg-gray-200 rounded">
+                        <i class="fas fa-file fa-2x text-gray-500"></i>
+                    </div>
+                    {% endif %}
+                    <p class="text-xs text-gray-500 truncate mt-1">{{ media.file_type }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            <p class="text-sm text-gray-500 mt-1">Check files you want to delete, then save.</p>
+        </div>
+        {% endif %}
+
+        <!-- Upload New Media -->
+        <div class="mb-4">
+            <label class="block text-sm font-medium mb-1">Add New Photos / Videos</label>
+            <input type="file" name="new_media" id="newMedia" accept="image/*,video/*" multiple
+                class="w-full px-3 py-2 border rounded-lg">
+            <div id="newMediaPreview" class="grid grid-cols-3 md:grid-cols-5 gap-2 mt-2"></div>
+            <p class="text-sm text-gray-500 mt-1">Max 10 files, 10MB each.</p>
+        </div>
+
+        <div class="flex gap-3">
+            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Save
+                Changes</button>
+            <a href="{{ url_for('main.contractor_content_hub') }}"
+                class="px-6 py-2 border rounded-lg hover:bg-gray-50">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    const mediaInput = document.getElementById('newMedia');
+    const previewDiv = document.getElementById('newMediaPreview');
+    mediaInput.addEventListener('change', function (e) {
+        const files = Array.from(e.target.files);
+        if (files.length > 10) files.splice(10);
+        previewDiv.innerHTML = '';
+        files.forEach((file, idx) => {
+            const reader = new FileReader();
+            reader.onload = function (ev) {
+                const container = document.createElement('div');
+                let html = '';
+                if (file.type.startsWith('image/')) {
+                    html = `<img src="${ev.target.result}" class="w-full h-20 object-cover rounded-lg border">`;
+                } else if (file.type.startsWith('video/')) {
+                    html = `<video class="w-full h-20 object-cover rounded-lg border"><source src="${ev.target.result}" type="${file.type}"></video>`;
+                } else {
+                    html = `<div class="w-full h-20 flex items-center justify-center bg-gray-100 rounded-lg border"><i class="fas fa-file fa-2x text-gray-400"></i></div>`;
+                }
+                container.innerHTML = html + `<span class="text-xs text-gray-500 truncate block mt-1">${file.name.substring(0, 20)}</span>`;
+                previewDiv.appendChild(container);
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+</script>
 {% endblock %}

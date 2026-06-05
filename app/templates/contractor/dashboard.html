@@ -15,6 +15,7 @@
 
 <!-- Milestones & Commissions (both roles) -->
 <div class="grid md:grid-cols-2 gap-6 mb-8">
+    <!-- Milestones - READ ONLY, no action buttons -->
     <div class="bg-white rounded-lg shadow p-6">
         <h3 class="text-xl font-bold mb-4"><i class="fas fa-flag-checkered mr-2"></i>My Milestones</h3>
         {% if milestones %}
@@ -41,6 +42,8 @@
         <p class="text-gray-500">No milestones assigned yet.</p>
         {% endif %}
     </div>
+
+    <!-- Commissions -->
     <div class="bg-white rounded-lg shadow p-6">
         <h3 class="text-xl font-bold mb-4"><i class="fas fa-percent mr-2"></i>My Commissions</h3>
         {% if commissions %}
@@ -82,7 +85,8 @@
 {% if contractor.role == 'community_manager' %}
 <h2 class="text-xl font-bold mb-4"><i class="fas fa-users mr-2"></i>Community Management Tools</h2>
 <div class="grid md:grid-cols-3 gap-4 mb-8">
-    <a href=" {{ url_for('main.contractor_member_directory') }}" class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+    <a href="{{ url_for('main.contractor_member_directory') }}"
+        class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
         <i class="fas fa-address-book text-3xl text-blue-500 mb-2"></i>
         <h4 class="font-semibold">Member Directory</h4>
         <p class="text-sm text-gray-600">Searchable list of members with profiles.</p>
@@ -98,17 +102,20 @@
         <h4 class="font-semibold">Content Calendar</h4>
         <p class="text-sm text-gray-600">Plan your public posts and engagements.</p>
     </a>
-    <a href="{{ url_for('main.contractor_content_hub') }}" class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+    <a href="{{ url_for('main.contractor_content_hub') }}"
+        class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
         <i class="fas fa-blog text-3xl text-blue-500 mb-2"></i>
         <h4 class="font-semibold">Content Hub</h4>
         <p class="text-sm text-gray-600">Blog posts, guides, and resources.</p>
     </a>
-    <a href="{{ url_for('main.contractor_feedback') }}" class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+    <a href="{{ url_for('main.contractor_feedback') }}"
+        class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
         <i class="fas fa-poll text-3xl text-blue-500 mb-2"></i>
         <h4 class="font-semibold">Feedback Forms</h4>
         <p class="text-sm text-gray-600">Surveys and polls for members.</p>
     </a>
-    <a href="{{ url_for('main.contractor_analytics') }}" class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+    <a href="{{ url_for('main.contractor_analytics') }}"
+        class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
         <i class="fas fa-chart-line text-3xl text-blue-500 mb-2"></i>
         <h4 class="font-semibold">Analytics</h4>
         <p class="text-sm text-gray-600">Engagement metrics and retention.</p>
@@ -127,27 +134,32 @@
         <h4 class="font-semibold">CRM</h4>
         <p class="text-sm text-gray-600">Lead tracking and customer profiles.</p>
     </a>
-    <a href="{{ url_for('main.contractor_lead_capture') }}" class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+    <a href="{{ url_for('main.contractor_lead_capture') }}"
+        class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
         <i class="fas fa-file-signature text-3xl text-orange-500 mb-2"></i>
         <h4 class="font-semibold">Lead Capture</h4>
         <p class="text-sm text-gray-600">Forms to collect prospect info.</p>
     </a>
-    <a href="{{ url_for('main.contractor_email_automation') }}" class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+    <a href="{{ url_for('main.contractor_email_automation') }}"
+        class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
         <i class="fas fa-envelope-open-text text-3xl text-orange-500 mb-2"></i>
         <h4 class="font-semibold">Email Automation</h4>
         <p class="text-sm text-gray-600">Triggered campaigns and follow‑ups.</p>
     </a>
-    <a href="{{ url_for('main.contractor_product_catalog') }}" class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+    <a href="{{ url_for('main.contractor_product_catalog') }}"
+        class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
         <i class="fas fa-boxes text-3xl text-orange-500 mb-2"></i>
         <h4 class="font-semibold">Product Catalog</h4>
         <p class="text-sm text-gray-600">Offerings with pricing and details.</p>
     </a>
-    <a href="{{ url_for('main.contractor_sales_analytics') }}" class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+    <a href="{{ url_for('main.contractor_sales_analytics') }}"
+        class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
         <i class="fas fa-chart-bar text-3xl text-orange-500 mb-2"></i>
         <h4 class="font-semibold">Sales Analytics</h4>
         <p class="text-sm text-gray-600">Conversion rates and pipeline.</p>
     </a>
-    <a href="{{ url_for('main.contractor_support_inbox') }}" class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+    <a href="{{ url_for('main.contractor_support_inbox') }}"
+        class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
         <i class="fas fa-comment-dots text-3xl text-orange-500 mb-2"></i>
         <h4 class="font-semibold">Live Chat</h4>
         <p class="text-sm text-gray-600">Instant support for prospects.</p>

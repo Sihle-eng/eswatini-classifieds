@@ -290,6 +290,7 @@ class BlogPost(db.Model):
     content = db.Column(db.Text, nullable=False)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    media = db.relationship('PostMedia', backref='post', cascade='all, delete-orphan', foreign_keys='PostMedia.post_id', order_by='PostMedia.order')
 
     author = db.relationship('User', backref='blog_posts')
 
@@ -309,3 +310,26 @@ class Feedback(db.Model):
     satisfaction = db.Column(db.String(50))
     suggestions = db.Column(db.Text)
     submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class PostMedia(db.Model):
+    __tablename__ = 'post_media'
+    id = db.Column(db.Integer, primary_key=True)
+    post_id = db.Column(db.Integer, db.ForeignKey('blog_posts.id', ondelete='CASCADE'), nullable=False)
+    file_url = db.Column(db.String(500), nullable=False)
+    file_type = db.Column(db.String(100), nullable=False)  # image/jpeg, video/mp4, etc.
+    order = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class ProductPackage(db.Model):
+    __tablename__ = 'product_packages'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    price = db.Column(db.Numeric(10,2), nullable=False)
+    features = db.Column(db.Text, nullable=False)   # store as comma-separated or JSON
+    is_active = db.Column(db.Boolean, default=True)
+    created_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def get_features_list(self):
+        return [f.strip() for f in self.features.split(',')] if self.features else []
