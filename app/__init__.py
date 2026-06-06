@@ -1,6 +1,6 @@
 from flask import Flask, app
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 from flask_mail import Mail
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -39,6 +39,16 @@ def create_app(config_name='default'):
     login_manager.init_app(app)
     mail.init_app(app)
     limiter.init_app(app)
+
+    @app.context_processor
+    def inject_contractor_status():
+        from app.models import Contractor
+        is_contractor = False
+        if current_user.is_authenticated:
+            # Check if the logged-in user's email exists in the contractors table and is active
+            contractor = Contractor.query.filter_by(email=current_user.email, active=True).first()
+            is_contractor = contractor is not None
+        return dict(is_contractor=is_contractor)
     
     # Login manager settings
     login_manager.login_view = 'main.login'

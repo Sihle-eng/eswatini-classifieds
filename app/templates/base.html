@@ -475,7 +475,7 @@
                     <a href="{{ url_for('main.admin_deletions') }}"
                         class="nav-link text-white px-3 py-2 text-sm font-medium"><i class="fas fa-trash-alt mr-1"></i>
                         Deletions</a>
-                    {% elif current_user.email in ['vkhetsa@gmail.com', 'lwandiswazikalala@gmail.com'] %}
+                    {% elif is_contractor %}
                     <a href="{{ url_for('main.contractor_dashboard') }}"
                         class="nav-link text-white px-3 py-2 text-sm font-medium"><i class="fas fa-user-tie mr-1"></i>
                         My Dashboard</a>
@@ -528,8 +528,7 @@
                                 <span
                                     class="inline-block mt-1 px-2 py-0.5 text-xs rounded-full 
                                         {% if current_user.email in ['eswatiniclassifieds@gmail.com'] %}bg-yellow-100 text-yellow-800">Admin
-                                    {% elif current_user.email in ['vkhetsa@gmail.com', 'lwandiswazikalala@gmail.com']
-                                    %}bg-purple-100 text-purple-800">Contractor
+                                    {% elif is_contractor %}bg-purple-100 text-purple-800">Contractor
                                     {% elif current_user.user_type == 'business' %}bg-blue-100 text-blue-800">Business
                                     {% else %}bg-green-100 text-green-800">Client
                                     {% endif %}
@@ -624,7 +623,7 @@
             <a href="{{ url_for('main.logout') }}"
                 class="flex items-center gap-3 p-3 rounded-lg text-red-600 hover:bg-red-50"><i
                     class="fas fa-sign-out-alt w-6"></i> Sign Out</a>
-            {% elif current_user.email in ['vkhetsa@gmail.com', 'lwandiswazikalala@gmail.com'] %}
+            {% elif is_contractor %}
             <div class="bg-purple-100 rounded-xl p-4 mb-4">
                 <div class="flex items-center gap-3">
                     <i class="fas fa-user-tie text-3xl text-purple-600"></i>
