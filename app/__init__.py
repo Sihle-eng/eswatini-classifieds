@@ -1,10 +1,11 @@
-from flask import Flask
+from flask import Flask, app
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_mail import Mail
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from dotenv import load_dotenv
+from flask_migrate import Migrate
 import os
 
 # Load environment variables
@@ -12,6 +13,7 @@ load_dotenv()
 
 # Create instances
 db = SQLAlchemy()
+migrate = Migrate()
 login_manager = LoginManager()
 mail = Mail()
 limiter = Limiter(key_func=get_remote_address)
@@ -33,6 +35,7 @@ def create_app(config_name='default'):
     
     # Initialize extensions
     db.init_app(app)
+    migrate.init_app(app, db)
     login_manager.init_app(app)
     mail.init_app(app)
     limiter.init_app(app)
