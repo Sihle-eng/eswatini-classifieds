@@ -28,6 +28,7 @@ from app.models import (
     ForumReply,
     Feedback,
     PostMedia,
+    CalendarEvent,
 )
 from datetime import datetime, timedelta
 from app.email_utils import (
@@ -2196,3 +2197,63 @@ def contractor_product_delete(contractor, package_id):
     db.session.commit()
     flash('Package deleted.', 'success')
     return redirect(url_for('main.contractor_product_catalog'))
+
+@main.route('/admin/user/<int:user_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def admin_delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+    
+    # Never allow an admin to delete themselves
+    if user.id == current_user.id:
+        flash('You cannot delete your own account from the admin panel.', 'danger')
+        return redirect(url_for('main.manage_users'))
+    
+    try:
+        # 1. Delete blog posts (author_id foreign key)
+        BlogPost.query.filter_by(author_id=user.id).delete()
+        
+        # 2. Delete forum threads and replies (author_id)
+        ForumReply.query.filter_by(author_id=user.id).delete()
+        ForumThread.query.filter_by(author_id=user.id).delete()
+        
+        # 3. Delete contact inquiries (no direct user FK, but if you have one, add it)
+        # ContactInquiry.query.filter_by(user_id=user.id).delete()  # if such column exists
+        
+        # 4. Delete saved ads, reports, ad views, transactions (client_user_id or reporter_user_id)
+        SavedAd.query.filter_by(client_user_id=user.id).delete()
+        Report.query.filter_by(reporter_user_id=user.id).delete()
+        AdView.query.filter_by(viewer_user_id=user.id).delete()
+        Transaction.query.filter_by(payer_user_id=user.id).delete()
+        
+        # 5. Delete client preferences (if user is a client)
+        ClientPreference.query.filter_by(client_user_id=user.id).delete()
+        # 6. Delete product packages created by this user (optional)
+        ProductPackage.query.filter_by(created_by=user.id).delete()
+
+        CalendarEvent.query.filter_by(created_by=user.id).delete()
+        
+        
+        # 7. Handle business profile and all its postings
+        if user.business_profile:
+            # Delete all postings belonging to this business
+            Posting.query.filter_by(business_id=user.business_profile.id).delete()
+            # Delete the business profile itself
+            db.session.delete(user.business_profile)
+        
+        # 8. Delete client profile (if any)
+        if user.client_profile:
+            db.session.delete(user.client_profile)
+        
+        # 9. Finally, delete the user
+        db.session.delete(user)
+        
+        # Commit all changes
+        db.session.commit()
+        flash(f'User {user.email} and all associated data have been permanently deleted.', 'success')
+        
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting user: {str(e)}', 'danger')
+    
+    return redirect(url_for('main.admin_users'))
