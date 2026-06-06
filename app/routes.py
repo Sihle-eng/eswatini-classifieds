@@ -2257,3 +2257,15 @@ def admin_delete_user(user_id):
         flash(f'Error deleting user: {str(e)}', 'danger')
     
     return redirect(url_for('main.admin_users'))
+
+@main.route('/admin/fix-calendar-schema')
+@admin_required
+def fix_calendar_schema():
+    try:
+        from sqlalchemy import text
+        db.session.execute(text("ALTER TABLE calendar_events ADD COLUMN IF NOT EXISTS calendar_type VARCHAR(20) DEFAULT 'team'"))
+        db.session.commit()
+        return "✅ Column 'calendar_type' added successfully. You can now remove this route.", 200
+    except Exception as e:
+        db.session.rollback()
+        return f"❌ Error: {str(e)}", 500
