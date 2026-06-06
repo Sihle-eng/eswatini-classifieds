@@ -2269,3 +2269,15 @@ def fix_calendar_schema():
     except Exception as e:
         db.session.rollback()
         return f"❌ Error: {str(e)}", 500
+
+@main.route('/admin/check-calendar-schema')
+@admin_required
+def check_calendar_schema():
+    from sqlalchemy import text
+    result = db.session.execute(text("""
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name='calendar_events' AND column_name='calendar_type'
+    """))
+    exists = result.fetchone() is not None
+    return f"Column 'calendar_type' exists: {exists}"
