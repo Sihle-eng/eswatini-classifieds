@@ -312,6 +312,10 @@ def logout():
 @main.route('/business/dashboard')
 @login_required
 def business_dashboard():
+    contractor = Contractor.query.filter_by(email=current_user.email, active=True).first()
+    if contractor:
+        return redirect(url_for('main.contractor_dashboard'))
+
     if current_user.user_type != 'business':
         flash('Access denied. Business account required.', 'error')
         return redirect(url_for('main.home'))
@@ -471,6 +475,10 @@ def post_ad():
 @main.route('/client/dashboard')
 @login_required
 def client_dashboard():
+    contractor = Contractor.query.filter_by(email=current_user.email, active=True).first()
+    if contractor:
+        return redirect(url_for('main.contractor_dashboard'))
+    
     if current_user.user_type != 'client':
         flash('Access denied. Client account required.', 'error')
         return redirect(url_for('main.home'))

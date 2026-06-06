@@ -47,6 +47,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
     <style>
+        /* Your existing styles – unchanged */
         :root {
             --primary-blue: #3A75C4;
             --primary-yellow: #FFD100;
@@ -57,8 +58,6 @@
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
         }
-
-        /* No pop-up animations – just clean, static styles */
 
         .premium-nav {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
@@ -174,7 +173,6 @@
             box-shadow: 0 8px 25px rgba(255, 209, 0, 0.4);
         }
 
-        /* Mobile Menu */
         .mobile-menu {
             position: fixed;
             top: 0;
@@ -350,7 +348,6 @@
             }
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .desktop-nav {
                 display: none !important;
@@ -534,7 +531,14 @@
                                     {% endif %}
                                 </span>
                             </div>
-                            {% if current_user.user_type == 'business' %}
+                            {% if is_contractor %}
+                            <a href="{{ url_for('main.contractor_dashboard') }}" class="dropdown-item"><i
+                                    class="fas fa-tachometer-alt text-gray-500"></i> My Dashboard</a>
+                            <a href="{{ url_for('main.submit_report') }}" class="dropdown-item"><i
+                                    class="fas fa-file-alt text-gray-500"></i> Submit Report</a>
+                            <a href="{{ url_for('main.team_calendar') }}" class="dropdown-item"><i
+                                    class="fas fa-calendar-alt text-gray-500"></i> Calendar</a>
+                            {% elif current_user.user_type == 'business' %}
                             <a href="{{ url_for('main.edit_business_profile') }}" class="dropdown-item"><i
                                     class="fas fa-building text-gray-500"></i> Edit Profile</a>
                             <a href="{{ url_for('main.my_ads') }}" class="dropdown-item"><i
@@ -646,7 +650,7 @@
             <a href="{{ url_for('main.logout') }}"
                 class="flex items-center gap-3 p-3 rounded-lg text-red-600 hover:bg-red-50"><i
                     class="fas fa-sign-out-alt w-6"></i> Sign Out</a>
-            {% elif current_user.is_authenticated %}
+            {% else %}
             <div class="bg-gray-100 rounded-xl p-4 mb-4">
                 <div class="flex items-center gap-3">
                     <i class="fas fa-user-circle text-3xl text-blue-600"></i>
@@ -721,12 +725,12 @@
     {% endif %}
     {% endwith %}
 
-    <!-- Main Content (no animation classes) -->
+    <!-- Main Content -->
     <main>
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer (no animation classes) -->
+    <!-- Footer -->
     <footer class="premium-footer">
         <div class="footer-container">
             <div class="footer-section">
