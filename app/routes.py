@@ -346,16 +346,20 @@ def post_ad():
         return redirect(url_for('main.home'))
     
     # ============================================
-    # PROMOTIONAL PERIOD: 35 days free for ALL business users
+    # PROMOTIONAL LOGIC:
+    # - Special email (sihlelelwelcome@gmail.com) always gets free posting.
+    # - Other business users: free only until 13 July 2026 (35 days).
     # ============================================
-    from datetime import datetime
-    PROMO_END_DATE = datetime(2026, 7, 13)  # 35 days from 8 June 2026
-    
-    # No email override – all business users follow the same date rule
-    is_promo = (current_user.user_type == 'business' and datetime.utcnow() <= PROMO_END_DATE)
-
+    from datetime import datetime, timedelta
+    PROMO_END_DATE = datetime(2026, 7, 13)
     PROMO_EMAIL = "sihlelelwelcome@gmail.com"
+    
     is_special_promo = (current_user.email == PROMO_EMAIL)
+    
+    if is_special_promo:
+        is_promo = True   # Always free
+    else:
+        is_promo = (datetime.utcnow() <= PROMO_END_DATE)
     
     if request.method == 'POST':
         title = request.form.get('title')
@@ -370,7 +374,6 @@ def post_ad():
             payment_method = 'promotional'
             amount = 0.00
         else:
-            # Normal paid flow (after promo period ends)
             payment_plan = request.form.get('payment_plan')
             payment_method = request.form.get('payment_method')
             if payment_plan == '7days':
@@ -433,10 +436,10 @@ def post_ad():
             )
             db.session.add(dummy)
             db.session.commit()
-            flash(f'🎉 Free ad posted! Expires {expires_at.strftime("%d %b %Y")}. Promotion ends 13 July 2026.', 'success')
+            flash(f'🎉 Free ad posted! Expires {expires_at.strftime("%d %b %Y")}.', 'success')
             return redirect(url_for('main.my_ads'))
         else:
-            # Normal paid flow (unchanged)
+            # Normal paid flow
             transaction = Transaction(
                 posting_id=new_posting.id,
                 payer_user_id=current_user.id,
@@ -466,9 +469,12 @@ def post_ad():
             elif payment_method == 'paypal':
                 flash('ℹ Redirecting to secure payment page...', 'info')
                 return redirect(url_for('main.payment_instructions', posting_id=new_posting.id))
+            # Add other payment methods (momo, dodo) as needed
     
     # GET request – show form
-    return render_template('business/post_ad.html', is_promo=is_promo, is_special_promo=is_special_promo)
+    return render_template('business/post_ad.html', 
+                           is_promo=is_promo, 
+                           is_special_promo=is_special_promo)
 
 # ============================================
 # CLIENT ROUTES (Login Required)
