@@ -352,9 +352,16 @@ def post_ad():
     # ============================================
     from datetime import datetime, timedelta
     PROMO_END_DATE = datetime(2026, 7, 13)
-    PROMO_EMAIL = "sihlelelwelcome@gmail.com"
+    PROMO_EMAIL = "sihlelelwewelcome@gmail.com"
+
+    user_email = current_user.email.strip().lower()
+    promo_email = PROMO_EMAIL.lower()
     
-    is_special_promo = (current_user.email == PROMO_EMAIL)
+    is_special_promo = (user_email == promo_email)
+
+    print(f"[DEBUG] User email: '{current_user.email}' -> normalized: '{user_email}'")
+    print(f"[DEBUG] PROMO_EMAIL: '{PROMO_EMAIL}' -> normalized: '{promo_email}'")
+    print(f"[DEBUG] is_special_promo = {is_special_promo}")
     
     if is_special_promo:
         is_promo = True   # Always free
