@@ -1,4 +1,4 @@
-from flask import Flask, app
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user
 from flask_mail import Mail
@@ -6,6 +6,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from dotenv import load_dotenv
 from flask_migrate import Migrate
+from sqlalchemy.pool import NullPool   
 import os
 
 # Load environment variables
@@ -33,23 +34,15 @@ def create_app(config_name='default'):
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     
     # ====================================================
-    # CRITICAL: Configure SQLAlchemy pool for Supabase session mode
+    # FIX: Use NullPool to avoid persistent connections
+    # Each database operation gets a fresh connection,
+    # which is closed immediately after use.
+    # This completely prevents "max clients reached" errors.
     # ====================================================
-    # Session mode on Supabase allows only 15 concurrent connections.
-    # We set pool_size=5 per engine, max_overflow=0 to stay within limit,
-    # and pool_recycle=300 to avoid stale connections.
-    # If you have more than 3 Gunicorn workers, reduce workers to 3 or fewer.
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-        'pool_size': 5,                # connections kept in pool
-        'max_overflow': 0,             # no extra connections beyond pool_size
-        'pool_timeout': 30,            # seconds to wait for a connection
-        'pool_recycle': 300,           # recycle connections every 5 minutes
-        'pool_pre_ping': True,         # verify connection before using
-        'connect_args': {'sslmode': 'require'}  # preserve your SSL requirement
+        'poolclass': NullPool,
+        'connect_args': {'sslmode': 'require'}   # preserve SSL
     }
-    # Alternative: use NullPool to disable pooling completely (safe but slightly slower)
-    # from sqlalchemy.pool import NullPool
-    # app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'poolclass': NullPool, 'connect_args': {'sslmode': 'require'}}
     
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
@@ -61,7 +54,8 @@ def create_app(config_name='default'):
     limiter.init_app(app)
 
     # ====================================================
-    # Teardown: ensure session is removed after each request/app context
+    # Teardown: ensure session is removed after each request
+    # (Still useful with NullPool to clear local state)
     # ====================================================
     @app.teardown_appcontext
     def shutdown_session(exception=None):
@@ -91,9 +85,9 @@ def create_app(config_name='default'):
     def load_user(user_id):
         return User.query.get(int(user_id))
     
-    # Create tables (now uses the limited pool)
-    with app.app_context():
-        db.create_all()
+    # Create tables (temporarily disabled – tables already exist)
+    # with app.app_context():
+    #     db.create_all()
     
     # Template filters
     @app.template_filter('get_user')
