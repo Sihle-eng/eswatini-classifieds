@@ -1733,9 +1733,11 @@ def admin_bulk_email():
             flash('No recipients found.', 'warning')
             return redirect(url_for('main.admin_bulk_email'))
 
-        # Send emails one by one – now uses the safe send_email() and the HTML template
         sent_count = 0
         for user in recipients:
+            # ==========================================================
+            # 1. Fetch name & user type (uses db.session)
+            # ==========================================================
             if user.user_type == 'business':
                 biz = BusinessProfile.query.filter_by(user_id=user.id).first()
                 name = biz.company_name if biz else user.email.split('@')[0]
@@ -1745,15 +1747,18 @@ def admin_bulk_email():
                 name = client.full_name if (client and client.full_name) else user.email.split('@')[0]
                 user_type_label = 'Client'
 
-            # Replace placeholders in the admin's message
+            # Personalize placeholders
             personalized_subject = subject.replace('{name}', name).replace('{email}', user.email).replace('{user_type}', user_type_label)
             personalized_body = body_template.replace('{name}', name).replace('{email}', user.email).replace('{user_type}', user_type_label)
 
+            # ==========================================================
+            # 2. Send the email (uses Brevo API, no database)
+            # ==========================================================
             try:
                 send_email(
                     to=user.email,
                     subject=personalized_subject,
-                    template_name='bulk_message',   # the new HTML template
+                    template_name='bulk_message',
                     user_name=name,
                     user_type=user_type_label,
                     body=personalized_body,
@@ -1763,6 +1768,12 @@ def admin_bulk_email():
                 sent_count += 1
             except Exception as e:
                 print(f"[BULK ERROR] {user.email}: {e}")
+                db.session.rollback()   # rollback any failed transaction (if any)
+            finally:
+                # ======================================================
+                # CRITICAL FIX: Release the database connection
+                # ======================================================
+                db.session.remove()     # closes the session for this thread
 
         flash(f'Bulk email sent to {sent_count} out of {len(recipients)} recipients.', 'success')
         return redirect(url_for('main.admin_dashboard'))
