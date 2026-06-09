@@ -86,8 +86,8 @@ def create_app(config_name='default'):
         return User.query.get(int(user_id))
     
     # Create tables (temporarily disabled – tables already exist)
-    # with app.app_context():
-    #     db.create_all()
+    with app.app_context():
+        db.create_all()
     
     # Template filters
     @app.template_filter('get_user')
