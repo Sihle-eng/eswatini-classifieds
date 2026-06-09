@@ -27,11 +27,31 @@ def create_app(config_name='default'):
    
     # Explicitly set Brevo API key from environment into config
     app.config['BREVO_API_KEY'] = os.environ.get('BREVO_API_KEY')
-   
     app.config['CRON_SECRET'] = os.environ.get('CRON_SECRET', 'eswatini2025daily')
     
     # Create upload folder
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    
+    # ====================================================
+    # CRITICAL: Configure SQLAlchemy pool for Supabase session mode
+    # ====================================================
+    # Session mode on Supabase allows only 15 concurrent connections.
+    # We set pool_size=5 per engine, max_overflow=0 to stay within limit,
+    # and pool_recycle=300 to avoid stale connections.
+    # If you have more than 3 Gunicorn workers, reduce workers to 3 or fewer.
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'pool_size': 5,                # connections kept in pool
+        'max_overflow': 0,             # no extra connections beyond pool_size
+        'pool_timeout': 30,            # seconds to wait for a connection
+        'pool_recycle': 300,           # recycle connections every 5 minutes
+        'pool_pre_ping': True,         # verify connection before using
+        'connect_args': {'sslmode': 'require'}  # preserve your SSL requirement
+    }
+    # Alternative: use NullPool to disable pooling completely (safe but slightly slower)
+    # from sqlalchemy.pool import NullPool
+    # app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'poolclass': NullPool, 'connect_args': {'sslmode': 'require'}}
+    
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
     # Initialize extensions
     db.init_app(app)
@@ -40,12 +60,18 @@ def create_app(config_name='default'):
     mail.init_app(app)
     limiter.init_app(app)
 
+    # ====================================================
+    # Teardown: ensure session is removed after each request/app context
+    # ====================================================
+    @app.teardown_appcontext
+    def shutdown_session(exception=None):
+        db.session.remove()
+
     @app.context_processor
     def inject_contractor_status():
         from app.models import Contractor
         is_contractor = False
         if current_user.is_authenticated:
-            # Check if the logged-in user's email exists in the contractors table and is active
             contractor = Contractor.query.filter_by(email=current_user.email, active=True).first()
             is_contractor = contractor is not None
         return dict(is_contractor=is_contractor)
@@ -54,12 +80,6 @@ def create_app(config_name='default'):
     login_manager.login_view = 'main.login'
     login_manager.login_message = 'Please log in to access this page.'
     login_manager.login_message_category = 'info'
-    
-    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    'connect_args': {
-        'sslmode': 'require'
-    }
-}
     
     # Import and register blueprints
     from app.routes import main
@@ -71,7 +91,7 @@ def create_app(config_name='default'):
     def load_user(user_id):
         return User.query.get(int(user_id))
     
-    # Create tables
+    # Create tables (now uses the limited pool)
     with app.app_context():
         db.create_all()
     
@@ -98,6 +118,7 @@ def create_app(config_name='default'):
             'CURRENCY_SYMBOL': app.config['CURRENCY_SYMBOL'],
             'FEATURE_IMAGE_UPLOADS': app.config['FEATURE_IMAGE_UPLOADS'],
         }
+    
     import cloudinary
     import cloudinary.uploader
     import cloudinary.api
