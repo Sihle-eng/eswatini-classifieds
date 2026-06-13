@@ -7,55 +7,145 @@
     <h2 class="text-2xl font-bold mb-2">
         <i class="fas fa-file-alt mr-2"></i>All Weekly Reports
     </h2>
-    <p class="text-gray-700">View submitted contractor reports.</p>
+    <p class="text-gray-700">Review contractor reports and flag insufficient activity or missing submissions.</p>
 </div>
 
-<div class="bg-white rounded-lg shadow overflow-x-auto">
-    {% if reports %}
-    <table class="w-full min-w-[600px]">
-        <thead class="bg-gray-100 border-b">
-            <tr>
-                <th class="px-4 py-3 text-left text-sm">Contractor</th>
-                <th class="px-4 py-3 text-left text-sm">Role</th>
-                <th class="px-4 py-3 text-left text-sm">Week Ending</th>
-                <th class="px-4 py-3 text-left text-sm">Summary</th>
-                <th class="px-4 py-3 text-left text-sm">Key Metrics</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for r in reports %}
-            <tr class="border-b hover:bg-gray-50">
-                <td class="px-4 py-3 text-sm align-middle font-medium">{{ r.contractor.name }}</td>
-                <td class="px-4 py-3 text-sm align-middle">
-                    {% if r.contractor.role == 'community_manager' %}
-                    <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs">CM</span>
+<!-- Week Selector -->
+<div class="bg-white rounded-lg shadow p-4 mb-6">
+    <form method="GET" action="{{ url_for('main.all_reports') }}" class="flex flex-wrap items-end gap-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Week Ending (Sunday)</label>
+            <select name="week_ending" class="px-3 py-2 border rounded-lg">
+                {% for date, label in weeks %}
+                <option value="{{ date.strftime('%Y-%m-%d') }}" {% if current_week==date %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+            <i class="fas fa-calendar-week mr-1"></i> Change Week
+        </button>
+    </form>
+    <p class="text-sm text-gray-500 mt-2">Showing reports for week ending <strong>{{ current_week.strftime('%d %b %Y')
+            }}</strong></p>
+</div>
+
+<!-- Two columns on laptop -->
+<div class="grid md:grid-cols-2 gap-6">
+    <!-- LEFT COLUMN: Contractors who submitted -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="bg-green-50 border-b border-green-200 px-6 py-3">
+            <h3 class="font-bold text-green-800">
+                <i class="fas fa-check-circle mr-2"></i> Submitted Reports ({{ submitted|length }})
+            </h3>
+        </div>
+        <div class="divide-y">
+            {% for contractor, report in submitted %}
+            <div class="p-4 hover:bg-gray-50">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="font-medium text-gray-900">{{ contractor.name }}</div>
+                        <div class="text-sm text-gray-500">
+                            {% if contractor.role == 'community_manager' %}
+                            <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs">CM</span>
+                            {% else %}
+                            <span class="bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full text-xs">Sales</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-gray-400">{{ report.week_ending.strftime('%d %b %Y') }}</div>
+                        {% if report.escalated %}
+                        <span class="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full">
+                            <i class="fas fa-flag mr-1"></i> Escalated
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <p class="text-sm"><span class="font-medium">Summary:</span> {{ report.summary or 'No summary' }}
+                    </p>
+                    <div class="text-sm mt-1">
+                        {% if contractor.role == 'community_manager' %}
+                        <span class="font-medium">Contacts:</span> {{ report.new_business_contacts }} |
+                        <span class="font-medium">Ads:</span> {{ report.ads_posted }}
+                        {% else %}
+                        <span class="font-medium">Clients:</span> {{ report.new_clients_contacted }} |
+                        <span class="font-medium">Sales:</span> {{ report.sales_made }} |
+                        <span class="font-medium">Revenue:</span> SZL {{ "%.2f"|format(report.revenue_generated) }}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="mt-3 flex justify-end space-x-2">
+                    {% if report.escalated %}
+                    <form method="POST" action="{{ url_for('main.unescalate_report', report_id=report.id) }}"
+                        onsubmit="return confirm('Remove escalation flag? The contractor will no longer see the warning.');">
+                        <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 text-xs rounded">
+                            <i class="fas fa-check-circle mr-1"></i> Remove Flag
+                        </button>
+                    </form>
                     {% else %}
-                    <span class="bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full text-xs">Sales</span>
+                    <form method="POST" action="{{ url_for('main.escalate_report', report_id=report.id) }}"
+                        onsubmit="return confirm('Escalate this report? It will flag on contractor\'s page.');">
+                        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-xs rounded">
+                            <i class="fas fa-flag mr-1"></i> Escalate
+                        </button>
+                    </form>
                     {% endif %}
-                </td>
-                <td class="px-4 py-3 text-sm align-middle">{{ r.week_ending.strftime('%d %b %Y') }}</td>
-                <td class="px-4 py-3 text-sm align-middle">{{ r.summary[:80] }}...</td>
-                <td class="px-4 py-3 text-sm align-middle">
-                    {% if r.contractor.role == 'community_manager' %}
-                    Contacts: {{ r.new_business_contacts }}, Ads: {{ r.ads_posted }}
-                    {% else %}
-                    Clients: {{ r.new_clients_contacted }}, Sales: {{ r.sales_made }}, Rev: SZL {{
-                    "%.2f"|format(r.revenue_generated) }}
-                    {% endif %}
-                </td>
-            </tr>
+                </div>
+            </div>
+            {% else %}
+            <div class="p-6 text-center text-gray-500">No submissions for this week.</div>
             {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <div class="p-12 text-center text-gray-500">
-        <i class="fas fa-file-alt text-4xl text-gray-300 mb-3 block"></i>
-        No reports submitted yet.
+        </div>
     </div>
-    {% endif %}
+
+    <!-- RIGHT COLUMN: Contractors who did NOT submit -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="bg-red-50 border-b border-red-200 px-6 py-3">
+            <h3 class="font-bold text-red-800">
+                <i class="fas fa-exclamation-triangle mr-2"></i> Missing Reports ({{ not_submitted|length }})
+            </h3>
+        </div>
+        <div class="divide-y">
+            {% for contractor in not_submitted %}
+            <div class="p-4 hover:bg-gray-50">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="font-medium text-gray-900">{{ contractor.name }}</div>
+                        <div class="text-sm text-gray-500">
+                            {% if contractor.role == 'community_manager' %}
+                            <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs">CM</span>
+                            {% else %}
+                            <span class="bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full text-xs">Sales</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-2 text-sm text-gray-600">
+                    <i class="fas fa-clock mr-1"></i> No report submitted for week ending {{ current_week.strftime('%d
+                    %b %Y') }}
+                </div>
+                <div class="mt-3 flex justify-end">
+                    <form method="POST" action="{{ url_for('main.escalate_missing', contractor_id=contractor.id) }}"
+                        onsubmit="return confirm('Flag this contractor for missing report? This will appear on their dashboard.');">
+                        <input type="hidden" name="week_ending" value="{{ current_week.strftime('%Y-%m-%d') }}">
+                        <button type="submit"
+                            class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 text-xs rounded">
+                            <i class="fas fa-flag mr-1"></i> Flag Missing Report
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <div class="p-6 text-center text-gray-500">All contractors submitted reports for this week.</div>
+            {% endfor %}
+        </div>
+    </div>
 </div>
 
-<div class="mt-4">
+<div class="mt-6">
     <a href="{{ url_for('main.team_dashboard') }}" class="text-purple-600 hover:underline">
         <i class="fas fa-arrow-left mr-1"></i> Back to Team Dashboard
     </a>

@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from flask_migrate import Migrate
 from sqlalchemy.pool import NullPool   
 import os
+import sys
 
 # Load environment variables
 load_dotenv()
@@ -39,9 +40,10 @@ def create_app(config_name='default'):
     # which is closed immediately after use.
     # This completely prevents "max clients reached" errors.
     # ====================================================
+    sslmode = 'require' if os.environ.get('RENDER') else 'disable'
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
         'poolclass': NullPool,
-        'connect_args': {'sslmode': 'require'}   # preserve SSL
+        'connect_args': {'sslmode': sslmode}   
     }
     
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

@@ -1082,11 +1082,47 @@ def submit_report():
         return redirect(url_for('main.submit_report'))
     return render_template('contractor/submit_report.html', contractor=contractor)
 
-@main.route('/team/reports')
+@main.route('/all_reports')
+@login_required
 @admin_required
 def all_reports():
-    reports = WeeklyReport.query.order_by(WeeklyReport.week_ending.desc()).all()
-    return render_template('admin/all_reports.html', reports=reports)
+    # Get week ending date from query param (default to last Sunday)
+    week_ending_str = request.args.get('week_ending')
+    if week_ending_str:
+        week_ending = datetime.strptime(week_ending_str, '%Y-%m-%d').date()
+    else:
+        # Default to most recent Sunday (today or previous Sunday)
+        today = datetime.utcnow().date()
+        week_ending = today - timedelta(days=(today.weekday() + 1) % 7)
+    
+    # Get all active contractors (adjust as needed)
+    contractors = Contractor.query.filter_by(active=True).all()
+    
+    submitted = []
+    not_submitted = []
+    
+    for contractor in contractors:
+        report = WeeklyReport.query.filter_by(
+            contractor_id=contractor.id,
+            week_ending=week_ending
+        ).first()
+        if report:
+            submitted.append((contractor, report))
+        else:
+            not_submitted.append(contractor)
+    
+    # Generate list of past 8 weeks for the dropdown
+    weeks = []
+    for i in range(8):
+        w = week_ending - timedelta(weeks=i)
+        weeks.append((w, w.strftime('%d %b %Y')))
+    weeks.reverse()  # oldest first
+    
+    return render_template('admin/all_reports.html',
+                           submitted=submitted,
+                           not_submitted=not_submitted,
+                           current_week=week_ending,
+                           weeks=weeks)
 
 @main.route('/team/calendar')
 @login_required
@@ -2318,3 +2354,154 @@ def check_calendar_schema():
     """))
     exists = result.fetchone() is not None
     return f"Column 'calendar_type' exists: {exists}"
+
+@main.route('/escalate_report/<int:report_id>', methods=['POST'])
+@login_required
+@admin_required   # make sure you have this decorator
+def escalate_report(report_id):
+    report = WeeklyReport.query.get_or_404(report_id)
+    
+    # Already escalated? Prevent duplicate.
+    if report.escalated:
+        flash('This report has already been escalated.', 'info')
+        return redirect(url_for('main.all_reports'))
+    
+    report.escalated = True
+    report.escalated_at = datetime.utcnow()
+    report.escalated_by_id = current_user.id
+    db.session.commit()
+    
+    flash(f'⚠️ Report for {report.contractor.name} (week ending {report.week_ending.strftime("%Y-%m-%d")}) has been escalated.', 'warning')
+    return redirect(url_for('main.all_reports'))
+
+@main.route('/escalate_missing/<int:contractor_id>', methods=['POST'])
+@login_required
+@admin_required
+def escalate_missing(contractor_id):
+    week_ending_str = request.form.get('week_ending')
+    if not week_ending_str:
+        flash('Missing week ending date.', 'danger')
+        return redirect(url_for('main.all_reports'))
+    
+    week_ending = datetime.strptime(week_ending_str, '%Y-%m-%d').date()
+    contractor = Contractor.query.get_or_404(contractor_id)
+    
+    # Check if a report already exists (avoid double escalation)
+    existing = WeeklyReport.query.filter_by(
+        contractor_id=contractor_id,
+        week_ending=week_ending
+    ).first()
+    if existing:
+        flash(f'{contractor.name} submitted a report for that week. Use the standard escalate button.', 'warning')
+        return redirect(url_for('main.all_reports', week_ending=week_ending_str))
+    
+    # Create an escalation record (you may want a separate table, but we'll reuse the report model with a flag)
+    # Option: Create a dummy report with escalated=True and empty data
+    dummy_report = WeeklyReport(
+        contractor_id=contractor_id,
+        week_ending=week_ending,
+        summary="[NO REPORT SUBMITTED]",
+        escalated=True,
+        escalated_at=datetime.utcnow(),
+        escalated_by_id=current_user.id
+    )
+    db.session.add(dummy_report)
+    db.session.commit()
+    
+    flash(f'⚠️ Flagged {contractor.name} for missing report in week ending {week_ending.strftime("%d %b %Y")}.', 'warning')
+    return redirect(url_for('main.all_reports', week_ending=week_ending_str))
+
+@main.route('/team/reports')
+@login_required
+def team_reports():
+    if not current_user.is_admin:
+        abort(403)
+    
+    # Get week_ending
+    week_ending_str = request.args.get('week_ending')
+    if week_ending_str:
+        try:
+            week_ending = datetime.strptime(week_ending_str, '%Y-%m-%d').date()
+        except ValueError:
+            week_ending = datetime.utcnow().date()
+    else:
+        today = datetime.utcnow().date()
+        week_ending = today - timedelta(days=(today.weekday() + 1) % 7)
+    
+    # Fetch contractors – adjust model name as needed
+    from models import User  # or Contractor
+    # Example: get all users with contractor roles
+    contractors = User.query.filter(User.role.in_(['community_manager', 'sales_rep'])).all()
+    
+    submitted = []
+    not_submitted = []
+    
+    for contractor in contractors:
+        report = WeeklyReport.query.filter_by(
+            contractor_id=contractor.id,
+            week_ending=week_ending
+        ).first()
+        if report:
+            submitted.append((contractor, report))
+        else:
+            not_submitted.append(contractor)
+    
+    # Weeks dropdown
+    weeks = []
+    for i in range(8):
+        w = week_ending - timedelta(weeks=i)
+        weeks.append((w, w.strftime('%d %b %Y')))
+    weeks.reverse()
+    
+    return render_template('team_reports.html',
+                           submitted=submitted,
+                           not_submitted=not_submitted,
+                           current_week=week_ending,
+                           weeks=weeks)
+
+@main.route('/unescalate_report/<int:report_id>', methods=['POST'])
+@login_required
+@admin_required
+def unescalate_report(report_id):
+    report = WeeklyReport.query.get_or_404(report_id)
+    
+    if not report.escalated:
+        flash('This report is not escalated.', 'info')
+        return redirect(url_for('main.all_reports'))
+    
+    report.escalated = False
+    report.escalated_at = None
+    report.escalated_by_id = None
+    db.session.commit()
+    
+    flash(f' Removed escalation flag for {report.contractor.name} (week ending {report.week_ending.strftime("%Y-%m-%d")}).', 'success')
+    return redirect(url_for('main.all_reports', week_ending=report.week_ending.strftime('%Y-%m-%d')))
+
+@main.route('/team/content-calendar')
+@login_required
+def shared_content_calendar():
+    """Unified planning calendar for all roles"""
+    # Fetch all events for planning
+    events = CalendarEvent.query.filter(
+        CalendarEvent.calendar_type.in_(['team', 'content', 'planning']),
+        CalendarEvent.event_scope.in_(['team', 'national', 'international'])
+    ).order_by(CalendarEvent.event_date.asc()).all()
+    
+    # Group events by date for easier template handling
+    events_by_date = {}
+    for event in events:
+        date_key = event.event_date.strftime('%Y-%m-%d')
+        if date_key not in events_by_date:
+            events_by_date[date_key] = []
+        events_by_date[date_key].append(event)
+    
+    # Permission logic for event creation
+    contractor = Contractor.query.filter_by(email=current_user.email, active=True).first()
+    can_add_event = (current_user.email in ['admin@example.com', 'eswatiniclassifieds@gmail.com']) or \
+                    (contractor and contractor.role in ['community_manager', 'sales_rep'])
+    
+    return render_template('team/content_calendar.html',
+                         events=events,
+                         events_by_date=events_by_date,
+                         can_add_event=can_add_event)
+

@@ -213,6 +213,9 @@ class WeeklyReport(db.Model):
     sales_made = db.Column(db.Integer, default=0)
     revenue_generated = db.Column(db.Numeric(10,2), default=0.00)
     pipeline_notes = db.Column(db.Text)
+    escalated = db.Column(db.Boolean, default=False, nullable=False)
+    escalated_at = db.Column(db.DateTime, nullable=True)
+    escalated_by_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Milestone(db.Model):
@@ -247,6 +250,7 @@ class CalendarEvent(db.Model):
     calendar_type = db.Column(db.String(20), default='team')  # 'team' or 'content'
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
 
 class Lead(db.Model):
     __tablename__ = 'leads'

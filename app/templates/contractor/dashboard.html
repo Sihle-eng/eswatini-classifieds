@@ -13,6 +13,26 @@
     </p>
 </div>
 
+<!-- ========== ESCALATION WARNING (TOP BANNER) ========== -->
+{% set escalated_reports = reports|selectattr('escalated', 'equalto', true)|list if reports else [] %}
+{% if escalated_reports %}
+<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded shadow">
+    <div class="flex items-start">
+        <i class="fas fa-exclamation-triangle text-xl mr-3 mt-0.5"></i>
+        <div>
+            <p class="font-bold text-lg">⚠️ Performance Escalation</p>
+            <p>You have <strong>{{ escalated_reports|length }}</strong> report(s) flagged by admin for insufficient
+                activity.</p>
+            {% for r in escalated_reports %}
+            <p class="text-sm mt-1">• Week ending {{ r.week_ending.strftime('%d %b %Y') }}</p>
+            {% endfor %}
+            <p class="text-sm mt-2">Please improve your engagement and activity. Future escalations may affect your
+                contract status.</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <!-- Milestones & Commissions (both roles) -->
 <div class="grid md:grid-cols-2 gap-6 mb-8">
     <!-- Milestones - READ ONLY, no action buttons -->
@@ -220,15 +240,24 @@
     </form>
 </div>
 
-<!-- Recent Reports -->
+<!-- Recent Reports with escalation badges -->
 <div class="bg-white rounded-lg shadow p-6">
     <h3 class="text-xl font-bold mb-4"><i class="fas fa-history mr-2"></i>Recent Reports</h3>
     {% if reports %}
     <div class="space-y-3">
         {% for r in reports[:5] %}
-        <div class="p-3 bg-gray-50 rounded-lg">
-            <p class="text-sm text-gray-500">Week ending {{ r.week_ending.strftime('%d %b %Y') }}</p>
-            <p class="text-sm">{{ r.summary[:100] }}...</p>
+        <div class="p-3 bg-gray-50 rounded-lg {% if r.escalated %}border-l-4 border-red-500{% endif %}">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-sm text-gray-500">Week ending {{ r.week_ending.strftime('%d %b %Y') }}</p>
+                    <p class="text-sm">{{ r.summary[:100] }}{% if r.summary|length > 100 %}...{% endif %}</p>
+                </div>
+                {% if r.escalated %}
+                <span class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full ml-2 flex-shrink-0">
+                    <i class="fas fa-flag mr-1"></i> Escalated
+                </span>
+                {% endif %}
+            </div>
         </div>
         {% endfor %}
     </div>
