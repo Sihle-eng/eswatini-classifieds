@@ -2414,7 +2414,9 @@ def escalate_missing(contractor_id):
 @main.route('/team/reports')
 @login_required
 def team_reports():
-    if not current_user.is_admin:
+    # Admin check using email list (same as your admin_required decorator)
+    admin_emails = ['admin@example.com', 'techcharities@example.com', 'eswatiniclassifieds@gmail.com']
+    if current_user.email not in admin_emails:
         abort(403)
     
     # Get week_ending
@@ -2428,14 +2430,11 @@ def team_reports():
         today = datetime.utcnow().date()
         week_ending = today - timedelta(days=(today.weekday() + 1) % 7)
     
-    # Fetch contractors – adjust model name as needed
-    from models import User  # or Contractor
-    # Example: get all users with contractor roles
-    contractors = User.query.filter(User.role.in_(['community_manager', 'sales_rep'])).all()
+    # Fetch active contractors (using your Contractor model)
+    contractors = Contractor.query.filter_by(active=True).all()
     
     submitted = []
     not_submitted = []
-    
     for contractor in contractors:
         report = WeeklyReport.query.filter_by(
             contractor_id=contractor.id,
@@ -2453,7 +2452,7 @@ def team_reports():
         weeks.append((w, w.strftime('%d %b %Y')))
     weeks.reverse()
     
-    return render_template('team_reports.html',
+    return render_template('admin/all_reports.html',   # note: correct path
                            submitted=submitted,
                            not_submitted=not_submitted,
                            current_week=week_ending,
