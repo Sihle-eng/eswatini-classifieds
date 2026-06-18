@@ -2506,8 +2506,7 @@ def shared_content_calendar():
                          events_by_date=events_by_date,
                          can_add_event=can_add_event)
 
-@app.route('/ads.txt')
+@main.route('/ads.txt')
 def ads_txt():
     content = "google.com, pub-7007646558751886, DIRECT, f08c47fec0942fa0\n"
     return Response(content, mimetype='text/plain')
-
