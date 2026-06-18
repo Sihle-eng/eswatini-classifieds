@@ -42,7 +42,7 @@ from app.email_utils import (
 from app.services.momo_service import MTNMoMoService
 from app.services.dodo_service import DodoPaymentsService
 from app.tasks import send_welcome_email_job, send_terms_agreement_job
-from sqlalchemy import case
+from sqlalchemy import case, func, cast, Date
 from app.models import ClientPreference
 from flask_mail import Message
 
@@ -1086,38 +1086,40 @@ def submit_report():
 @login_required
 @admin_required
 def all_reports():
-    # Get week ending date from query param (default to last Sunday)
+    # 1. Determine the week to display
     week_ending_str = request.args.get('week_ending')
     if week_ending_str:
         week_ending = datetime.strptime(week_ending_str, '%Y-%m-%d').date()
     else:
-        # Default to most recent Sunday (today or previous Sunday)
-        today = datetime.utcnow().date()
-        week_ending = today - timedelta(days=(today.weekday() + 1) % 7)
-    
-    # Get all active contractors (adjust as needed)
+        # Default: most recent Sunday (today or previous Sunday)
+        today = datetime.now().date()
+        week_ending = today - timedelta(days=(today.weekday() + 1) % 7)  # Sunday
+
+    # 2. Get active contractors
     contractors = Contractor.query.filter_by(active=True).all()
-    
+
     submitted = []
     not_submitted = []
-    
+
     for contractor in contractors:
-        report = WeeklyReport.query.filter_by(
-            contractor_id=contractor.id,
-            week_ending=week_ending
+        # Compare only the date part (ignores time)
+        report = WeeklyReport.query.filter(
+            WeeklyReport.contractor_id == contractor.id,
+            func.date(WeeklyReport.week_ending) == week_ending
         ).first()
         if report:
             submitted.append((contractor, report))
         else:
             not_submitted.append(contractor)
-    
-    # Generate list of past 8 weeks for the dropdown
+
+    # 3. Generate dropdown: last 8 Sundays from today (not from selected week)
+    today = datetime.now().date()
     weeks = []
     for i in range(8):
-        w = week_ending - timedelta(weeks=i)
+        w = today - timedelta(days=(today.weekday() + 1) % 7) - timedelta(weeks=i)
         weeks.append((w, w.strftime('%d %b %Y')))
     weeks.reverse()  # oldest first
-    
+
     return render_template('admin/all_reports.html',
                            submitted=submitted,
                            not_submitted=not_submitted,
