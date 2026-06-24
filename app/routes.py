@@ -2510,3 +2510,32 @@ def shared_content_calendar():
 def ads_txt():
     content = "google.com, pub-7007646558751886, DIRECT, f08c47fec0942fa0\n"
     return Response(content, mimetype='text/plain')
+
+
+@main.route('/about')
+def about():
+    return render_template('about.html')
+
+@main.route('/how-it-works')
+def how_it_works():
+    return render_template('how_it_works.html')
+
+@main.route('/safety-tips')
+def safety_tips():
+    return render_template('safety_tips.html')
+
+@main.route('/faq')
+def faq():
+    return render_template('faq.html')
+
+@main.route('/contact', methods=['GET', 'POST'])
+def contact():
+    if request.method == 'POST':
+        # Handle form submission (send email, save to DB, etc.)
+        flash('Your message has been sent. We\'ll get back to you soon.', 'success')
+        return redirect(url_for('main.contact'))
+    return render_template('contact.html')
+
+@main.route('/terms')
+def terms():
+    return render_template('terms.html')

@@ -12,7 +12,7 @@
 
     <!-- SEO META TAGS -->
     <meta name="description"
-        content="Eswatini Classifieds - Find jobs, cars, property, and services across Eswatini. Buy, sell, and connect locally.">
+        content="{% block meta_description %}Eswatini Classifieds - Find jobs, cars, property, and services across Eswatini. Buy, sell, and connect locally.{% endblock %}">
     <meta name="keywords" content="Eswatini, classifieds, jobs, cars, property, Mbabane, Manzini, Swaziland, buy, sell">
     <meta name="author" content="Eswatini Classifieds">
     <meta name="robots" content="index, follow">
@@ -427,6 +427,51 @@
                 display: none !important;
             }
         }
+
+        /* --- NEW: Better footer responsive --- */
+        @media (max-width: 640px) {
+            .footer-container {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 1.5rem !important;
+                text-align: left;
+            }
+
+            .footer-section h4 {
+                font-size: 1rem;
+            }
+
+            .footer-links a {
+                font-size: 0.875rem;
+            }
+
+            .footer-social {
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .footer-container {
+                grid-template-columns: 1fr !important;
+                text-align: center;
+            }
+
+            .footer-social {
+                justify-content: center;
+            }
+
+            .footer-section {
+                padding-bottom: 1rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            }
+
+            .footer-section:last-child {
+                border-bottom: none;
+            }
+        }
+
+        .footer-section li {
+            word-break: break-word;
+        }
     </style>
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7007646558751886"
@@ -732,18 +777,20 @@
     <main>
         {% block content %}{% endblock %}
     </main>
+
     <!-- Ad Unit: Header Banner -->
     <div style="text-align:center; margin: 10px 0;">
-        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-7007646558751886" data-ad-slot="3344774247"
-            data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-7007646558751886"
+            data-ad-slot="3344774247" data-ad-format="auto" data-full-width-responsive="true"></ins>
         <script>
             (adsbygoogle = window.adsbygoogle || []).push({});
         </script>
     </div>
 
-    <!-- Footer -->
+    <!-- Footer – FULLY RESPONSIVE (fixed overlap) -->
     <footer class="premium-footer">
         <div class="footer-container">
+            <!-- Brand -->
             <div class="footer-section">
                 <h4><i class="fas fa-store mr-2"></i> Eswatini Classifieds</h4>
                 <p class="text-sm text-gray-300 mb-4">Connecting buyers and sellers across Eswatini since 2026.</p>
@@ -758,15 +805,20 @@
                             class="fab fa-instagram text-xl"></i></a>
                 </div>
             </div>
+
+            <!-- Company -->
             <div class="footer-section">
-                <h4>Quick Links</h4>
+                <h4>Company</h4>
                 <ul class="footer-links">
-                    <li><a href="{{ url_for('main.home') }}">Home</a></li>
-                    <li><a href="{{ url_for('main.browse_ads') }}">Browse Ads</a></li>
-                    <li><a href="{{ url_for('main.post_ad') }}">Post Ad</a></li>
-                    <li><a href="{{ url_for('main.privacy') }}">Privacy Policy</a></li>
+                    <li><a href="{{ url_for('main.about') }}">About Us</a></li>
+                    <li><a href="{{ url_for('main.how_it_works') }}">How It Works</a></li>
+                    <li><a href="{{ url_for('main.safety_tips') }}">Safety Tips</a></li>
+                    <li><a href="{{ url_for('main.faq') }}">FAQ</a></li>
+                    <li><a href="{{ url_for('main.contact') }}">Contact</a></li>
                 </ul>
             </div>
+
+            <!-- Categories -->
             <div class="footer-section">
                 <h4>Categories</h4>
                 <ul class="footer-links">
@@ -774,14 +826,27 @@
                     <li><a href="{{ url_for('main.browse_ads', category='motors') }}">Motors</a></li>
                     <li><a href="{{ url_for('main.browse_ads', category='property') }}">Property</a></li>
                     <li><a href="{{ url_for('main.browse_ads', category='services') }}">Services</a></li>
+                    <li><a href="{{ url_for('main.browse_ads', category='general') }}">General</a></li>
                 </ul>
             </div>
+
+            <!-- Legal & Contact (FIXED: text-wrap & break-word) -->
             <div class="footer-section">
-                <h4>Contact</h4>
+                <h4>Legal</h4>
                 <ul class="footer-links">
-                    <li><i class="fas fa-map-marker-alt mr-2"></i> Mbabane, Eswatini</li>
-                    <li><i class="fas fa-phone mr-2"></i> +268 7970 8243</li>
-                    <li><i class="fas fa-envelope mr-2"></i> eswatiniclassifieds@gmail.com</li>
+                    <li><a href="{{ url_for('main.privacy') }}">Privacy Policy</a></li>
+                    <li><a href="{{ url_for('main.terms') }}">Terms of Service</a></li>
+                </ul>
+                <h4 class="mt-4">Contact</h4>
+                <ul class="footer-links">
+                    <li class="flex items-center gap-2 justify-center md:justify-start">
+                        <i class="fas fa-phone"></i>
+                        <span class="break-all">+268 7970 8243</span>
+                    </li>
+                    <li class="flex items-center gap-2 justify-center md:justify-start">
+                        <i class="fas fa-envelope"></i>
+                        <span class="break-all">eswatiniclassifieds@gmail.com</span>
+                    </li>
                 </ul>
             </div>
         </div>

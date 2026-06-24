@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}How It Works – Eswatini Classifieds{% endblock %}
+
+{% block meta_description %}Learn how to buy and sell safely on Eswatini Classifieds. Step‑by‑step guide for posting
+ads, connecting with buyers, and closing deals.{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-12 max-w-4xl">
+    <h1 class="text-4xl font-bold text-gray-800 mb-6">How It Works</h1>
+    <p class="text-lg text-gray-600 mb-8">Getting started on Eswatini Classifieds is simple. Whether you're selling an
+        item or looking to buy, follow these steps to make the most of our platform.</p>
+
+    <div class="space-y-12">
+        <!-- Step 1 -->
+        <div class="flex flex-col md:flex-row gap-6 items-start">
+            <div
+                class="bg-blue-100 text-blue-800 rounded-full w-14 h-14 flex items-center justify-center text-2xl font-bold flex-shrink-0">
+                1</div>
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Create an Account or Log In</h2>
+                <p class="text-gray-600 mt-2">If you're new, sign up for a free account using your email or phone. If
+                    you already have an account, simply log in. Having an account lets you post ads, save favourites,
+                    and manage your listings.</p>
+            </div>
+        </div>
+        <!-- Step 2 -->
+        <div class="flex flex-col md:flex-row gap-6 items-start">
+            <div
+                class="bg-green-100 text-green-800 rounded-full w-14 h-14 flex items-center justify-center text-2xl font-bold flex-shrink-0">
+                2</div>
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Post Your Ad</h2>
+                <p class="text-gray-600 mt-2">Click the <strong>“Post Ad”</strong> button. Fill in the title,
+                    description, category, price (if applicable), location, and upload one or more images. The more
+                    detail you provide, the quicker you'll find a buyer.</p>
+                <ul class="list-disc list-inside text-gray-600 mt-2 space-y-1">
+                    <li>Use clear, high‑quality photos.</li>
+                    <li>Be honest about the condition and price.</li>
+                    <li>Include contact info (phone or email) – but only share it after an initial enquiry for privacy.
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!-- Step 3 -->
+        <div class="flex flex-col md:flex-row gap-6 items-start">
+            <div
+                class="bg-yellow-100 text-yellow-800 rounded-full w-14 h-14 flex items-center justify-center text-2xl font-bold flex-shrink-0">
+                3</div>
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Connect with Interested Buyers</h2>
+                <p class="text-gray-600 mt-2">Once your ad is live, buyers will contact you via the phone number or
+                    email you provided. Reply promptly, answer questions honestly, and negotiate a fair price.</p>
+                <p class="text-gray-600 mt-2"><strong>Pro tip:</strong> Keep your ad active by renewing it every 30 days
+                    – we'll remind you!</p>
+            </div>
+        </div>
+        <!-- Step 4 -->
+        <div class="flex flex-col md:flex-row gap-6 items-start">
+            <div
+                class="bg-purple-100 text-purple-800 rounded-full w-14 h-14 flex items-center justify-center text-2xl font-bold flex-shrink-0">
+                4</div>
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Close the Deal Safely</h2>
+                <p class="text-gray-600 mt-2">Arrange to meet in a public, well‑lit place – like a shopping centre or
+                    police station. Bring a friend if possible. Inspect the item carefully before paying, and count cash
+                    together. For larger transactions, consider using a secure payment method.</p>
+                <p class="text-gray-600 mt-2">After the sale, you can mark your ad as <strong>“Sold”</strong> so others
+                    know it's no longer available.</p>
+            </div>
+        </div>
+        <!-- Step 5 -->
+        <div class="flex flex-col md:flex-row gap-6 items-start">
+            <div
+                class="bg-red-100 text-red-800 rounded-full w-14 h-14 flex items-center justify-center text-2xl font-bold flex-shrink-0">
+                5</div>
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Leave Feedback</h2>
+                <p class="text-gray-600 mt-2">Help us build a trustworthy community by leaving a review for the other
+                    party. This helps others know who to deal with.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-12 p-6 bg-gray-100 rounded-xl">
+        <h3 class="text-xl font-bold text-gray-800">Need More Help?</h3>
+        <p class="text-gray-600">Visit our <a href="{{ url_for('main.faq') }}"
+                class="text-blue-600 hover:underline">FAQ</a> or <a href="{{ url_for('main.contact') }}"
+                class="text-blue-600 hover:underline">Contact Us</a> – we're here to assist.</p>
+    </div>
+</div>
+{% endblock %}

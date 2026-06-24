@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}FAQ – Eswatini Classifieds{% endblock %}
+
+{% block meta_description %}Frequently asked questions about posting ads, buying, selling, accounts, and safety on
+Eswatini Classifieds. Find answers here.{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-12 max-w-4xl">
+    <h1 class="text-4xl font-bold text-gray-800 mb-6">Frequently Asked Questions</h1>
+
+    <div class="space-y-4">
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="text-xl font-semibold text-gray-800">How do I post an ad?</h3>
+            <p class="text-gray-600 mt-2">Click the <strong>“Post Ad”</strong> button (top right), fill in the required
+                details – title, description, category, price, location, and upload images – then submit. Your ad will
+                go live immediately after moderation (if applicable).</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="text-xl font-semibold text-gray-800">Is posting an ad free?</h3>
+            <p class="text-gray-600 mt-2">Yes! Basic ads are completely free. We may introduce premium features (like
+                highlighting or boosting) in the future, but standard listings will always remain free.</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="text-xl font-semibold text-gray-800">How long does my ad stay active?</h3>
+            <p class="text-gray-600 mt-2">Ads remain active for 30 days. You'll receive a reminder to renew it before
+                expiry. You can also delete or mark it as sold at any time.</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="text-xl font-semibold text-gray-800">Can I edit my ad after posting?</h3>
+            <p class="text-gray-600 mt-2">Yes, go to <strong>“My Ads”</strong> in your dashboard, find the ad, and click
+                “Edit”. You can change the description, price, images, etc.</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="text-xl font-semibold text-gray-800">How do I contact a seller?</h3>
+            <p class="text-gray-600 mt-2">Each ad displays the seller's phone number or email. You can call, WhatsApp,
+                or email them directly. We recommend contacting them via phone for a faster response.</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="text-xl font-semibold text-gray-800">What should I do if I suspect a scam?</h3>
+            <p class="text-gray-600 mt-2">If you believe an ad or user is fraudulent, please report it using the
+                <strong>“Report”</strong> button on the ad page, or contact us directly. We will investigate and take
+                action.</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="text-xl font-semibold text-gray-800">Do you offer buyer/seller protection?</h3>
+            <p class="text-gray-600 mt-2">We provide safety tips and a reporting system, but we are not directly
+                involved in transactions. We encourage users to meet in person and inspect items before paying.</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="text-xl font-semibold text-gray-800">Can I delete my account?</h3>
+            <p class="text-gray-600 mt-2">Yes, you can request account deletion from your dashboard settings. Please
+                note that this will remove all your ads and personal data permanently.</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="text-xl font-semibold text-gray-800">How do I change my password?</h3>
+            <p class="text-gray-600 mt-2">Log in, go to your profile settings, and click “Change Password”. Enter your
+                current password and the new one, then save.</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 class="text-xl font-semibold text-gray-800">Is my personal information secure?</h3>
+            <p class="text-gray-600 mt-2">Yes, we take data protection seriously. We only share the information you
+                choose to display on your ads (e.g., phone number). We do not sell or rent your data to third parties.
+                Read our <a href="{{ url_for('main.privacy') }}" class="text-blue-600 hover:underline">Privacy
+                    Policy</a> for full details.</p>
+        </div>
+    </div>
+
+    <div class="mt-8 p-6 bg-gray-50 rounded-xl text-center">
+        <p class="text-gray-600">Didn't find your answer? <a href="{{ url_for('main.contact') }}"
+                class="text-blue-600 hover:underline">Contact us</a> and we'll help you out.</p>
+    </div>
+</div>
+{% endblock %}
