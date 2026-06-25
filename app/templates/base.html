@@ -580,6 +580,13 @@
                                     {% endif %}
                                 </span>
                             </div>
+
+                            <!-- ✅ My Profile link (desktop) – now visible to all logged‑in users -->
+                            <a href="{{ url_for('main.profile') }}" class="dropdown-item">
+                                <i class="fas fa-user-circle text-gray-500"></i> My Profile
+                            </a>
+
+                            <!-- Role-specific dropdown items -->
                             {% if current_user.user_type|lower == 'contractor' %}
                             <a href="{{ url_for('main.contractor_dashboard') }}" class="dropdown-item"><i
                                     class="fas fa-tachometer-alt text-gray-500"></i> My Dashboard</a>
@@ -652,6 +659,7 @@
                     </div>
                 </div>
             </div>
+            <!-- Admin mobile items -->
             <a href="{{ url_for('main.admin_dashboard') }}"
                 class="flex items-center gap-3 p-3 rounded-lg hover:bg-yellow-50"><i
                     class="fas fa-tachometer-alt w-6 text-yellow-600"></i> Dashboard</a>
@@ -676,6 +684,7 @@
             <a href="{{ url_for('main.logout') }}"
                 class="flex items-center gap-3 p-3 rounded-lg text-red-600 hover:bg-red-50"><i
                     class="fas fa-sign-out-alt w-6"></i> Sign Out</a>
+
             {% elif current_user.user_type|lower == 'contractor' %}
             <div class="bg-purple-100 rounded-xl p-4 mb-4">
                 <div class="flex items-center gap-3">
@@ -686,6 +695,10 @@
                     </div>
                 </div>
             </div>
+            <!-- ✅ My Profile link (mobile) – visible to contractors -->
+            <a href="{{ url_for('main.profile') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-user-circle w-6 text-blue-600"></i> My Profile
+            </a>
             <a href="{{ url_for('main.contractor_dashboard') }}"
                 class="flex items-center gap-3 p-3 rounded-lg hover:bg-purple-50"><i
                     class="fas fa-tachometer-alt w-6 text-purple-600"></i> My Dashboard</a>
@@ -698,7 +711,9 @@
             <a href="{{ url_for('main.logout') }}"
                 class="flex items-center gap-3 p-3 rounded-lg text-red-600 hover:bg-red-50"><i
                     class="fas fa-sign-out-alt w-6"></i> Sign Out</a>
+
             {% else %}
+            <!-- Clients and Business (non-admin, non-contractor) -->
             <div class="bg-gray-100 rounded-xl p-4 mb-4">
                 <div class="flex items-center gap-3">
                     <i class="fas fa-user-circle text-3xl text-blue-600"></i>
@@ -708,6 +723,10 @@
                     </div>
                 </div>
             </div>
+            <!-- ✅ My Profile link (mobile) – visible to clients & businesses -->
+            <a href="{{ url_for('main.profile') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100">
+                <i class="fas fa-user-circle w-6 text-blue-600"></i> My Profile
+            </a>
             <a href="{{ url_for('main.home') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100"><i
                     class="fas fa-home w-6 text-blue-600"></i> Home</a>
             <a href="{{ url_for('main.browse_ads') }}"
@@ -741,7 +760,9 @@
                 class="flex items-center gap-3 p-3 rounded-lg text-red-600 hover:bg-red-50"><i
                     class="fas fa-sign-out-alt w-6"></i> Sign Out</a>
             {% endif %}
+
             {% else %}
+            <!-- Not logged in -->
             <a href="{{ url_for('main.login') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100"><i
                     class="fas fa-sign-in-alt w-6 text-blue-600"></i> Login</a>
             <a href="{{ url_for('main.register') }}"
@@ -787,7 +808,7 @@
         </script>
     </div>
 
-    <!-- Footer – FULLY RESPONSIVE (fixed overlap) -->
+    <!-- Footer – FULLY RESPONSIVE -->
     <footer class="premium-footer">
         <div class="footer-container">
             <!-- Brand -->
@@ -830,7 +851,7 @@
                 </ul>
             </div>
 
-            <!-- Legal & Contact (FIXED: text-wrap & break-word) -->
+            <!-- Legal & Contact (wrapped for mobile) -->
             <div class="footer-section">
                 <h4>Legal</h4>
                 <ul class="footer-links">

@@ -2578,3 +2578,42 @@ def contact():
 @main.route('/terms')
 def terms():
     return render_template('terms.html')
+
+
+@main.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    if request.method == 'POST':
+        current_password = request.form.get('current_password')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+
+        # Validate current password
+        if not check_password_hash(current_user.password_hash, current_password):
+            flash('Current password is incorrect.', 'error')
+            return redirect(url_for('main.profile'))
+
+        # Validate new password
+        if len(new_password) < 8:
+            flash('Password must be at least 8 characters long.', 'error')
+            return redirect(url_for('main.profile'))
+
+        if not any(c.isupper() for c in new_password):
+            flash('Password must contain at least one uppercase letter.', 'error')
+            return redirect(url_for('main.profile'))
+
+        if not any(c.isdigit() for c in new_password):
+            flash('Password must contain at least one number.', 'error')
+            return redirect(url_for('main.profile'))
+
+        if new_password != confirm_password:
+            flash('Passwords do not match.', 'error')
+            return redirect(url_for('main.profile'))
+
+        # Hash and update
+        current_user.password_hash = generate_password_hash(new_password, method='pbkdf2:sha256')
+        db.session.commit()
+        flash('Your password has been updated successfully.', 'success')
+        return redirect(url_for('main.profile'))
+
+    return render_template('profile.html')
