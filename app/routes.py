@@ -2540,12 +2540,14 @@ def contact():
             flash('All fields are required.', 'error')
             return render_template('contact.html')
 
-        # Save to database
+        # Combine subject and message into one field
+        full_message = f"Subject: {subject}\n\n{message}"
+
+        # Save to database (using only fields that exist)
         inquiry = ContactInquiry(
             sender_name=name,
             sender_email=email,
-            subject=subject,
-            message=message,
+            message=full_message,
             created_at=datetime.utcnow()
         )
         db.session.add(inquiry)
@@ -2553,14 +2555,14 @@ def contact():
 
         # Send email to admin
         try:
-            admin_email = 'eswatiniclassifieds@gmail.com'  # or from config
+            admin_email = 'eswatiniclassifieds@gmail.com'
             send_email(
                 to=admin_email,
-                subject=f"Contact Form: {subject}",          # email subject line
+                subject=f"Contact Form: {subject}",
                 template_name='contact_notification',
                 name=name,
                 email=email,
-                subject_text=subject,                       # template variable – renamed!
+                subject_text=subject,
                 message=message,
                 inquiry_id=inquiry.id
             )
