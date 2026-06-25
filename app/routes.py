@@ -2531,9 +2531,48 @@ def faq():
 @main.route('/contact', methods=['GET', 'POST'])
 def contact():
     if request.method == 'POST':
-        # Handle form submission (send email, save to DB, etc.)
-        flash('Your message has been sent. We\'ll get back to you soon.', 'success')
+        # Get form data
+        name = request.form.get('name', '').strip()
+        email = request.form.get('email', '').strip()
+        subject = request.form.get('subject', '').strip()
+        message = request.form.get('message', '').strip()
+
+        # Validate required fields
+        if not all([name, email, subject, message]):
+            flash('All fields are required.', 'error')
+            return render_template('contact.html')
+
+        # Save to database
+        inquiry = ContactInquiry(
+            sender_name=name,
+            sender_email=email,
+            subject=subject,
+            message=message,
+            created_at=datetime.utcnow()
+        )
+        db.session.add(inquiry)
+        db.session.commit()
+
+        # Send email to admin (you)
+        try:
+            admin_email = 'eswatiniclassifieds@gmail.com'  # or get from config
+            send_email(
+                to=admin_email,
+                subject=f"Contact Form: {subject}",
+                template_name='contact_notification',
+                name=name,
+                email=email,
+                subject=subject,
+                message=message,
+                inquiry_id=inquiry.id
+            )
+            flash('✅ Your message has been sent. We\'ll get back to you within 24 hours.', 'success')
+        except Exception as e:
+            # Log the error (you can use current_app.logger.error(str(e)))
+            flash('⚠️ Your message was saved, but we could not send an email notification. We\'ll check it manually.', 'warning')
+
         return redirect(url_for('main.contact'))
+
     return render_template('contact.html')
 
 @main.route('/terms')
