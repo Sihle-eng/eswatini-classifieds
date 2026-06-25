@@ -1684,10 +1684,10 @@ def update_preferences():
 def daily_digest_cron(secret):
     if secret != current_app.config.get('CRON_SECRET'):
         return 'Unauthorized', 401
-    
+
     from datetime import datetime, timedelta
-    
-    # Get clients who want daily updates - USING JOIN INSTEAD OF .has()
+
+    # Get clients who want daily updates
     clients = db.session.query(User).join(
         ClientPreference, User.id == ClientPreference.client_user_id
     ).filter(
@@ -1698,14 +1698,20 @@ def daily_digest_cron(secret):
             ClientPreference.last_digest_sent < datetime.utcnow() - timedelta(days=1)
         )
     ).all()
-    
+
     sent_count = 0
+
     for client in clients:
-        prefs = client.preferences  # This still works (scalar)
+        # ✅ FIX: Get the first preference object (if any)
+        prefs = client.preferences[0] if client.preferences else None
+        if not prefs:
+            continue  # Shouldn't happen because of the join, but just in case
+
         categories = prefs.preferred_categories.split(',') if prefs.preferred_categories else []
         cities = prefs.preferred_cities.split(',') if prefs.preferred_cities else []
-        
+
         since_date = prefs.last_digest_sent if prefs.last_digest_sent else (datetime.utcnow() - timedelta(days=1))
+
         query = Posting.query.filter(
             Posting.is_active == True,
             Posting.expires_at > datetime.utcnow(),
@@ -1715,26 +1721,26 @@ def daily_digest_cron(secret):
             query = query.filter(Posting.category.in_(categories))
         if cities:
             query = query.filter(Posting.location_city.in_(cities))
-        
+
         new_ads = query.limit(20).all()
+
         if new_ads:
             try:
                 from app.email_utils import send_email
-                subject = "Your Daily Digest - New Listings in Eswatini Classifieds"
                 send_email(
                     to=client.email,
-                    subject=subject,
+                    subject="Your Daily Digest - New Listings in Eswatini Classifieds",
                     template_name='daily_digest',
                     client_name=client.client_profile.full_name if client.client_profile else client.email.split('@')[0],
                     ads=new_ads,
-                    date=datetime.utcnow().strftime('%B %d, %Y')
+                    site_url=current_app.config.get('SITE_URL', 'https://eswatini-classifieds.onrender.com')
                 )
                 prefs.last_digest_sent = datetime.utcnow()
                 db.session.commit()
                 sent_count += 1
             except Exception as e:
-                print(f"[ERROR] Digest failed for {client.email}: {e}")
-    
+                current_app.logger.error(f"Digest failed for {client.email}: {e}")
+
     return f'Processed {len(clients)} clients, sent {sent_count} digests', 200
 
 @main.route('/admin/bulk-email', methods=['GET', 'POST'])
