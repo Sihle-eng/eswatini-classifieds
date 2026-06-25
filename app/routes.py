@@ -2531,13 +2531,11 @@ def faq():
 @main.route('/contact', methods=['GET', 'POST'])
 def contact():
     if request.method == 'POST':
-        # Get form data
         name = request.form.get('name', '').strip()
         email = request.form.get('email', '').strip()
         subject = request.form.get('subject', '').strip()
         message = request.form.get('message', '').strip()
 
-        # Validate required fields
         if not all([name, email, subject, message]):
             flash('All fields are required.', 'error')
             return render_template('contact.html')
@@ -2553,22 +2551,22 @@ def contact():
         db.session.add(inquiry)
         db.session.commit()
 
-        # Send email to admin (you)
+        # Send email to admin
         try:
-            admin_email = 'eswatiniclassifieds@gmail.com'  # or get from config
+            admin_email = 'eswatiniclassifieds@gmail.com'  # or from config
             send_email(
                 to=admin_email,
-                subject=f"Contact Form: {subject}",
+                subject=f"Contact Form: {subject}",          # email subject line
                 template_name='contact_notification',
                 name=name,
                 email=email,
-                subject=subject,
+                subject_text=subject,                       # template variable – renamed!
                 message=message,
                 inquiry_id=inquiry.id
             )
             flash('✅ Your message has been sent. We\'ll get back to you within 24 hours.', 'success')
         except Exception as e:
-            # Log the error (you can use current_app.logger.error(str(e)))
+            current_app.logger.error(f"Contact email failed: {e}")
             flash('⚠️ Your message was saved, but we could not send an email notification. We\'ll check it manually.', 'warning')
 
         return redirect(url_for('main.contact'))
