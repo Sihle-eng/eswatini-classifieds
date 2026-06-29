@@ -1086,39 +1086,44 @@ def submit_report():
 @login_required
 @admin_required
 def all_reports():
-    # 1. Determine the week to display
+    # 1. Determine the week to display (week_ending = Sunday)
     week_ending_str = request.args.get('week_ending')
     if week_ending_str:
         week_ending = datetime.strptime(week_ending_str, '%Y-%m-%d').date()
     else:
-        # Default: most recent Sunday (today or previous Sunday)
         today = datetime.now().date()
         week_ending = today - timedelta(days=(today.weekday() + 1) % 7)  # Sunday
 
-    # 2. Get active contractors
+    # 2. Compute Monday and Sunday of that week (Monday=0)
+    monday = week_ending - timedelta(days=6)   # since week_ending is Sunday
+    # or more generally: monday = week_ending - timedelta(days=week_ending.weekday() + 1)
+    # But week_ending.weekday() for Sunday is 6, so (weekday+1)%7 = 0 for Sunday
+    # So just subtract 6 days to get Monday.
+
+    # 3. Get active contractors
     contractors = Contractor.query.filter_by(active=True).all()
 
     submitted = []
     not_submitted = []
 
     for contractor in contractors:
-        # Compare only the date part (ignores time)
+        # Filter reports whose week_ending is between Monday and Sunday (inclusive)
         report = WeeklyReport.query.filter(
             WeeklyReport.contractor_id == contractor.id,
-            func.date(WeeklyReport.week_ending) == week_ending
+            WeeklyReport.week_ending.between(monday, week_ending)
         ).first()
         if report:
             submitted.append((contractor, report))
         else:
             not_submitted.append(contractor)
 
-    # 3. Generate dropdown: last 8 Sundays from today (not from selected week)
+    # 4. Generate dropdown: last 8 Sundays (unchanged)
     today = datetime.now().date()
     weeks = []
     for i in range(8):
         w = today - timedelta(days=(today.weekday() + 1) % 7) - timedelta(weeks=i)
         weeks.append((w, w.strftime('%d %b %Y')))
-    weeks.reverse()  # oldest first
+    weeks.reverse()
 
     return render_template('admin/all_reports.html',
                            submitted=submitted,
