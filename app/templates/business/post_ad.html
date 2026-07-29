@@ -4,32 +4,35 @@
 
 {% block content %}
 <div class="max-w-3xl mx-auto">
-    <h2 class="text-2xl font-bold mb-6"><i class="fas fa-pen-square text-blue-600 mr-2"></i>Post a New Advertisement</h2>
+    <h2 class="text-2xl font-bold mb-6"><i class="fas fa-pen-square text-blue-600 mr-2"></i>Post a New Advertisement
+    </h2>
 
     <!-- Promotional Banner (only for sihlelelwewelcome@gmail.com) -->
     {% if is_promo %}
-        {% if is_special_promo %}
-        <!-- Special Promotional Partner Banner -->
-        <div class="mb-6 bg-purple-100 border-l-4 border-purple-500 text-purple-700 p-4 rounded">
-            ⭐ <strong>Promotional Partner</strong> – Your ads will be posted immediately at no cost.
-        </div>
-        {% else %}
-        <!-- Free Period Banner for all other business users -->
-        <div class="mb-6 bg-green-100 border-l-4 border-green-500 text-green-800 p-4 rounded">
-            <div class="flex items-start gap-3">
-                <i class="fas fa-gift text-2xl mt-1"></i>
-                <div>
-                    <strong class="text-lg">Limited Time Offer – Free Posting for 35 Days!</strong><br>
-                    From <strong>8 June 2026</strong> to <strong>13 July 2026</strong>, all businesses can post ads
-                    <strong>absolutely free</strong>.<br>
-                    Your ad will be active for <strong>35 days</strong> – no payment required. Just fill in the form and publish
-                    instantly.
-                </div>
+    {% if is_special_promo %}
+    <!-- Special Promotional Partner Banner -->
+    <div class="mb-6 bg-purple-100 border-l-4 border-purple-500 text-purple-700 p-4 rounded">
+        ⭐ <strong>Promotional Partner</strong> – Your ads will be posted immediately at no cost.
+    </div>
+    {% else %}
+    <!-- Free Period Banner for all other business users -->
+    <div class="mb-6 bg-green-100 border-l-4 border-green-500 text-green-800 p-4 rounded">
+        <div class="flex items-start gap-3">
+            <i class="fas fa-gift text-2xl mt-1"></i>
+            <div>
+                <strong class="text-lg">Limited Time Offer – Free Posting for 35 Days!</strong><br>
+                From <strong>8 June 2026</strong> to <strong>13 July 2026</strong>, all businesses can post ads
+                <strong>absolutely free</strong>.<br>
+                Your ad will be active for <strong>35 days</strong> – no payment required. Just fill in the form and
+                publish
+                instantly.
             </div>
         </div>
-        {% endif %}
+    </div>
     {% endif %}
-    <form method="POST" action="{{ url_for('main.post_ad') }}" enctype="multipart/form-data" class="bg-white rounded-lg shadow p-6">
+    {% endif %}
+    <form method="POST" action="{{ url_for('main.post_ad') }}" enctype="multipart/form-data"
+        class="bg-white rounded-lg shadow p-6">
 
         <!-- Hidden fields for promo user (default plan & method) -->
         {% if is_promo %}
@@ -37,7 +40,7 @@
         <input type="hidden" name="payment_method" value="promotional">
         {% endif %}
 
-        <!-- Step 1: Basic Information (same for all) -->
+        <!-- Step 1: Basic Information -->
         <div class="mb-8">
             <h3 class="text-lg font-semibold mb-4 pb-2 border-b">Step 1: Ad Details</h3>
 
@@ -45,15 +48,16 @@
             <div class="mb-4">
                 <label class="block text-gray-700 mb-2 font-medium">Ad Title *</label>
                 <input type="text" name="title" required maxlength="200"
-                       placeholder="e.g., Experienced Accountant Needed / Toyota Hilux for Sale"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                    placeholder="e.g., Experienced Accountant Needed / Toyota Hilux for Sale"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
                 <p class="text-sm text-gray-500 mt-1">Make it clear and descriptive</p>
             </div>
 
             <!-- Category -->
             <div class="mb-4">
                 <label class="block text-gray-700 mb-2 font-medium">Category *</label>
-                <select name="category" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                <select name="category" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
                     <option value="">-- Select Category --</option>
                     <option value="employment">Employment / Jobs</option>
                     <option value="motors">Motors / Vehicles</option>
@@ -64,69 +68,71 @@
             </div>
 
             <!-- Location City -->
-            <select name="location_city" required
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
-                <option value="">-- Select City --</option>
-                <option value="Manzini">Manzini</option>
-                <option value="Mbabane">Mbabane</option>
-                <option value="Lobamba">Lobamba</option>
-                <option value="Big Bend">Big Bend</option>
-                <option value="Malkerns">Malkerns</option>
-                <option value="Nhlangano">Nhlangano</option>
-                <option value="Mhlume">Mhlume</option>
-                <option value="Hlutsi">Hlutsi</option>
-                <option value="Simunye">Simunye</option>
-                <option value="Siteki">Siteki</option>
-                <option value="Piggs Peak">Piggs Peak</option>
-                <option value="Ngomane">Ngomane</option>
-                <option value="Vuvulane">Vuvulane</option>
-                <option value="Mpaka">Mpaka</option>
-                <option value="Kwaluseni">Kwaluseni</option>
-                <option value="Bhunya">Bhunya</option>
-                <option value="Mhlambanyatsi">Mhlambanyatsi</option>
-                <option value="Tabankhulu">Tabankhulu</option>
-                <option value="Hlathikhulu">Hlathikhulu</option>
-                <option value="Bulembu">Bulembu</option>
-                <option value="Buhleni">Buhleni</option>
-                <option value="Khubutsa">Khubutsa</option>
-                <option value="Tjaneni">Tjaneni</option>
-                <option value="Sidvokodvo">Sidvokodvo</option>
-                <option value="Lavumisa">Lavumisa</option>
-                <option value="Ngwenya">Ngwenya</option>
-                <option value="Nsoko">Nsoko</option>
-                <option value="Mankayane">Mankayane</option>
-                <option value="Matsapha">Matsapha</option>
-                <option value="Ezulwini">Ezulwini</option>
-                <option value="Gege">Gege</option>
-                <option value="Sicunusa">Sicunusa</option>
-                <option value="Mahamba">Mahamba</option>
-                <option value="Sandlane">Sandlane</option>
-                <option value="Luyengo">Luyengo</option>
-                <option value="Mahlanya">Mahlanya</option>
-                <option value="Sgombeni">Sgombeni</option>
-                <option value="Siphofaneni">Siphofaneni</option>
-                <option value="Sthobelweni">Sthobelweni</option>
-                <option value="Luve">Luve</option>
-                <option value="Mafutseni">Mafutseni</option>
-                <option value="other">Other (Nationwide or Unspecified)</option>
-            </select>
+            <div class="mb-4">
+                <label class="block text-gray-700 mb-2 font-medium">City *</label>
+                <select name="location_city" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                    <option value="">-- Select City --</option>
+                    <option value="Manzini">Manzini</option>
+                    <option value="Mbabane">Mbabane</option>
+                    <option value="Lobamba">Lobamba</option>
+                    <option value="Big Bend">Big Bend</option>
+                    <option value="Malkerns">Malkerns</option>
+                    <option value="Nhlangano">Nhlangano</option>
+                    <option value="Mhlume">Mhlume</option>
+                    <option value="Hlutsi">Hlutsi</option>
+                    <option value="Simunye">Simunye</option>
+                    <option value="Siteki">Siteki</option>
+                    <option value="Piggs Peak">Piggs Peak</option>
+                    <option value="Ngomane">Ngomane</option>
+                    <option value="Vuvulane">Vuvulane</option>
+                    <option value="Mpaka">Mpaka</option>
+                    <option value="Kwaluseni">Kwaluseni</option>
+                    <option value="Bhunya">Bhunya</option>
+                    <option value="Mhlambanyatsi">Mhlambanyatsi</option>
+                    <option value="Tabankhulu">Tabankhulu</option>
+                    <option value="Hlathikhulu">Hlathikhulu</option>
+                    <option value="Bulembu">Bulembu</option>
+                    <option value="Buhleni">Buhleni</option>
+                    <option value="Khubutsa">Khubutsa</option>
+                    <option value="Tjaneni">Tjaneni</option>
+                    <option value="Sidvokodvo">Sidvokodvo</option>
+                    <option value="Lavumisa">Lavumisa</option>
+                    <option value="Ngwenya">Ngwenya</option>
+                    <option value="Nsoko">Nsoko</option>
+                    <option value="Mankayane">Mankayane</option>
+                    <option value="Matsapha">Matsapha</option>
+                    <option value="Ezulwini">Ezulwini</option>
+                    <option value="Gege">Gege</option>
+                    <option value="Sicunusa">Sicunusa</option>
+                    <option value="Mahamba">Mahamba</option>
+                    <option value="Sandlane">Sandlane</option>
+                    <option value="Luyengo">Luyengo</option>
+                    <option value="Mahlanya">Mahlanya</option>
+                    <option value="Sgombeni">Sgombeni</option>
+                    <option value="Siphofaneni">Siphofaneni</option>
+                    <option value="Sthobelweni">Sthobelweni</option>
+                    <option value="Luve">Luve</option>
+                    <option value="Mafutseni">Mafutseni</option>
+                    <option value="other">Other (Nationwide or Unspecified)</option>
+                </select>
+            </div>
 
             <!-- Salary/Price -->
             <div class="mb-4">
                 <label class="block text-gray-700 mb-2 font-medium">Salary / Price</label>
-                <input type="text" name="salary_price"
-                       placeholder="e.g., SZL 5,000 - 8,000 / month OR SZL 150,000"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                <input type="text" name="salary_price" placeholder="e.g., SZL 5,000 - 8,000 / month OR SZL 150,000"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
                 <p class="text-sm text-gray-500 mt-1">Optional but recommended</p>
             </div>
 
-            <!-- Multiple Image Upload with Preview (unchanged) -->
+            <!-- Multiple Image Upload with Preview -->
             <div class="mb-4">
-                <label class="block text-gray-700 mb-2 font-medium"><i class="fas fa-camera mr-1"></i> Upload Images (Up to 10)</label>
-                <input type="file" name="images" id="imageUpload" 
-                       accept="image/png, image/jpeg, image/jpg, image/gif, image/webp" 
-                       multiple
-                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                <label class="block text-gray-700 mb-2 font-medium"><i class="fas fa-camera mr-1"></i> Upload Images (Up
+                    to 10)</label>
+                <input type="file" name="images" id="imageUpload"
+                    accept="image/png, image/jpeg, image/jpg, image/gif, image/webp" multiple
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
                 <p class="text-sm text-gray-500 mt-1">
                     <span id="imageCount">0</span> image(s) selected. Max 10 images. 5MB each.
                 </p>
@@ -134,73 +140,82 @@
                 <div id="imagePreview" class="grid grid-cols-5 gap-2 mt-3"></div>
             </div>
 
-            <!-- JavaScript for Image Preview (unchanged) -->
+            <!-- JavaScript for Image Preview -->
             <script>
-            document.getElementById('imageUpload').addEventListener('change', function(e) {
-                const preview = document.getElementById('imagePreview');
-                const countSpan = document.getElementById('imageCount');
-                const files = Array.from(e.target.files);
-                if (files.length > 10) {
-                    alert('Maximum 10 images allowed. Only the first 10 will be uploaded.');
-                    files.splice(10);
-                }
-                countSpan.textContent = files.length;
-                preview.innerHTML = '';
-                files.forEach((file, index) => {
-                    if (file.type.startsWith('image/')) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            const div = document.createElement('div');
-                            div.className = 'relative group';
-                            const badge = index === 0 
-                                ? '<span class="absolute top-1 left-1 bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full z-10">Main</span>' 
-                                : '';
-                            const removeBtn = `
+                document.getElementById('imageUpload').addEventListener('change', function (e) {
+                    const preview = document.getElementById('imagePreview');
+                    const countSpan = document.getElementById('imageCount');
+                    const files = Array.from(e.target.files);
+                    if (files.length > 10) {
+                        alert('Maximum 10 images allowed. Only the first 10 will be uploaded.');
+                        files.splice(10);
+                    }
+                    countSpan.textContent = files.length;
+                    preview.innerHTML = '';
+                    files.forEach((file, index) => {
+                        if (file.type.startsWith('image/')) {
+                            const reader = new FileReader();
+                            reader.onload = function (e) {
+                                const div = document.createElement('div');
+                                div.className = 'relative group';
+                                const badge = index === 0
+                                    ? '<span class="absolute top-1 left-1 bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full z-10">Main</span>'
+                                    : '';
+                                const removeBtn = `
                                 <button type="button" 
                                         class="absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition z-10"
                                         onclick="removeImage(${index})">×</button>
                             `;
-                            div.innerHTML = `${badge}${removeBtn}<img src="${e.target.result}" class="w-full h-20 object-cover rounded-lg border-2 ${index === 0 ? 'border-blue-500' : 'border-gray-200'}"><span class="text-xs text-gray-500 truncate block mt-1">${file.name.substring(0, 15)}</span>`;
-                            preview.appendChild(div);
-                        };
-                        reader.readAsDataURL(file);
+                                div.innerHTML = `${badge}${removeBtn}<img src="${e.target.result}" class="w-full h-20 object-cover rounded-lg border-2 ${index === 0 ? 'border-blue-500' : 'border-gray-200'}"><span class="text-xs text-gray-500 truncate block mt-1">${file.name.substring(0, 15)}</span>`;
+                                preview.appendChild(div);
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    });
+                });
+                function removeImage(index) {
+                    alert('To change images, click "Choose Files" again and re-select.');
+                }
+                let hasSelectedImages = false;
+                document.getElementById('imageUpload').addEventListener('change', function () { hasSelectedImages = true; });
+                window.addEventListener('beforeunload', function (e) {
+                    if (hasSelectedImages) {
+                        e.preventDefault();
+                        e.returnValue = 'You have selected images. Are you sure you want to leave?';
                     }
                 });
-            });
-            function removeImage(index) {
-                alert('To change images, click "Choose Files" again and re-select.');
-            }
-            let hasSelectedImages = false;
-            document.getElementById('imageUpload').addEventListener('change', function() { hasSelectedImages = true; });
-            window.addEventListener('beforeunload', function(e) {
-                if (hasSelectedImages) {
-                    e.preventDefault();
-                    e.returnValue = 'You have selected images. Are you sure you want to leave?';
-                }
-            });
             </script>
             <style>
-            input[type="file"] { color: transparent; }
-            input[type="file"]::-webkit-file-upload-button { visibility: hidden; }
-            input[type="file"]::before {
-                content: '📁 Choose Images';
-                display: inline-block;
-                background: #3B82F6;
-                color: white;
-                padding: 8px 16px;
-                border-radius: 6px;
-                cursor: pointer;
-                margin-right: 10px;
-            }
-            input[type="file"]:hover::before { background: #2563EB; }
+                input[type="file"] {
+                    color: transparent;
+                }
+
+                input[type="file"]::-webkit-file-upload-button {
+                    visibility: hidden;
+                }
+
+                input[type="file"]::before {
+                    content: '📁 Choose Images';
+                    display: inline-block;
+                    background: #3B82F6;
+                    color: white;
+                    padding: 8px 16px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    margin-right: 10px;
+                }
+
+                input[type="file"]:hover::before {
+                    background: #2563EB;
+                }
             </style>
 
             <!-- Description -->
             <div class="mb-4">
                 <label class="block text-gray-700 mb-2 font-medium">Description *</label>
                 <textarea name="description" required rows="6"
-                          placeholder="Provide full details about the job, item, or service..."
-                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"></textarea>
+                    placeholder="Provide full details about the job, item, or service..."
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"></textarea>
                 <p class="text-sm text-gray-500 mt-1">Be specific - good descriptions get more responses</p>
             </div>
         </div>
@@ -212,7 +227,8 @@
             <div class="grid md:grid-cols-3 gap-4">
                 <label class="block cursor-pointer">
                     <input type="radio" name="payment_plan" value="7days" checked class="peer hidden">
-                    <div class="border-2 border-gray-300 rounded-lg p-4 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition">
+                    <div
+                        class="border-2 border-gray-300 rounded-lg p-4 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition">
                         <div class="text-2xl mb-2"><i class="fas fa-calendar-alt text-blue-500"></i></div>
                         <div class="font-bold text-lg">7 Days</div>
                         <div class="text-2xl font-bold my-2">SZL 50</div>
@@ -225,7 +241,8 @@
                 </label>
                 <label class="block cursor-pointer">
                     <input type="radio" name="payment_plan" value="30days" class="peer hidden">
-                    <div class="border-2 border-gray-300 rounded-lg p-4 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition">
+                    <div
+                        class="border-2 border-gray-300 rounded-lg p-4 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition">
                         <div class="text-2xl mb-2"><i class="fas fa-calendar-alt text-blue-500"></i></div>
                         <div class="font-bold text-lg">30 Days</div>
                         <div class="text-2xl font-bold my-2">SZL 150</div>
@@ -238,7 +255,8 @@
                 </label>
                 <label class="block cursor-pointer">
                     <input type="radio" name="payment_plan" value="featured" class="peer hidden">
-                    <div class="border-2 border-gray-300 rounded-lg p-4 peer-checked:border-yellow-500 peer-checked:bg-yellow-50 transition">
+                    <div
+                        class="border-2 border-gray-300 rounded-lg p-4 peer-checked:border-yellow-500 peer-checked:bg-yellow-50 transition">
                         <div class="text-2xl mb-2"><i class="fas fa-star text-yellow-500"></i></div>
                         <div class="font-bold text-lg">Featured 14 Days</div>
                         <div class="text-2xl font-bold my-2">SZL 300</div>
@@ -253,14 +271,16 @@
             </div>
         </div>
 
-        <!-- Step 3: Payment Method (HIDDEN FOR PROMO) -->
+        <!-- Step 3: Payment Method – ONLY PAYPAL NOW -->
         <div class="mb-8">
             <h3 class="text-lg font-semibold mb-4 pb-2 border-b">Step 3: Payment Method</h3>
             <div class="space-y-3">
-                <label class="flex items-center p-3 border-2 border-blue-500 rounded-lg cursor-pointer hover:bg-blue-50 bg-blue-50">
+                <!-- PayPal – the only option -->
+                <label
+                    class="flex items-center p-3 border-2 border-blue-500 rounded-lg cursor-pointer hover:bg-blue-50 bg-blue-50">
                     <input type="radio" name="payment_method" value="paypal" checked class="mr-3 w-5 h-5">
                     <div>
-                        <span class="font-medium"><i class="fab fa-paypal text-blue-800 mr-1"></i> PayPal (Recommended)</span>
+                        <span class="font-medium"><i class="fab fa-paypal text-blue-800 mr-1"></i> PayPal</span>
                         <p class="text-sm text-gray-600">Pay securely with PayPal or credit/debit card</p>
                         <div class="flex gap-2 mt-1">
                             <span class="text-xs bg-gray-200 px-2 py-0.5 rounded">PayPal</span>
@@ -269,7 +289,10 @@
                         </div>
                     </div>
                 </label>
-                {% if current_user.is_authenticated and current_user.email in ['admin@example.com', 'techcharities@example.com'] %}
+
+                <!-- Admin Test Mode (hidden from regular users) -->
+                {% if current_user.is_authenticated and current_user.email in ['admin@example.com',
+                'techcharities@example.com'] %}
                 <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
                     <input type="radio" name="payment_method" value="mock" class="mr-3 w-5 h-5">
                     <div>
@@ -282,14 +305,14 @@
         </div>
         {% endif %}
 
-        <!-- Submit button (different text for promo) -->
+        <!-- Submit button -->
         <div class="flex gap-3">
-            <button type="submit" 
-                    class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
+            <button type="submit"
+                class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
                 {% if is_promo %}Post Ad Immediately (Free){% else %}Proceed to Payment →{% endif %}
             </button>
-            <a href="{{ url_for('main.business_dashboard') }}" 
-               class="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+            <a href="{{ url_for('main.business_dashboard') }}"
+                class="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
                 Cancel
             </a>
         </div>

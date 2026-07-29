@@ -346,9 +346,7 @@ def post_ad():
         return redirect(url_for('main.home'))
     
     # ============================================
-    # PROMOTIONAL LOGIC:
-    # - Special email (sihlelelwelcome@gmail.com) always gets free posting.
-    # - Other business users: free only until 13 July 2026 (35 days).
+    # PROMOTIONAL LOGIC
     # ============================================
     from datetime import datetime, timedelta
     PROMO_END_DATE = datetime(2026, 7, 13)
@@ -356,15 +354,10 @@ def post_ad():
 
     user_email = current_user.email.strip().lower()
     promo_email = PROMO_EMAIL.lower()
-    
     is_special_promo = (user_email == promo_email)
-
-    print(f"[DEBUG] User email: '{current_user.email}' -> normalized: '{user_email}'")
-    print(f"[DEBUG] PROMO_EMAIL: '{PROMO_EMAIL}' -> normalized: '{promo_email}'")
-    print(f"[DEBUG] is_special_promo = {is_special_promo}")
     
     if is_special_promo:
-        is_promo = True   # Always free
+        is_promo = True
     else:
         is_promo = (datetime.utcnow() <= PROMO_END_DATE)
     
@@ -417,7 +410,7 @@ def post_ad():
         db.session.add(new_posting)
         db.session.flush()
         
-        # Handle images
+        # Handle images (unchanged)
         if 'images' in request.files:
             files = request.files.getlist('images')
             valid_files = [f for f in files if f.filename != '']
@@ -458,6 +451,9 @@ def post_ad():
             db.session.add(transaction)
             db.session.commit()
             
+            # ============================================
+            # PAYMENT METHOD HANDLING
+            # ============================================
             if payment_method == 'mock':
                 admin_emails = ['admin@example.com', 'techcharities@example.com', 'eswatiniclassifieds@gmail.com']
                 if current_user.email not in admin_emails:
@@ -473,10 +469,21 @@ def post_ad():
                     print(f"Email error: {e}")
                 flash(f'✔ Ad posted successfully. Expires {expires_at.strftime("%d %b %Y")}.', 'success')
                 return redirect(url_for('main.business_dashboard'))
+            
             elif payment_method == 'paypal':
                 flash('ℹ Redirecting to secure payment page...', 'info')
                 return redirect(url_for('main.payment_instructions', posting_id=new_posting.id))
-            # Add other payment methods (momo, dodo) as needed
+            
+            # ============ NEW: Dodo Payments ============
+            elif payment_method == 'dodo':
+                flash('ℹ Redirecting to Dodo Payments...', 'info')
+                return redirect(url_for('main.pay_with_dodo', posting_id=new_posting.id))
+            # ============================================
+            
+            # Fallback (should not happen)
+            else:
+                flash('Payment method not supported.', 'error')
+                return redirect(url_for('main.business_dashboard'))
     
     # GET request – show form
     return render_template('business/post_ad.html', 
