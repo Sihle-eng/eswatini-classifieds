@@ -128,7 +128,8 @@ def home():
         Posting.is_active == True,
         Posting.is_approved == True,
         Posting.expires_at > datetime.utcnow(),
-        Posting.payment_plan == 'featured'
+        Posting.payment_plan == 'featured',
+        Posting.payment_plan == 'promo35'
     ).order_by(Posting.created_at.desc()).limit(3).all()
     
     # Get counts for each category (for the category cards)
@@ -423,9 +424,12 @@ def post_ad():
             category=category,
             salary_price=salary_price,
             location_city=location_city,
-            is_active=False,                # never auto-active for paid ads
+            is_active=is_promo,                # never auto-active for paid ads
             is_approved=is_promo,           # promo skips approval
+
+            approved_at=datetime.utcnow() if is_promo else None,
             expires_at=expires_at,
+
             payment_plan=payment_plan,
             payment_confirmed=payment_confirmed,
             payment_reference=payment_reference
@@ -577,9 +581,10 @@ def browse_ads():
     
     # Get all matching ads
     rank = case(
-         (Posting.payment_plan == 'featured', 1),
-         (Posting.payment_plan == '30days', 2),
-         (Posting.payment_plan == '7days', 3),
+         (Posting.payment_plan == 'promo35', 1)
+         (Posting.payment_plan == 'featured', 2),
+         (Posting.payment_plan == '30days', 3),
+         (Posting.payment_plan == '7days', 4),
          else_=4
     )
     ads = query.order_by(rank, Posting.created_at.desc()).all()
