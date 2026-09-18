@@ -75,9 +75,18 @@ class Posting(db.Model):
     payment_plan = db.Column(db.String(20))  # '7days', '30days', 'featured'
     views_count = db.Column(db.Integer, default=0)
     image_filename = db.Column(db.String(200), nullable=True)
-    
+
+    # ============================================
+    # NEW: Admin approval + payment confirmation
+    # ============================================
+    is_approved       = db.Column(db.Boolean, default=False, nullable=False)
+    approved_at       = db.Column(db.DateTime, nullable=True)
+    payment_confirmed = db.Column(db.Boolean, default=False, nullable=False)
+    payment_reference = db.Column(db.String(100), nullable=True)
+
     def __repr__(self):
         return f'<Posting {self.title}>'
+    
 class PostingImage(db.Model):
     """Multiple images for each posting"""
     __tablename__ = 'posting_images'
