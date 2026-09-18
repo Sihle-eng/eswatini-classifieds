@@ -124,12 +124,15 @@ def home():
     ).count()
     
     # Get featured ads (featured plan, active, not expired)
+    from sqlalchemy import or_
     featured_ads = Posting.query.filter(
         Posting.is_active == True,
         Posting.is_approved == True,
         Posting.expires_at > datetime.utcnow(),
-        Posting.payment_plan == 'featured',
-        Posting.payment_plan == 'promo35'
+        or_(
+            Posting.payment_plan == 'featured',
+            Posting.payment_plan == 'promo35'
+        )
     ).order_by(Posting.created_at.desc()).limit(3).all()
     
     # Get counts for each category (for the category cards)
@@ -585,7 +588,7 @@ def browse_ads():
          (Posting.payment_plan == 'featured', 2),
          (Posting.payment_plan == '30days', 3),
          (Posting.payment_plan == '7days', 4),
-         else_=4
+         else_=5
     )
     ads = query.order_by(rank, Posting.created_at.desc()).all()
     
