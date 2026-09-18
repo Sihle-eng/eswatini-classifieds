@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}Terms of Service - Eswatini Classifieds{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl p-8 mb-8 text-white">
+        <h1 class="text-3xl md:text-4xl font-bold mb-2"><i class="fas fa-file-contract mr-3"></i> Terms of Service</h1>
+        <p class="text-blue-100">Last updated: April 2026</p>
+    </div>
+
+    <!-- Content -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+
+        <div class="prose max-w-none">
+            <p class="text-lg text-gray-600 mb-6">
+                Welcome to Eswatini Classifieds. By accessing or using our platform, you agree to be bound by
+                these Terms of Service. Please read them carefully before using our services.
+            </p>
+
+            <h2 class="text-xl font-bold mt-8 mb-4 text-gray-800">1. Acceptance of Terms</h2>
+            <p class="text-gray-600 mb-4">
+                By creating an account, posting an ad, or browsing Eswatini Classifieds, you acknowledge that
+                you have read, understood, and agree to these terms. If you do not agree, please do not use our
+                platform.
+            </p>
+
+            <h2 class="text-xl font-bold mt-8 mb-4 text-gray-800">2. Eligibility</h2>
+            <p class="text-gray-600 mb-4">To use Eswatini Classifieds, you must:</p>
+            <ul class="list-disc pl-6 text-gray-600 space-y-2 mb-4">
+                <li>Be at least 18 years of age</li>
+                <li>Have the legal capacity to enter into a binding agreement</li>
+                <li>Provide accurate and complete registration information</li>
+                <li>Not be prohibited from using our services under the laws of Eswatini</li>
+            </ul>
+
+            <h2 class="text-xl font-bold mt-8 mb-4 text-gray-800">3. Account Responsibilities</h2>
+            <p class="text-gray-600 mb-4">When you create an account, you agree to:</p>
+            <ul class="list-disc pl-6 text-gray-600 space-y-2 mb-4">
+                <li>Provide truthful, accurate, and current information</li>
+                <li>Maintain the security of your password and account</li>
+                <li>Notify us immediately of any unauthorized use</li>
+                <li>Accept responsibility for all activities under your account</li>
+                <li>Not share your account credentials with others</li>
+            </ul>
+
+            <h2 class="text-xl font-bold mt-8 mb-4 text-gray-800">4. Posting Ads & Content Rules</h2>
+            <p class="text-gray-600 mb-4">When posting ads, you agree <strong>NOT</strong> to post content that:</p>
+            <ul class="list-disc pl-6 text-gray-600 space-y-2 mb-4">
+                <li>Is false, misleading, or deceptive</li>
+                <li>Promotes illegal products or services</li>
+                <li>Contains hate speech, harassment, or discriminatory content</li>
+                <li>Infringes on intellectual property rights</li>
+                <li>Contains malware, viruses, or harmful code</li>
+                <li>Involves weapons, drugs, or other prohibited items</li>
+                <li>Is sexually explicit or pornographic</li>
+                <li>Violates any laws of the Kingdom of Eswatini</li>
+            </ul>
+
+            <h2 class="text-xl font-bold mt-8 mb-4 text-gray-800">5. Listing Fees & Payment</h2>
+            <p class="text-gray-600 mb-4">
+                Some listings may require payment. By purchasing a listing, you agree to:
+            </p>
+            <ul class="list-disc pl-6 text-gray-600 space-y-2 mb-4">
+                <li>Pay all applicable fees as displayed</li>
+                <li>Provide valid payment information</li>
+                <li>Understand that fees are generally non-refundable</li>
+                <li>Accept that listing durations are fixed once purchased</li>
+            </ul>
+
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-6">
+                <p class="text-yellow-800">
+                    <strong><i class="fas fa-exclamation-triangle mr-1"></i> Important:</strong> We reserve the right
+                    to remove any listing that violates these terms without refund and to suspend or terminate
+                    accounts that repeatedly breach our policies.
+                </p>
+            </div>
+
+            <h2 class="text-xl font-bold mt-8 mb-4 text-gray-800">6. Transactions Between Users</h2>
+            <p class="text-gray-600 mb-4">
+                Eswatini Classifieds is a platform that connects buyers and sellers. We are <strong>NOT</strong>
+                a party to any transaction between users. We do not:
+            </p>
+            <ul class="list-disc pl-6 text-gray-600 space-y-2 mb-4">
+                <li>Guarantee the quality, safety, or legality of items listed</li>
+                <li>Guarantee the accuracy of listings or user information</li>
+                <li>Handle payments between buyers and sellers</li>
+                <li>Provide escrow or buyer protection services</li>
+            </ul>
+            <p class="text-gray-600 mb-4">
+                All transactions are strictly between the buyer and seller. Use caution and follow our
+                <a href="{{ url_for('main.safety_tips') }}" class="text-blue-600 hover:underline">Safety Tips</a>
+                when dealing with other users.
+            </p>
+
+            <h2 class="text-xl font-bold mt-8 mb-4 text-gray-800">7. Intellectual Property</h2>
+            <p class="text-gray-600 mb-4">
+                All content on Eswatini Classifieds (logos, design, text, graphics) is owned by us or our
+                licensors and protected by copyright laws. You may not copy, reproduce, or distribute our
+                content without written permission.
+            </p>
+            <p class="text-gray-600 mb-4">
+                By posting content, you grant us a non-exclusive, royalty-free, worldwide license to display,
+                distribute, and promote your listings on our platform.
+            </p>
+
+            <h2 class="text-xl font-bold mt-8 mb-4 text-gray-800">8. Prohibited Activities</h2>
+            <p class="text-gray-600 mb-4">You agree not to:</p>
+            <ul class="list-disc pl-6 text-gray-600 space-y-2 mb-4">
+                <li>Use automated tools to scrape or harvest data</li>
+                <li>Attempt to hack, disrupt, or overload our servers</li>
+                <li>Impersonate another person or business</li>
+                <li>Post spam or unsolicited commercial messages</li>
+                <li>Circumvent fees or security measures</li>
+                <li>Use the platform for money laundering or fraud</li>
+            </ul>
+
+            <h2 class="text-xl font-bold mt-8 mb-4 text-gray-800">9. Account Suspension & Termination</h2>
+            <p class="text-gray-600 mb-4">
+                We reserve the right to suspend or terminate your account at any time, with or without notice,
+                if you violate these terms or engage in harmful behavior. You may also delete your account at
+                any time from your account settings.
+            </p>
+
+            <h2 class="text-xl font-bold mt-8 mb-4 text-gray-800">10. Disclaimer of Warranties</h2>
+            <p class="text-gray-600 mb-4">
+                Eswatini Classifieds is provided "as is" and "as available" without warranties of any kind.
+                We do not guarantee uninterrupted, error-free, or secure service.
+            </p>
+
+            <h2 class="text-xl font-bold mt-8 mb-4 text-gray-800">11. Limitation of Liability</h2>
+            <p class="text-gray-600 mb-4">
+                To the maximum extent permitted by law, Eswatini Classifieds shall not be liable for any
+                indirect, incidental, or consequential damages arising from your use of the platform,
+                including lost profits, data loss, or disputes between users.
+            </p>
+
+            <h2 class="text-xl font-bold mt-8 mb-4 text-gray-800">12. Changes to These Terms</h2>
+            <p class="text-gray-600 mb-4">
+                We may update these Terms of Service from time to time. Continued use of the platform after
+                changes constitutes acceptance of the new terms. We will notify users of significant changes
+                via email or platform announcement.
+            </p>
+
+            <h2 class="text-xl font-bold mt-8 mb-4 text-gray-800">13. Governing Law</h2>
+            <p class="text-gray-600 mb-4">
+                These terms are governed by the laws of the Kingdom of Eswatini. Any disputes shall be
+                resolved in the courts of Eswatini.
+            </p>
+
+            <h2 class="text-xl font-bold mt-8 mb-4 text-gray-800">14. Contact Us</h2>
+            <p class="text-gray-600 mb-4">
+                For questions about these Terms of Service, contact us:
+            </p>
+            <div class="bg-gray-100 rounded-xl p-6 mb-6">
+                <p class="mb-2"><i class="fas fa-envelope mr-2 text-blue-600"></i> <strong>Email:</strong>
+                    eswatiniclassifieds@gmail.com</p>
+                <p class="mb-2"><i class="fas fa-phone mr-2 text-blue-600"></i> <strong>Phone:</strong> +268 7970 8243
+                </p>
+                <p><i class="fas fa-map-marker-alt mr-2 text-blue-600"></i> <strong>Address:</strong> Mbabane, Eswatini
+                </p>
+            </div>
+
+            <div class="bg-blue-50 rounded-xl p-6 mt-8">
+                <h3 class="text-lg font-bold text-blue-800 mb-2"><i class="fas fa-gavel mr-2"></i> Legal Compliance</h3>
+                <p class="text-blue-700">
+                    Eswatini Classifieds operates in compliance with the laws of the Kingdom of Eswatini and
+                    the regulations of the Eswatini Communications Commission (ESCCOM).
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back to Home -->
+    <div class="text-center mt-8">
+        <a href="{{ url_for('main.home') }}"
+            class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+    </div>
+</div>
+{% endblock %}
