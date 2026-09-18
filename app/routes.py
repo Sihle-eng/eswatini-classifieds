@@ -103,6 +103,7 @@ def home():
     from datetime import datetime
     query = Posting.query.filter(
         Posting.is_active == True,
+        Posting.is_approved == True,
         Posting.expires_at > datetime.utcnow()
     )
     
@@ -118,12 +119,14 @@ def home():
     #Get total active ads count
     active_count = Posting.query.filter(
          Posting.is_active == True,
+         Posting.is_approved == True,
          Posting.expires_at > datetime.utcnow()
     ).count()
     
     # Get featured ads (featured plan, active, not expired)
     featured_ads = Posting.query.filter(
         Posting.is_active == True,
+        Posting.is_approved == True,
         Posting.expires_at > datetime.utcnow(),
         Posting.payment_plan == 'featured'
     ).order_by(Posting.created_at.desc()).limit(3).all()
@@ -134,6 +137,7 @@ def home():
     for cat in categories:
         count = Posting.query.filter(
             Posting.is_active == True,
+            Posting.is_approved == True,
             Posting.expires_at > datetime.utcnow(),
             Posting.category == cat
         ).count()
@@ -344,7 +348,7 @@ def post_ad():
     if current_user.user_type != 'business':
         flash('Access denied. Business account required.', 'error')
         return redirect(url_for('main.home'))
-    
+
     # ============================================
     # PROMOTIONAL LOGIC
     # ============================================
@@ -355,47 +359,63 @@ def post_ad():
     user_email = current_user.email.strip().lower()
     promo_email = PROMO_EMAIL.lower()
     is_special_promo = (user_email == promo_email)
-    
+
     if is_special_promo:
         is_promo = True
     else:
         is_promo = (datetime.utcnow() <= PROMO_END_DATE)
-    
+
     if request.method == 'POST':
         title = request.form.get('title')
         category = request.form.get('category')
         location_city = request.form.get('location_city')
         salary_price = request.form.get('salary_price')
         description = request.form.get('description')
-        
+
         if is_promo:
             days_to_add = 35
             payment_plan = 'promo35'
             payment_method = 'promotional'
             amount = 0.00
+            payment_confirmed = True
+            payment_reference = None
         else:
             payment_plan = request.form.get('payment_plan')
             payment_method = request.form.get('payment_method')
+            payment_confirmed = (request.form.get('payment_confirmed') == 'yes')
+            payment_reference = (request.form.get('payment_reference') or '').strip() or None
+
+            # NEW PRICES
             if payment_plan == '7days':
                 days_to_add = 7
-                amount = 50.00
+                amount = 10.00
             elif payment_plan == '30days':
                 days_to_add = 30
-                amount = 150.00
+                amount = 20.00
             elif payment_plan == 'featured':
                 days_to_add = 14
-                amount = 300.00
+                amount = 50.00
             else:
                 days_to_add = 7
-                amount = 50.00
-        
+                amount = 10.00
+
+            # Require confirmation (skip for admin mock)
+            admin_emails = ['admin@example.com', 'techcharities@example.com', 'eswatiniclassifieds@gmail.com']
+            is_admin_user = current_user.email in admin_emails
+            if payment_method != 'mock' and not payment_confirmed:
+                flash('Please tick the confirmation box to confirm you have paid.', 'error')
+                return redirect(url_for('main.post_ad'))
+
         expires_at = datetime.utcnow() + timedelta(days=days_to_add)
-        
+
         business = BusinessProfile.query.filter_by(user_id=current_user.id).first()
         if not business:
             flash('Please complete your business profile first.', 'error')
             return redirect(url_for('main.business_dashboard'))
-        
+
+        # ============================================
+        # CREATE POSTING — not active until approved (except promo)
+        # ============================================
         new_posting = Posting(
             business_id=business.id,
             title=title,
@@ -403,13 +423,16 @@ def post_ad():
             category=category,
             salary_price=salary_price,
             location_city=location_city,
-            is_active=is_promo,
+            is_active=False,                # never auto-active for paid ads
+            is_approved=is_promo,           # promo skips approval
             expires_at=expires_at,
-            payment_plan=payment_plan
+            payment_plan=payment_plan,
+            payment_confirmed=payment_confirmed,
+            payment_reference=payment_reference
         )
         db.session.add(new_posting)
         db.session.flush()
-        
+
         # Handle images (unchanged)
         if 'images' in request.files:
             files = request.files.getlist('images')
@@ -421,9 +444,12 @@ def post_ad():
                     if primary:
                         new_posting.image_filename = primary.filename
                     flash(f'📷 {saved_count} image(s) uploaded.', 'success')
-        
+
         db.session.commit()
-        
+
+        # ============================================
+        # PROMO FLOW
+        # ============================================
         if is_promo:
             dummy = Transaction(
                 posting_id=new_posting.id,
@@ -438,56 +464,62 @@ def post_ad():
             db.session.commit()
             flash(f'🎉 Free ad posted! Expires {expires_at.strftime("%d %b %Y")}.', 'success')
             return redirect(url_for('main.my_ads'))
-        else:
-            # Normal paid flow
-            transaction = Transaction(
-                posting_id=new_posting.id,
-                payer_user_id=current_user.id,
-                amount=amount,
-                currency='SZL',
-                payment_method=payment_method,
-                payment_status='pending'
-            )
-            db.session.add(transaction)
+
+        # ============================================
+        # PAID FLOW — create pending transaction
+        # ============================================
+        transaction = Transaction(
+            posting_id=new_posting.id,
+            payer_user_id=current_user.id,
+            amount=amount,
+            currency='SZL',
+            payment_method=payment_method,
+            payment_status='pending'
+        )
+        db.session.add(transaction)
+        db.session.commit()
+
+        # ---- Mock (admin only) ----
+        if payment_method == 'mock':
+            if not is_admin_user:
+                flash('Mock payment is for administrators only.', 'error')
+                return redirect(url_for('main.business_dashboard'))
+            transaction.payment_status = 'success'
+            transaction.paid_at = datetime.utcnow()
+            new_posting.is_active = True
+            new_posting.is_approved = True
+            new_posting.approved_at = datetime.utcnow()
             db.session.commit()
-            
-            # ============================================
-            # PAYMENT METHOD HANDLING
-            # ============================================
-            if payment_method == 'mock':
-                admin_emails = ['admin@example.com', 'techcharities@example.com', 'eswatiniclassifieds@gmail.com']
-                if current_user.email not in admin_emails:
-                    flash('Mock payment is for administrators only.', 'error')
-                    return redirect(url_for('main.business_dashboard'))
-                transaction.payment_status = 'success'
-                transaction.paid_at = datetime.utcnow()
-                new_posting.is_active = True
-                db.session.commit()
-                try:
-                    send_ad_posted_confirmation(current_user.email, title, new_posting.id, expires_at, amount, payment_method)
-                except Exception as e:
-                    print(f"Email error: {e}")
-                flash(f'✔ Ad posted successfully. Expires {expires_at.strftime("%d %b %Y")}.', 'success')
-                return redirect(url_for('main.business_dashboard'))
-            
-            elif payment_method == 'paypal':
-                flash('ℹ Redirecting to secure payment page...', 'info')
-                return redirect(url_for('main.payment_instructions', posting_id=new_posting.id))
-            
-            # ============ NEW: Dodo Payments ============
-            elif payment_method == 'dodo':
-                flash('ℹ Redirecting to Dodo Payments...', 'info')
-                return redirect(url_for('main.pay_with_dodo', posting_id=new_posting.id))
-            # ============================================
-            
-            # Fallback (should not happen)
-            else:
-                flash('Payment method not supported.', 'error')
-                return redirect(url_for('main.business_dashboard'))
-    
+            try:
+                send_ad_posted_confirmation(current_user.email, title, new_posting.id, expires_at, amount, payment_method)
+            except Exception as e:
+                print(f"Email error: {e}")
+            flash(f'✔ Ad posted successfully. Expires {expires_at.strftime("%d %b %Y")}.', 'success')
+            return redirect(url_for('main.business_dashboard'))
+
+        # ---- FNB PayToCell (NEW) ----
+        elif payment_method == 'fnb_paytocell':
+            flash('✅ Ad submitted! Send payment to +268 7970 8243. '
+                  'Admin will verify and approve your ad shortly.', 'info')
+            return redirect(url_for('main.my_ads'))
+
+        # ---- PayPal ----
+        elif payment_method == 'paypal':
+            flash('ℹ Redirecting to secure payment page...', 'info')
+            return redirect(url_for('main.payment_instructions', posting_id=new_posting.id))
+
+        # ---- Dodo ----
+        elif payment_method == 'dodo':
+            flash('ℹ Redirecting to Dodo Payments...', 'info')
+            return redirect(url_for('main.pay_with_dodo', posting_id=new_posting.id))
+
+        else:
+            flash('Payment method not supported.', 'error')
+            return redirect(url_for('main.business_dashboard'))
+
     # GET request – show form
-    return render_template('business/post_ad.html', 
-                           is_promo=is_promo, 
+    return render_template('business/post_ad.html',
+                           is_promo=is_promo,
                            is_special_promo=is_special_promo)
 
 # ============================================
@@ -524,6 +556,7 @@ def browse_ads():
     # Base query - active and non-expired
     query = Posting.query.filter(
         Posting.is_active == True,
+        Posting.is_approved == True,
         Posting.expires_at > datetime.utcnow()
     )
     
@@ -627,16 +660,16 @@ def renew_ad(posting_id):
         
         if payment_plan == '7days':
             days_to_add = 7
-            amount = 50.00
+            amount = 10.00
         elif payment_plan == '30days':
             days_to_add = 30
-            amount = 150.00
+            amount = 20.00
         elif payment_plan == 'featured':
             days_to_add = 14
-            amount = 300.00
+            amount = 50.00
         else:
             days_to_add = 7
-            amount = 50.00
+            amount = 10.00
         
         # Update expiration
         if posting.expires_at < datetime.utcnow():
@@ -646,6 +679,7 @@ def renew_ad(posting_id):
         
         posting.payment_plan = payment_plan
         posting.is_active = False
+        posting.is_approved = False
         
         # Create transaction
         transaction = Transaction(
@@ -689,6 +723,20 @@ def view_ad(posting_id):
     from datetime import datetime
     
     posting = Posting.query.get_or_404(posting_id)
+
+    # ============================================
+    # BLOCK NON-APPROVED ADS FROM PUBLIC
+    # ============================================
+    if not posting.is_approved:
+        is_owner = current_user.is_authenticated and posting.business.user_id == current_user.id
+        is_admin = current_user.is_authenticated and current_user.email in [
+            'admin@example.com', 'techcharities@example.com', 'eswatiniclassifieds@gmail.com'
+        ]
+        if not (is_owner or is_admin):
+            abort(404)
+
+
+    
 
     # ============================================
     # CHECK IF USER IS AUTHENTICATED
@@ -866,6 +914,53 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+@main.route('/admin/pending-ads')
+@admin_required
+def admin_pending_ads():
+    """View all ads waiting for admin approval"""
+    pending_ads = Posting.query.filter_by(is_approved=False, is_active=False) \
+        .order_by(Posting.created_at.desc()).all()
+    return render_template('admin/pending_ads.html', pending_ads=pending_ads)
+
+
+@main.route('/admin/approve-ad/<int:posting_id>', methods=['POST'])
+@admin_required
+def approve_ad(posting_id):
+    """Approve a pending ad and activate it"""
+    from datetime import datetime
+    posting = Posting.query.get_or_404(posting_id)
+    posting.is_approved = True
+    posting.is_active = True
+    posting.approved_at = datetime.utcnow()
+
+    # Also mark the linked transaction as success
+    txn = Transaction.query.filter_by(posting_id=posting.id).first()
+    if txn and txn.payment_status == 'pending':
+        txn.payment_status = 'success'
+        txn.paid_at = datetime.utcnow()
+
+    db.session.commit()
+    flash(f'✅ Ad "{posting.title}" approved and published.', 'success')
+    return redirect(url_for('main.admin_pending_ads'))
+
+
+@main.route('/admin/reject-ad/<int:posting_id>', methods=['POST'])
+@admin_required
+def reject_ad(posting_id):
+    """Reject a pending ad — keep the record but don't publish"""
+    posting = Posting.query.get_or_404(posting_id)
+    posting.is_approved = False
+    posting.is_active = False
+
+    # Mark transaction as failed
+    txn = Transaction.query.filter_by(posting_id=posting.id).first()
+    if txn and txn.payment_status == 'pending':
+        txn.payment_status = 'failed'
+
+    db.session.commit()
+    flash(f'❌ Ad "{posting.title}" rejected.', 'info')
+    return redirect(url_for('main.admin_pending_ads'))
+
 @main.route('/admin')
 @admin_required
 def admin_dashboard():
@@ -878,10 +973,13 @@ def admin_dashboard():
     # Get stats
     total_users = User.query.count()
     total_ads = Posting.query.count()
-    active_ads = Posting.query.filter_by(is_active=True).count()
+    active_ads = Posting.query.filter_by(is_active=True).count()    
     total_revenue = db.session.query(db.func.sum(Transaction.amount)).filter(Transaction.payment_status == 'success').scalar() or 0
     total_reports = Report.query.count()
-    
+
+    # NEW: count ads awaiting approval
+    pending_ads_count = Posting.query.filter_by(is_approved=False, is_active=False).count()
+
     return render_template('admin/dashboard.html',
                          pending_transactions=pending_transactions,
                          pending_reports=pending_reports,
@@ -889,7 +987,8 @@ def admin_dashboard():
                          total_ads=total_ads,
                          active_ads=active_ads,
                          total_revenue=total_revenue,
-                         total_reports=total_reports)
+                         total_reports=total_reports,
+                         pending_ads_count=pending_ads_count)
 
 @main.route('/admin/verify-payment/<int:transaction_id>')
 @admin_required
@@ -1370,13 +1469,13 @@ def pay_with_dodo(posting_id):
     
     # Determine amount based on payment plan
     if posting.payment_plan == '7days':
-        amount = 50.00
+        amount = 10.00
     elif posting.payment_plan == '30days':
-        amount = 150.00
+        amount = 20.00
     elif posting.payment_plan == 'featured':
-        amount = 300.00
-    else:
         amount = 50.00
+    else:
+        amount = 10.00
     
     # Create transaction record
     transaction = Transaction.query.filter_by(
@@ -1533,13 +1632,13 @@ def pay_with_paypal(posting_id):
     
     # Determine amount in SZL
     if posting.payment_plan == '7days':
-        amount_szl = 50
+        amount_szl = 10
     elif posting.payment_plan == '30days':
-        amount_szl = 150
+        amount_szl = 20
     elif posting.payment_plan == 'featured':
-        amount_szl = 300
-    else:
         amount_szl = 50
+    else:
+        amount_szl = 10
     
     # Convert SZL to USD (approximate exchange rate)
     # 1 USD ≈ 18 SZL

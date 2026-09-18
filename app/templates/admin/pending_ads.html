@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Pending Ads - Admin{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold">
+            <i class="fas fa-clock text-yellow-500 mr-2"></i>
+            Pending Ads ({{ pending_ads|length }})
+        </h1>
+        <a href="{{ url_for('main.admin_dashboard') }}" class="text-blue-600 hover:underline">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    {% if not pending_ads %}
+    <div class="bg-green-50 border border-green-200 rounded-lg p-8 text-center">
+        <i class="fas fa-check-circle text-4xl text-green-500 mb-3"></i>
+        <p class="text-green-800 font-medium">No pending ads. All caught up!</p>
+    </div>
+    {% endif %}
+
+    <div class="space-y-4">
+        {% for ad in pending_ads %}
+        <div class="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
+            <div class="flex flex-col md:flex-row">
+                <!-- Image -->
+                <div class="md:w-48 h-48 md:h-auto bg-gray-100 flex-shrink-0">
+                    {% if ad.image_filename %}
+                    <img src="{{ ad.image_filename }}" alt="{{ ad.title }}" class="w-full h-full object-cover">
+                    {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-gray-400">
+                        <i class="fas fa-image text-4xl"></i>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Details -->
+                <div class="flex-1 p-4">
+                    <h3 class="font-bold text-lg">{{ ad.title }}</h3>
+                    <p class="text-sm text-gray-500 mb-2">
+                        {{ ad.business.company_name }} • {{ ad.location_city }} • {{ ad.category }}
+                    </p>
+                    <p class="text-sm text-gray-700 mb-3 line-clamp-2">{{ ad.description[:200] }}...</p>
+
+                    <!-- Payment Info -->
+                    <div class="bg-blue-50 rounded p-3 mb-3 text-sm">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div><span class="text-gray-500">Plan:</span> <strong>{{ ad.payment_plan }}</strong></div>
+                            <div><span class="text-gray-500">Amount:</span> <strong>
+                                    {% if ad.payment_plan == '7days' %}SZL 10
+                                    {% elif ad.payment_plan == '30days' %}SZL 20
+                                    {% elif ad.payment_plan == 'featured' %}SZL 50
+                                    {% else %}—{% endif %}
+                                </strong></div>
+                            <div><span class="text-gray-500">Confirmed:</span>
+                                {% if ad.payment_confirmed %}
+                                <span class="text-green-600 font-medium">✓ Yes</span>
+                                {% else %}
+                                <span class="text-red-600 font-medium">✗ No</span>
+                                {% endif %}
+                            </div>
+                            <div><span class="text-gray-500">Reference:</span>
+                                <strong>{{ ad.payment_reference or '—' }}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex gap-2">
+                        <form method="POST" action="{{ url_for('main.approve_ad', posting_id=ad.id) }}" class="inline">
+                            <button type="submit"
+                                class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 font-medium">
+                                <i class="fas fa-check mr-1"></i> Approve & Publish
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ url_for('main.reject_ad', posting_id=ad.id) }}" class="inline"
+                            onsubmit="return confirm('Reject this ad?');">
+                            <button type="submit"
+                                class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 font-medium">
+                                <i class="fas fa-times mr-1"></i> Reject
+                            </button>
+                        </form>
+                        <a href="{{ url_for('main.view_ad', posting_id=ad.id) }}" target="_blank"
+                            class="border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50">
+                            <i class="fas fa-eye mr-1"></i> Preview
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

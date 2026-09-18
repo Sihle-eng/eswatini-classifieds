@@ -43,7 +43,7 @@
     {% endif %}
 
     <form method="POST" action="{{ url_for('main.post_ad') }}" enctype="multipart/form-data"
-        class="bg-white rounded-lg shadow p-6">
+        class="bg-white rounded-lg shadow p-6" id="postAdForm">
 
         {% if is_promo %}
         <input type="hidden" name="payment_plan" value="7days">
@@ -321,7 +321,7 @@
 
                 <!-- Admin Test Mode -->
                 {% if current_user.is_authenticated and current_user.email in ['admin@example.com',
-                'techcharities@example.com'] %}
+                'techcharities@example.com', 'eswatiniclassifieds@gmail.com'] %}
                 <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
                     <input type="radio" name="payment_method" value="mock" class="mr-3 w-5 h-5">
                     <div>
@@ -334,7 +334,7 @@
         </div>
 
         <!-- Step 4: Confirm Payment -->
-        <div class="mb-8 bg-amber-50 border-2 border-amber-200 rounded-lg p-4">
+        <div class="mb-8 bg-amber-50 border-2 border-amber-200 rounded-lg p-4" id="confirmPaymentBox">
             <h3 class="text-lg font-semibold mb-3 text-amber-900">
                 <i class="fas fa-check-double mr-2"></i> Step 4: Confirm Your Payment
             </h3>
@@ -344,7 +344,8 @@
                 but not published until approved.
             </p>
             <label class="flex items-start gap-3 cursor-pointer bg-white rounded-lg p-3 border border-amber-300">
-                <input type="checkbox" name="payment_confirmed" value="yes" required class="mt-1 w-5 h-5 text-blue-600">
+                <input type="checkbox" name="payment_confirmed" value="yes" id="paymentConfirmCheckbox"
+                    class="mt-1 w-5 h-5 text-blue-600">
                 <span class="text-gray-800 font-medium">
                     I confirm that I have paid the selected amount using my chosen payment method.
                     I understand my ad will only be published after admin verification.
@@ -359,6 +360,13 @@
                     placeholder="e.g., FNB ref number, PayPal transaction ID, or the phone number you paid from"
                     class="w-full px-3 py-2 border border-amber-300 rounded-lg focus:outline-none focus:border-blue-500 bg-white">
             </div>
+        </div>
+
+        <!-- Mock-mode helper notice (hidden by default) -->
+        <div id="mockModeNotice"
+            class="mb-6 hidden bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-3 rounded text-sm">
+            <i class="fas fa-flask mr-2"></i>
+            <strong>Admin Test Mode active.</strong> Confirmation is auto-ticked. Ad will activate immediately.
         </div>
         {% endif %}
 
@@ -379,4 +387,40 @@
         </div>
     </form>
 </div>
+
+<!-- ============================================
+     Admin Mock Mode Script
+     Auto-ticks the confirm checkbox when admin picks "mock"
+     ============================================ -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const radios = document.querySelectorAll('input[name="payment_method"]');
+        const checkbox = document.getElementById('paymentConfirmCheckbox');
+        const notice = document.getElementById('mockModeNotice');
+        const confirmBox = document.getElementById('confirmPaymentBox');
+
+        if (!checkbox) return; // promo users won't have it
+
+        function updateCheckbox() {
+            const selected = document.querySelector('input[name="payment_method"]:checked');
+            if (!selected) return;
+
+            if (selected.value === 'mock') {
+                checkbox.checked = true;
+                checkbox.required = false;
+                checkbox.disabled = true;
+                if (notice) notice.classList.remove('hidden');
+                if (confirmBox) confirmBox.classList.add('opacity-60');
+            } else {
+                checkbox.required = true;
+                checkbox.disabled = false;
+                if (notice) notice.classList.add('hidden');
+                if (confirmBox) confirmBox.classList.remove('opacity-60');
+            }
+        }
+
+        radios.forEach(r => r.addEventListener('change', updateCheckbox));
+        updateCheckbox(); // run on load
+    });
+</script>
 {% endblock %}
