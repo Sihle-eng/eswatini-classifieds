@@ -584,7 +584,7 @@ def browse_ads():
     
     # Get all matching ads
     rank = case(
-         (Posting.payment_plan == 'promo35', 1)
+         (Posting.payment_plan == 'promo35', 1),
          (Posting.payment_plan == 'featured', 2),
          (Posting.payment_plan == '30days', 3),
          (Posting.payment_plan == '7days', 4),
