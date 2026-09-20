@@ -598,6 +598,7 @@ def browse_ads():
     for cat in categories:
         count = Posting.query.filter(
             Posting.is_active == True,
+            Posting.is_approved == True,
             Posting.expires_at > datetime.utcnow(),
             Posting.category == cat
         ).count()
