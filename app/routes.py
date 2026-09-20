@@ -2168,20 +2168,47 @@ def contractor_analytics(contractor):
 @contractor_required(role='sales_rep')
 def contractor_email_automation(contractor):
     leads = Lead.query.filter_by(contractor_id=contractor.id).all()
+
     if request.method == 'POST':
-        subject = request.form.get('subject')
-        body = request.form.get('body')
+        subject = request.form.get('subject', '').strip()
+        body = request.form.get('body', '').strip()
         recipient_ids = request.form.getlist('recipients')
+
+        if not subject or not body or not recipient_ids:
+            flash('Subject, message and at least one recipient are required.', 'error')
+            return redirect(url_for('main.contractor_email_automation'))
+
+        sent_count = 0
+        failed = []
+
         for lead_id in recipient_ids:
             lead = Lead.query.get(int(lead_id))
-            if lead and lead.email:
-                try:
-                    msg = Message(subject, recipients=[lead.email], body=body)
-                    mail.send(msg)
-                except Exception as e:
-                    print(f"Email error: {e}")
-        flash('Emails sent.', 'success')
+            if not (lead and lead.email):
+                continue
+
+            try:
+                send_email(
+                    to=lead.email,
+                    subject=subject,
+                    template_name='admin_message',   # maps to templates/emails/admin_message.html
+                    user_name=lead.name or lead.email.split('@')[0],
+                    user_type='Business',
+                    body=body,
+                    site_url=current_app.config.get('SITE_URL', 'https://eswatiniclassifieds.com'),
+                    current_year=datetime.utcnow().year,
+                )
+                sent_count += 1
+            except Exception as e:
+                current_app.logger.error(f"[LEAD EMAIL FAILED] {lead.email}: {e}")
+                failed.append(lead.email)
+
+        if failed:
+            flash(f'✅ Sent {sent_count}. ❌ Failed: {", ".join(failed)}', 'warning')
+        else:
+            flash(f'✅ Sent to {sent_count} lead(s).', 'success')
+
         return redirect(url_for('main.contractor_email_automation'))
+
     return render_template('contractor/email_automation.html', leads=leads)
 
 # ---- Sales Rep: Support Inbox (Live Chat replacement) ----
